@@ -1,0 +1,22 @@
+<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <p class="text-sm text-nota-800">
+    {% if page_obj %}
+      Найдено: {{ page_obj.paginator.count }}
+    {% else %}
+      Найдено: 0
+    {% endif %}
+  </p>
+  <div class="flex items-center gap-2">
+    <label for="id_sort" class="text-sm text-nota-800">Сортировка</label>
+    <select
+      name="sort"
+      id="id_sort"
+      class="min-w-[12rem] rounded-lg border border-nota-200 bg-white px-3 py-2 text-sm text-nota-900 shadow-sm focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
+    >
+      <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Сначала новые</option>
+      <option value="name" {% if current_sort == "name" %}selected{% endif %}>По названию</option>
+      <option value="price_asc" {% if current_sort == "price_asc" %}selected{% endif %}>Цена: по возрастанию</option>
+      <option value="price_desc" {% if current_sort == "price_desc" %}selected{% endif %}>Цена: по убыванию</option>
+    </select>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+{% extends "products/base_catalog.html" %}
+{% load static %}
+
+{% block body %}
+<div class="min-h-screen bg-nota-50 text-nota-900">
+  <header class="border-b border-nota-200 bg-white/80 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <a href="{% url 'home' %}" class="font-serif text-2xl tracking-tight text-nota-900">nota</a>
+      <nav class="flex gap-6 text-sm text-nota-800">
+        <a href="{% url 'home' %}" class="hover:text-nota-900">Главная</a>
+        <span class="font-medium text-nota-900">Каталог</span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="font-serif text-3xl text-nota-900 sm:text-4xl">Каталог</h1>
+      <p class="mt-2 max-w-2xl text-sm text-nota-800">Фильтры и сортировка обновляют список без перезагрузки страницы.</p>
+    </div>
+
+    <form
+      id="catalog-form"
+      method="get"
+      action="{% url 'products:catalog' %}"
+      hx-get="{% url 'products:catalog' %}"
+      hx-target="#catalog-results"
+      hx-trigger="change from:select, change from:checkbox, change from:input[type=number], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
+      hx-push-url="true"
+      hx-indicator="#catalog-loading"
+      class="flex flex-col gap-8 lg:flex-row"
+    >
+      {% include "products/partials/catalog_filters.html" %}
+
+      <div class="min-w-0 flex-1">
+        <div class="relative">
+          <div
+            id="catalog-loading"
+            class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-nota-50/60 pt-16 opacity-0 transition-opacity duration-200"
+          >
+            <span class="rounded-full bg-white px-4 py-2 text-sm shadow-md text-nota-800">Загрузка…</span>
+          </div>
+
+          <div id="catalog-results" class="transition-opacity duration-200">
+            {% include "products/partials/catalog_results.html" %}
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+<style>
+  #catalog-form.htmx-request #catalog-loading {
+    opacity: 1;
+  }
+  #catalog-form.htmx-request #catalog-results {
+    opacity: 0.65;
+  }
+</style>
+{% endblock %}
