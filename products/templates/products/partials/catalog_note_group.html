@@ -1,0 +1,19 @@
+<div class="border-t border-[#C9A96E]/20 pt-4 first:border-t-0 first:pt-0">
+  <h3 class="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">{{ section_title }}</h3>
+  <div class="space-y-2">
+    {% for note in notes %}
+      <label class="flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]">
+        <input
+          type="checkbox"
+          name="notes"
+          value="{{ note.slug }}"
+          class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+          {% if note.slug in selected_notes %}checked{% endif %}
+        >
+        <span>{{ note.name }}</span>
+      </label>
+    {% empty %}
+      <p class="text-sm text-[#BDB6AA]">—</p>
+    {% endfor %}
+  </div>
+</div>

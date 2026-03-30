@@ -2,21 +2,13 @@
 {% load static %}
 
 {% block body %}
-<div class="min-h-screen bg-nota-50 text-nota-900">
-  <header class="border-b border-nota-200 bg-white/80 backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-      <a href="{% url 'home' %}" class="font-serif text-2xl tracking-tight text-nota-900">nota</a>
-      <nav class="flex gap-6 text-sm text-nota-800">
-        <a href="{% url 'home' %}" class="hover:text-nota-900">Главная</a>
-        <span class="font-medium text-nota-900">Каталог</span>
-      </nav>
-    </div>
-  </header>
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+  {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="mb-8">
-      <h1 class="font-serif text-3xl text-nota-900 sm:text-4xl">Каталог</h1>
-      <p class="mt-2 max-w-2xl text-sm text-nota-800">Фильтры и сортировка обновляют список без перезагрузки страницы.</p>
+  <main class="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
+    <div class="mb-12">
+      <h1 class="font-serif text-4xl text-[#F5F1E8] sm:text-5xl">Catalog</h1>
+      <p class="mt-4 max-w-2xl text-sm uppercase tracking-[0.14em] text-[#BDB6AA]">Luxury fragrances. Sharp details. Timeless design.</p>
     </div>
 
     <form
@@ -25,10 +17,10 @@
       action="{% url 'products:catalog' %}"
       hx-get="{% url 'products:catalog' %}"
       hx-target="#catalog-results"
-      hx-trigger="change from:select, change from:checkbox, change from:input[type=number], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
+      hx-trigger="change from:select, change from:input[type=checkbox], change from:input[type=number], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
       hx-push-url="true"
       hx-indicator="#catalog-loading"
-      class="flex flex-col gap-8 lg:flex-row"
+      class="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]"
     >
       {% include "products/partials/catalog_filters.html" %}
 
@@ -36,9 +28,9 @@
         <div class="relative">
           <div
             id="catalog-loading"
-            class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-nota-50/60 pt-16 opacity-0 transition-opacity duration-200"
+            class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-[#0B0B0B]/70 pt-16 opacity-0 transition-opacity duration-200"
           >
-            <span class="rounded-full bg-white px-4 py-2 text-sm shadow-md text-nota-800">Загрузка…</span>
+            <span class="border border-[#C9A96E] bg-[#0B0B0B] px-4 py-2 text-xs uppercase tracking-[0.14em] text-[#C9A96E]">Loading...</span>
           </div>
 
           <div id="catalog-results" class="transition-opacity duration-200">
@@ -47,7 +39,9 @@
         </div>
       </div>
     </form>
+    {% include "products/partials/catalog_filter_modals.html" %}
   </main>
+  {% include "core/partials/footer.html" %}
 </div>
 <style>
   #catalog-form.htmx-request #catalog-loading {

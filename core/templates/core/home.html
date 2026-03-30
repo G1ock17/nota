@@ -2,112 +2,76 @@
 {% load static %}
 
 {% block body %}
-<header class="site-header">
-    <div class="shell header-inner">
-        <a class="logo" href="{% url 'home' %}">nota</a>
-        <button type="button" class="nav-toggle" aria-label="Открыть меню" aria-expanded="false"></button>
-        <nav class="nav" aria-label="Основное меню">
-            <a href="{% url 'products:catalog' %}">Каталог</a>
-            <a href="#about">О нас</a>
-            <a href="#delivery">Доставка</a>
-            <a href="#contacts">Контакты</a>
-        </nav>
-    </div>
-</header>
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+    {% include "core/partials/navbar.html" %}
 
-<main>
-    <section class="hero">
-        <div class="hero-bg" aria-hidden="true"></div>
-        <div class="shell hero-content">
-            <p class="hero-eyebrow">интернет-магазин парфюмерии</p>
-            <h1 class="hero-title">Аромат — это нота,<br>которую слышат только свои</h1>
-            <p class="hero-lead">Подбираем композиции от нишевых домов и любимых брендов. Оригинальная продукция, бережная доставка по России.</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary" href="{% url 'products:catalog' %}">Смотреть каталог</a>
-                <a class="btn btn-ghost" href="#about">Узнать о nota</a>
+    <main>
+        <section class="relative border-b border-[#C9A96E]/25">
+            <div class="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1920&q=80" alt="Luxury perfume" class="h-full w-full object-cover opacity-35">
             </div>
-        </div>
-    </section>
-
-    <section class="section" id="catalog">
-        <div class="shell">
-            <header class="section-head">
-                <h2>Направления</h2>
-                <p class="section-sub">Найдите свой характер среди семейств ароматов</p>
-            </header>
-            <ul class="grid-cards">
-                <li class="card">
-                    <span class="card-tag">цветочные</span>
-                    <h3>Роза и жасмин</h3>
-                    <p>Классика и современные интерпретации цветочных сердец.</p>
-                </li>
-                <li class="card">
-                    <span class="card-tag">древесные</span>
-                    <h3>Сандал и кедр</h3>
-                    <p>Тёплые, устойчивые базы для дневного и вечернего образа.</p>
-                </li>
-                <li class="card">
-                    <span class="card-tag">свежие</span>
-                    <h3>Цитрус и зелень</h3>
-                    <p>Лёгкие композиции для ясных дней и городской суеты.</p>
-                </li>
-                <li class="card">
-                    <span class="card-tag">восточные</span>
-                    <h3>Амбра и специи</h3>
-                    <p>Глубина, шлейф и характер для особых моментов.</p>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <section class="section section-alt" id="about">
-        <div class="shell split">
-            <div class="split-text">
-                <h2>Почему nota</h2>
-                <p>Мы работаем только с проверенными поставщиками и следим за условиями хранения. Каждая позиция в каталоге — оригинал с официальной партиёй.</p>
-                <ul class="checklist">
-                    <li>Консультации по подбору аромата</li>
-                    <li>Пробники и наборы для знакомства</li>
-                    <li>Подарочная упаковка по запросу</li>
-                </ul>
-            </div>
-            <div class="split-panel" aria-hidden="true">
-                <div class="split-panel-inner"></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section" id="delivery">
-        <div class="shell narrow">
-            <header class="section-head">
-                <h2>Доставка и оплата</h2>
-            </header>
-            <div class="info-grid">
-                <div>
-                    <h3>По России</h3>
-                    <p>Курьером до двери и в пункты выдачи. Сроки и стоимость рассчитываются при оформлении заказа.</p>
-                </div>
-                <div>
-                    <h3>Оплата</h3>
-                    <p>Банковская карта онлайн, при получении — по согласованию с менеджером.</p>
+            <div class="relative mx-auto flex min-h-[78vh] w-full max-w-7xl items-center justify-center px-6 py-28 text-center lg:px-12">
+                <div class="reveal max-w-4xl">
+                    <p class="mb-8 text-[11px] uppercase tracking-[0.28em] text-[#C9A96E]">Niche Perfume E-commerce</p>
+                    <h1 class="mb-10 font-serif text-5xl leading-tight text-[#F5F1E8] md:text-7xl">The Art of Scent in a Pure Luxury Form</h1>
+                    <p class="mx-auto mb-12 max-w-2xl text-sm leading-8 text-[#C6BFB2] md:text-base">Discover rare compositions from iconic perfume houses curated for those who value detail, silence, and timeless elegance.</p>
+                    <a href="{% url 'products:catalog' %}" class="btn-luxury">Explore Collection</a>
                 </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
 
-<footer class="site-footer" id="contacts">
-    <div class="shell footer-inner">
-        <div class="footer-brand">
-            <span class="logo logo-footer">nota</span>
-            <p>Парфюмерия с вниманием к деталям</p>
-        </div>
-        <div class="footer-contact">
-            <p><strong>Связь</strong></p>
-            <p>hello@nota.shop</p>
-            <p>+7 (800) 000-00-00</p>
-        </div>
-        <p class="footer-copy">© {% now "Y" %} nota. Все права защищены.</p>
-    </div>
-</footer>
+        <section id="featured" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
+            <div class="mb-16 flex items-end justify-between gap-6">
+                <div class="reveal max-w-xl">
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Featured Perfumes</p>
+                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Curated Signatures</h2>
+                </div>
+                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-[#D9D2C6] md:inline-block">View All</a>
+            </div>
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=800&q=80" family="Amber Woody" name="Noir Absolu" description="Dense amber, smoky cedar and polished leather for a long, magnetic trail." volume="100 ml" price="14 900 ₽" %}
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80" family="Floral Musk" name="Velvet Iris" description="Powdery iris with white musk and soft violet petals for a refined daily statement." volume="75 ml" price="11 700 ₽" %}
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1615634262417-f5b51e838f0d?auto=format&fit=crop&w=800&q=80" family="Fresh Citrus" name="Citrine Veil" description="Sparkling bergamot, neroli and mineral woods with a crisp contemporary finish." volume="90 ml" price="12 400 ₽" %}
+            </div>
+        </section>
+
+        <section id="categories" class="border-y border-[#C9A96E]/25">
+            <div class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
+                <div class="reveal mb-14 max-w-xl">
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Categories</p>
+                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">By Identity</h2>
+                </div>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Men</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Bold / Woody / Spicy</p>
+                    </a>
+                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Women</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Floral / Powdery / Soft</p>
+                    </a>
+                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Unisex</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Clean / Citrus / Musky</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="brands" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
+            <div class="reveal mb-14 max-w-xl">
+                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Brands</p>
+                <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Prestige Houses</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
+                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Amouage</div>
+                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Byredo</div>
+                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Diptyque</div>
+                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Le Labo</div>
+            </div>
+        </section>
+    </main>
+
+    {% include "core/partials/footer.html" %}
+</div>
 {% endblock %}

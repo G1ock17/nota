@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Аккаунт — nota{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="mx-auto w-full max-w-md px-6 py-16 lg:px-12">
+    <h1 class="font-serif text-4xl text-[#F5F1E8]">Аккаунт</h1>
+    <p class="mt-6 text-sm text-[#BDB6AA]">Вы вошли как</p>
+    <p class="mt-2 font-serif text-2xl text-[#F5F1E8]">{{ user.get_username }}</p>
+
+    <form method="post" action="{% url 'logout' %}" class="mt-10">
+      {% csrf_token %}
+      <button type="submit" class="btn-luxury w-full">Выйти</button>
+    </form>
+  </main>
+</div>
+{% endblock %}

@@ -1,76 +1,87 @@
 {% load static %}
 {% include "products/partials/catalog_sort_bar.html" %}
 
-<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+<div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
   {% for product in product_list %}
-    <article class="group flex flex-col overflow-hidden rounded-2xl border border-nota-200 bg-white shadow-sm transition hover:shadow-md">
-      <div class="relative aspect-[4/5] overflow-hidden bg-nota-100">
+    <article class="group relative flex flex-col overflow-hidden border border-[#C9A96E]/35 bg-[#0B0B0B] transition duration-500 hover:scale-[1.03]">
+      <div class="relative aspect-[4/5] overflow-hidden border-b border-[#C9A96E]/25">
+        <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-10" aria-label="{{ product.name }}"></a>
         {% with imgs=product.images.all %}
           {% if imgs %}
             <img
               src="{{ imgs.0.image.url }}"
               alt=""
-              class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+              class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               loading="lazy"
               width="400"
               height="500"
             >
           {% else %}
-            <div class="flex h-full w-full items-center justify-center text-sm text-nota-800">Нет фото</div>
+            <div class="flex h-full w-full items-center justify-center text-sm text-[#BDB6AA]">No image</div>
           {% endif %}
         {% endwith %}
       </div>
-      <div class="flex flex-1 flex-col p-4">
-        <p class="text-xs uppercase tracking-wide text-nota-800">{{ product.brand.name }}</p>
-        <h2 class="mt-1 font-serif text-lg text-nota-900">{{ product.name }}</h2>
+      <div class="flex flex-1 flex-col p-6">
+        <p class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">{{ product.brand.name }}</p>
+        <h2 class="mt-2 font-serif text-2xl text-[#F5F1E8]">
+          <a href="{% url 'products:product_detail' product.slug %}" class="nav-link">{{ product.name }}</a>
+        </h2>
         <div class="mt-auto pt-4">
-          <p class="text-sm font-medium text-nota-900">
+          <p class="font-serif text-2xl text-[#F5F1E8]">
             {% if product.min_price != None %}
-              от {{ product.min_price }} ₽
+              от {{ product.min_price|floatformat:2 }} ₽
             {% else %}
-              нет в наличии
+              out of stock
             {% endif %}
           </p>
-          <div class="mt-2 flex flex-wrap gap-1.5">
-            {% for v in product.variants.all %}
-              {% if v.stock > 0 %}
-                <span class="rounded-md bg-nota-100 px-2 py-0.5 text-xs text-nota-800">{{ v.get_volume_display }}</span>
-              {% endif %}
-            {% endfor %}
-          </div>
         </div>
       </div>
     </article>
   {% empty %}
-    <div class="col-span-full rounded-2xl border border-dashed border-nota-300 bg-white p-12 text-center">
-      <p class="font-serif text-xl text-nota-900">Ничего не найдено</p>
-      <p class="mt-2 text-sm text-nota-800">Измените фильтры или сбросьте их.</p>
+    <div class="col-span-full border border-dashed border-[#C9A96E]/45 p-12 text-center">
+      <p class="font-serif text-2xl text-[#F5F1E8]">Nothing found</p>
+      <p class="mt-2 text-sm text-[#BDB6AA]">Try changing filters or reset them.</p>
     </div>
   {% endfor %}
 </div>
 
 {% if page_obj.has_other_pages %}
-  <nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Страницы">
+  <nav class="catalog-pagination mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Страницы">
     {% if page_obj.has_previous %}
       <a
         href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
         hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
         hx-target="#catalog-results"
         hx-push-url="true"
-        class="rounded-lg border border-nota-200 bg-white px-4 py-2 text-sm text-nota-900 shadow-sm hover:bg-nota-50"
+        class="btn-luxury px-4 py-2"
       >Назад</a>
     {% endif %}
-    <span class="px-3 py-2 text-sm text-nota-800">
-      Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-    </span>
+    {% for entry in catalog_pagination_entries %}
+      {% if entry is None %}
+        <span class="px-1 text-sm text-[#6f685a]" aria-hidden="true">…</span>
+      {% elif entry == page_obj.number %}
+        <span
+          class="inline-flex min-w-[2.5rem] items-center justify-center border border-[#C9A96E] bg-[#C9A96E] px-3 py-2 text-xs uppercase tracking-[0.12em] text-[#0B0B0B]"
+          aria-current="page"
+        >{{ entry }}</span>
+      {% else %}
+        <a
+          href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ entry }}"
+          hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ entry }}"
+          hx-target="#catalog-results"
+          hx-push-url="true"
+          class="inline-flex min-w-[2.5rem] items-center justify-center border border-[#C9A96E]/45 px-3 py-2 text-xs uppercase tracking-[0.12em] text-[#C9A96E] transition-colors hover:border-[#C9A96E] hover:bg-[#C9A96E]/10"
+        >{{ entry }}</a>
+      {% endif %}
+    {% endfor %}
     {% if page_obj.has_next %}
       <a
         href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}"
         hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}"
         hx-target="#catalog-results"
         hx-push-url="true"
-        class="rounded-lg border border-nota-200 bg-white px-4 py-2 text-sm text-nota-900 shadow-sm hover:bg-nota-50"
-      >Вперёд</a>
+        class="btn-luxury px-4 py-2"
+      >Далее</a>
     {% endif %}
   </nav>
 {% endif %}

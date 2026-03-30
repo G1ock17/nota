@@ -1,0 +1,5 @@
+<span
+  id="nav-cart-badge"
+  class="nav-cart__badge absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center border border-[#0B0B0B] bg-[#C9A96E] px-0.5 text-[9px] font-semibold leading-none text-[#0B0B0B] {% if count == 0 %}hidden{% endif %}"
+  {% if hx_oob %}hx-swap-oob="true"{% endif %}
+>{% if count %}{{ count }}{% endif %}</span>

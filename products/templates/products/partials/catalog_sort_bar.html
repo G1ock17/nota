@@ -1,22 +1,24 @@
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-  <p class="text-sm text-nota-800">
-    {% if page_obj %}
-      Найдено: {{ page_obj.paginator.count }}
-    {% else %}
-      Найдено: 0
-    {% endif %}
-  </p>
-  <div class="flex items-center gap-2">
-    <label for="id_sort" class="text-sm text-nota-800">Сортировка</label>
+<div class="catalog-sort-bar mb-6 flex w-full min-w-0 flex-nowrap items-center justify-between gap-4 overflow-x-auto pb-0.5 md:gap-8">
+  <div class="catalog-sort-bar__filters flex shrink-0 flex-nowrap items-center gap-3 md:gap-4">
+    <button type="button" class="btn-luxury text-[10px]" data-filter-modal-open="brands">
+      Бренды{% if selected_brands %} ({{ selected_brands|length }}){% endif %}
+    </button>
+    <button type="button" class="btn-luxury text-[10px]" data-filter-modal-open="notes">
+      Ноты{% if selected_notes %} ({{ selected_notes|length }}){% endif %}
+    </button>
+  </div>
+  <div class="catalog-sort-bar__sort-group flex min-w-0 shrink-0 flex-nowrap items-center gap-2 border-l border-[#C9A96E]/30 pl-4 md:gap-3 md:pl-8">
+    <label for="id_sort" class="shrink-0 whitespace-nowrap text-[10px] uppercase text-[#C9A96E]">Сортировка</label>
     <select
       name="sort"
       id="id_sort"
-      class="min-w-[12rem] rounded-lg border border-nota-200 bg-white px-3 py-2 text-sm text-nota-900 shadow-sm focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
+      class="catalog-sort-bar__select shrink-0 border border-[#C9A96E]/45 bg-[#0B0B0B] text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
     >
       <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Сначала новые</option>
-      <option value="name" {% if current_sort == "name" %}selected{% endif %}>По названию</option>
+      <option value="popularity" {% if current_sort == "popularity" %}selected{% endif %}>По популярности</option>
       <option value="price_asc" {% if current_sort == "price_asc" %}selected{% endif %}>Цена: по возрастанию</option>
       <option value="price_desc" {% if current_sort == "price_desc" %}selected{% endif %}>Цена: по убыванию</option>
+      <option value="name" {% if current_sort == "name" %}selected{% endif %}>По названию</option>
     </select>
   </div>
 </div>

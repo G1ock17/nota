@@ -1,0 +1,46 @@
+<header class="relative z-50 border-b border-[#C9A96E]/40">
+    <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 lg:px-12">
+        <a href="{% url 'home' %}" class="font-serif text-3xl uppercase tracking-[0.22em] text-[#C9A96E] nav-link">nota</a>
+        <button type="button" class="nav-toggle inline-flex h-11 w-11 items-center justify-center border border-[#C9A96E] text-[#C9A96E] lg:hidden" aria-label="Открыть меню" aria-expanded="false">
+            <span class="sr-only">Открыть меню</span>
+            <span class="block h-px w-5 bg-current"></span>
+        </button>
+        <nav class="nav hidden items-center gap-10 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9] lg:flex">
+            <a href="{% url 'home' %}#featured" class="nav-link pb-1">Featured</a>
+            <a href="{% url 'home' %}#categories" class="nav-link pb-1">Categories</a>
+            <a href="{% url 'home' %}#brands" class="nav-link pb-1">Brands</a>
+            <a href="{% url 'products:catalog' %}" class="nav-link pb-1">Shop</a>
+            {% if user.is_authenticated %}
+            <a
+              href="{% url 'account' %}"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              aria-label="Аккаунт, {{ user.get_username }}"
+            >
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            {% else %}
+            <a
+              href="{% url 'login' %}?next={{ request.path|urlencode }}"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              aria-label="Войти"
+            >
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            {% endif %}
+            <a
+              href="{% url 'products:cart' %}"
+              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-[#C9A96E] transition-colors hover:text-[#E4DFD5]"
+              aria-label="Корзина{% if cart_item_count %}, {{ cart_item_count }} шт.{% endif %}"
+            >
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              {% include "core/partials/nav_cart_badge.html" with count=cart_item_count only %}
+            </a>
+        </nav>
+    </div>
+</header>

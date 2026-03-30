@@ -1,84 +1,36 @@
-<aside class="w-full shrink-0 lg:w-64">
-  <div class="sticky top-6 space-y-6 rounded-2xl border border-nota-200 bg-white p-5 shadow-sm">
+<aside id="catalog-sidebar-filters" class="w-full shrink-0">
+  <div class="sticky top-6 space-y-8 border border-[#C9A96E]/35 bg-[#0B0B0B] p-6">
     <div class="flex items-center justify-between gap-2">
-      <h2 class="font-serif text-lg text-nota-900">Фильтры</h2>
+      <h2 class="font-serif text-2xl text-[#F5F1E8]">Filters</h2>
       <a
         href="{% url 'products:catalog' %}"
-        class="text-xs text-nota-800 underline-offset-2 hover:underline"
-      >Сбросить</a>
+        class="nav-link text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]"
+      >Reset</a>
     </div>
 
     <div>
-      <label for="id_category" class="mb-1 block text-xs font-medium uppercase tracking-wide text-nota-800">Категория</label>
-      <select
-        name="category"
-        id="id_category"
-        class="w-full rounded-lg border border-nota-200 bg-nota-50 px-3 py-2 text-sm text-nota-900 focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
-      >
-        <option value="">Все</option>
+      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Category</span>
+      <div class="space-y-2">
         {% for c in categories %}
-          <option value="{{ c.slug }}" {% if selected_category == c.slug %}selected{% endif %}>{{ c.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <label for="id_brand" class="mb-1 block text-xs font-medium uppercase tracking-wide text-nota-800">Бренд</label>
-      <select
-        name="brand"
-        id="id_brand"
-        class="w-full rounded-lg border border-nota-200 bg-nota-50 px-3 py-2 text-sm text-nota-900 focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
-      >
-        <option value="">Все</option>
-        {% for b in brands %}
-          <option value="{{ b.slug }}" {% if selected_brand == b.slug %}selected{% endif %}>{{ b.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-nota-800">Ноты</span>
-      <div class="max-h-48 space-y-2 overflow-y-auto pr-1">
-        {% regroup fragrance_notes by type as notes_by_type %}
-        {% for group in notes_by_type %}
-          <p class="mt-2 text-[10px] font-semibold uppercase text-nota-800 first:mt-0">
-            {% if group.grouper == "top" %}Верхние{% elif group.grouper == "middle" %}Сердечные{% elif group.grouper == "base" %}Базовые{% else %}{{ group.grouper }}{% endif %}
-          </p>
-          {% for note in group.list %}
-            <label class="flex cursor-pointer items-center gap-2 text-sm text-nota-900">
-              <input
-                type="checkbox"
-                name="notes"
-                value="{{ note.slug }}"
-                class="rounded border-nota-300 text-nota-900 focus:ring-nota-800"
-                {% if note.slug in selected_notes %}checked{% endif %}
-              >
-              <span>{{ note.name }}</span>
-            </label>
-          {% endfor %}
+          <label class="flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]">
+            <input
+              type="checkbox"
+              name="category"
+              value="{{ c.slug }}"
+              class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+              {% if c.slug in selected_categories %}checked{% endif %}
+            >
+            <span>{{ c.name }}</span>
+          </label>
         {% empty %}
-          <p class="text-sm text-nota-800">Ноты пока не добавлены.</p>
+          <p class="text-sm text-[#BDB6AA]">—</p>
         {% endfor %}
       </div>
     </div>
 
-    <div>
-      <label for="id_volume" class="mb-1 block text-xs font-medium uppercase tracking-wide text-nota-800">Объём</label>
-      <select
-        name="volume"
-        id="id_volume"
-        class="w-full rounded-lg border border-nota-200 bg-nota-50 px-3 py-2 text-sm text-nota-900 focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
-      >
-        <option value="">Любой</option>
-        {% for val, label in volume_choices %}
-          <option value="{{ val }}" {% if selected_volume == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid grid-cols-2 gap-3 border-t border-[#C9A96E]/20 pt-6">
       <div>
-        <label for="id_min_price" class="mb-1 block text-xs font-medium text-nota-800">Цена от</label>
+        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Price Min</label>
         <input
           type="number"
           name="min_price"
@@ -87,11 +39,11 @@
           min="0"
           step="0.01"
           placeholder="0"
-          class="w-full rounded-lg border border-nota-200 bg-nota-50 px-3 py-2 text-sm text-nota-900 focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
+          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
         >
       </div>
       <div>
-        <label for="id_max_price" class="mb-1 block text-xs font-medium text-nota-800">до</label>
+        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Price Max</label>
         <input
           type="number"
           name="max_price"
@@ -100,9 +52,53 @@
           min="0"
           step="0.01"
           placeholder="∞"
-          class="w-full rounded-lg border border-nota-200 bg-nota-50 px-3 py-2 text-sm text-nota-900 focus:border-nota-800 focus:outline-none focus:ring-1 focus:ring-nota-800"
+          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
         >
       </div>
     </div>
+  </div>
+
+  {# Скрытые поля брендов и нот — только для формы/HTMX и синхронизации с модалками #}
+  <div class="hidden" aria-hidden="true">
+    {% for b in brands %}
+      <label>
+        <input
+          type="checkbox"
+          name="brand"
+          value="{{ b.slug }}"
+          {% if b.slug in selected_brands %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
+    {% for note in notes_top %}
+      <label>
+        <input
+          type="checkbox"
+          name="notes"
+          value="{{ note.slug }}"
+          {% if note.slug in selected_notes %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
+    {% for note in notes_middle %}
+      <label>
+        <input
+          type="checkbox"
+          name="notes"
+          value="{{ note.slug }}"
+          {% if note.slug in selected_notes %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
+    {% for note in notes_base %}
+      <label>
+        <input
+          type="checkbox"
+          name="notes"
+          value="{{ note.slug }}"
+          {% if note.slug in selected_notes %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
   </div>
 </aside>

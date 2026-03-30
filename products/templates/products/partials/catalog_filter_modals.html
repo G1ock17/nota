@@ -1,0 +1,115 @@
+{# Модальные окна фильтров: дублируют списки брендов и нот, синхронизируются с сайдбаром через JS #}
+<div id="filter-modal-brands" class="filter-modal" aria-hidden="true">
+  <div class="filter-modal__backdrop" data-filter-modal-close="brands"></div>
+  <div class="filter-modal__panel" role="dialog" aria-labelledby="filter-modal-brands-title">
+    <div class="flex items-start justify-between gap-4 border-b border-[#C9A96E]/25 pb-4">
+      <h2 id="filter-modal-brands-title" class="font-serif text-2xl text-[#F5F1E8]">Бренды</h2>
+      <button type="button" class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]" data-filter-modal-close="brands">Закрыть</button>
+    </div>
+    <div class="mt-4">
+      <label for="filter-modal-brands-search" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Поиск</label>
+      <input
+        id="filter-modal-brands-search"
+        type="search"
+        class="filter-modal__search w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none"
+        placeholder="Название бренда…"
+        autocomplete="off"
+      >
+    </div>
+    <div class="filter-modal__body mt-4 max-h-[55vh] space-y-2 overflow-y-auto pr-1">
+      {% for b in brands %}
+        <label
+          class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+          data-filter-text="{{ b.name|lower }} {{ b.slug|lower }}"
+        >
+          <input
+            type="checkbox"
+            class="js-modal-brand h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+            value="{{ b.slug }}"
+          >
+          <span>{{ b.name }}</span>
+        </label>
+      {% empty %}
+        <p class="text-sm text-[#BDB6AA]">Нет брендов</p>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex gap-3 border-t border-[#C9A96E]/25 pt-4">
+      <button type="button" class="btn-luxury flex-1" data-filter-modal-apply="brands">Применить</button>
+      <button type="button" class="flex-1 border border-[#C9A96E]/45 py-3 text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]" data-filter-modal-close="brands">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="filter-modal-notes" class="filter-modal" aria-hidden="true">
+  <div class="filter-modal__backdrop" data-filter-modal-close="notes"></div>
+  <div class="filter-modal__panel" role="dialog" aria-labelledby="filter-modal-notes-title">
+    <div class="flex items-start justify-between gap-4 border-b border-[#C9A96E]/25 pb-4">
+      <h2 id="filter-modal-notes-title" class="font-serif text-2xl text-[#F5F1E8]">Ноты</h2>
+      <button type="button" class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]" data-filter-modal-close="notes">Закрыть</button>
+    </div>
+    <div class="mt-4">
+      <label for="filter-modal-notes-search" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Поиск</label>
+      <input
+        id="filter-modal-notes-search"
+        type="search"
+        class="filter-modal__search w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none"
+        placeholder="Название ноты…"
+        autocomplete="off"
+      >
+    </div>
+    <div class="filter-modal__body mt-4 max-h-[55vh] overflow-y-auto pr-1">
+      <div class="js-modal-notes-section space-y-2 border-b border-[#C9A96E]/20 pb-4">
+        <h3 class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Верхние</h3>
+        <div class="space-y-2">
+          {% for note in notes_top %}
+            <label
+              class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+              data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
+            >
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <span>{{ note.name }}</span>
+            </label>
+          {% empty %}
+            <p class="text-sm text-[#BDB6AA]">—</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="js-modal-notes-section space-y-2 border-b border-[#C9A96E]/20 py-4">
+        <h3 class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Сердечные</h3>
+        <div class="space-y-2">
+          {% for note in notes_middle %}
+            <label
+              class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+              data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
+            >
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <span>{{ note.name }}</span>
+            </label>
+          {% empty %}
+            <p class="text-sm text-[#BDB6AA]">—</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="js-modal-notes-section space-y-2 pt-4">
+        <h3 class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Базовые</h3>
+        <div class="space-y-2">
+          {% for note in notes_base %}
+            <label
+              class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+              data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
+            >
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <span>{{ note.name }}</span>
+            </label>
+          {% empty %}
+            <p class="text-sm text-[#BDB6AA]">—</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 flex gap-3 border-t border-[#C9A96E]/25 pt-4">
+      <button type="button" class="btn-luxury flex-1" data-filter-modal-apply="notes">Применить</button>
+      <button type="button" class="flex-1 border border-[#C9A96E]/45 py-3 text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]" data-filter-modal-close="notes">Отмена</button>
+    </div>
+  </div>
+</div>

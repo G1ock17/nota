@@ -1,0 +1,13 @@
+{% if error %}
+<div class="border border-[#C9A96E]/60 bg-[#141414] px-5 py-4 text-xs uppercase tracking-[0.14em] text-[#D7A3A3]">
+  {{ error }}
+</div>
+{% else %}
+<div class="border border-[#C9A96E]/60 bg-[#0B0B0B] px-5 py-4 text-xs text-[#E4DFD5]">
+  <p class="uppercase tracking-[0.14em] text-[#C9A96E]">Товар добавлен</p>
+  <p class="mt-2 font-serif text-base normal-case text-[#F5F1E8]">{{ product_name }}</p>
+  <p class="mt-2 text-[#BDB6AA]">Товаров в корзине: {{ item_count }}</p>
+  <a href="{% url 'products:cart' %}" class="btn-luxury mt-4 inline-flex px-4 py-2 text-[10px]">В корзину</a>
+</div>
+{% include "core/partials/nav_cart_badge.html" with count=item_count hx_oob=True only %}
+{% endif %}

@@ -1,30 +1,5 @@
 {% extends "core/base.html" %}
 {% block title %}Каталог — nota{% endblock %}
-{% block extra_css %}
-{{ block.super }}
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
-          serif: ["Cormorant Garamond", "Georgia", "serif"],
-        },
-        colors: {
-          nota: {
-            50: "#faf8f6",
-            100: "#f0ebe4",
-            200: "#ddd2c4",
-            800: "#3d3429",
-            900: "#1f1a15",
-          },
-        },
-      },
-    },
-  };
-</script>
-{% endblock %}
 {% block extra_js %}
 {{ block.super }}
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
