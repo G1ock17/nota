@@ -24,7 +24,7 @@
         >
           <input
             type="checkbox"
-            class="js-modal-brand h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+            class="js-modal-brand h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
             value="{{ b.slug }}"
           >
           <span>{{ b.name }}</span>
@@ -66,7 +66,7 @@
               class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
               data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
             >
-              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0" value="{{ note.slug }}">
               <span>{{ note.name }}</span>
             </label>
           {% empty %}
@@ -82,7 +82,7 @@
               class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
               data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
             >
-              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0" value="{{ note.slug }}">
               <span>{{ note.name }}</span>
             </label>
           {% empty %}
@@ -98,7 +98,7 @@
               class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
               data-filter-text="{{ note.name|lower }} {{ note.slug|lower }}"
             >
-              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0" value="{{ note.slug }}">
+              <input type="checkbox" class="js-modal-note h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0" value="{{ note.slug }}">
               <span>{{ note.name }}</span>
             </label>
           {% empty %}

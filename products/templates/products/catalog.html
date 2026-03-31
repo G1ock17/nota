@@ -7,8 +7,8 @@
 
   <main class="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
     <div class="mb-12">
-      <h1 class="font-serif text-4xl text-[#F5F1E8] sm:text-5xl">Catalog</h1>
-      <p class="mt-4 max-w-2xl text-sm uppercase tracking-[0.14em] text-[#BDB6AA]">Luxury fragrances. Sharp details. Timeless design.</p>
+      <h1 class="font-serif text-4xl text-[#F5F1E8] sm:text-5xl">Каталог</h1>
+      <p class="mt-4 max-w-2xl text-sm uppercase tracking-[0.14em] text-[#BDB6AA]">Роскошные ароматы. Четкие детали. Неподвластный времени дизайн.</p>
     </div>
 
     <form
@@ -17,7 +17,7 @@
       action="{% url 'products:catalog' %}"
       hx-get="{% url 'products:catalog' %}"
       hx-target="#catalog-results"
-      hx-trigger="change from:select, change from:input[type=checkbox], change from:input[type=number], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
+      hx-trigger="change from:select, change from:input[type=checkbox], change from:input[type=number], change from:input[type=range], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
       hx-push-url="true"
       hx-indicator="#catalog-loading"
       class="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]"
@@ -50,5 +50,138 @@
   #catalog-form.htmx-request #catalog-results {
     opacity: 0.65;
   }
+  .catalog-price-slider-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-top: 10px;
+    border-radius: 9999px;
+    border: 2px solid #0B0B0B;
+    background: #F5F1E8;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .catalog-price-slider-thumb::-moz-range-thumb {
+    width: 0.95rem;
+    height: 0.95rem;
+    transform: translateY(10px);
+    border-radius: 9999px;
+    border: 2px solid #0B0B0B;
+    background: #F5F1E8;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .catalog-price-slider-thumb {
+    pointer-events: none;
+  }
+  .catalog-price-slider-thumb::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+  .catalog-price-slider-thumb::-moz-range-track {
+    background: transparent;
+  }
 </style>
+<script>
+  (() => {
+    const minInput = document.getElementById("id_min_price");
+    const maxInput = document.getElementById("id_max_price");
+    const minRange = document.getElementById("id_min_price_range");
+    const maxRange = document.getElementById("id_max_price_range");
+    const activeRange = document.getElementById("catalog-price-slider-range");
+    if (!minInput || !maxInput || !minRange || !maxRange || !activeRange) return;
+
+    const toInt = (value, fallback) => {
+      const parsed = parseInt(value, 10);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const boundsMin = toInt(minRange.min, 0);
+    const boundsMax = toInt(maxRange.max, 100000);
+    const minGap = 1;
+
+    const isClickNearThumb = (event, rangeEl) => {
+      const rect = rangeEl.getBoundingClientRect();
+      if (!rect.width) return false;
+      const value = toInt(rangeEl.value, boundsMin);
+      const min = toInt(rangeEl.min, boundsMin);
+      const max = toInt(rangeEl.max, boundsMax);
+      const ratio = (value - min) / Math.max(max - min, 1);
+      const thumbX = rect.left + ratio * rect.width;
+      const threshold = 12;
+      return Math.abs(event.clientX - thumbX) <= threshold;
+    };
+
+    const syncRangeFill = () => {
+      const minValue = toInt(minRange.value, boundsMin);
+      const maxValue = toInt(maxRange.value, boundsMax);
+      const total = Math.max(boundsMax - boundsMin, 1);
+      const left = ((minValue - boundsMin) / total) * 100;
+      const right = ((maxValue - boundsMin) / total) * 100;
+      activeRange.style.left = `${left}%`;
+      activeRange.style.width = `${Math.max(right - left, 0)}%`;
+    };
+
+    const normalizeRangePair = (changed) => {
+      let minValue = toInt(minRange.value, boundsMin);
+      let maxValue = toInt(maxRange.value, boundsMax);
+      if (changed === "min" && minValue >= maxValue) {
+        minValue = Math.max(boundsMin, maxValue - minGap);
+      }
+      if (changed === "max" && maxValue <= minValue) {
+        maxValue = Math.min(boundsMax, minValue + minGap);
+      }
+      minRange.value = String(minValue);
+      maxRange.value = String(maxValue);
+      minInput.value = String(minValue);
+      maxInput.value = String(maxValue);
+      syncRangeFill();
+      minInput.dispatchEvent(new Event("input", { bubbles: true }));
+      maxInput.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+
+    const normalizeNumberPair = (keepEmpty = false) => {
+      const minRaw = (minInput.value || "").trim();
+      const maxRaw = (maxInput.value || "").trim();
+      let minValue = toInt(minRaw, boundsMin);
+      let maxValue = toInt(maxRaw, boundsMax);
+      minValue = Math.min(Math.max(minValue, boundsMin), boundsMax);
+      maxValue = Math.min(Math.max(maxValue, boundsMin), boundsMax);
+      if (minValue >= maxValue) {
+        if (minRaw && !maxRaw) {
+          maxValue = Math.min(boundsMax, minValue + minGap);
+        } else {
+          minValue = Math.max(boundsMin, maxValue - minGap);
+        }
+      }
+      minInput.value = keepEmpty && !minRaw ? "" : String(minValue);
+      maxInput.value = keepEmpty && !maxRaw ? "" : String(maxValue);
+      minRange.value = String(minValue);
+      maxRange.value = String(maxValue);
+      syncRangeFill();
+    };
+
+    const blockTrackClick = (rangeEl) => {
+      rangeEl.addEventListener("pointerdown", (event) => {
+        if (!isClickNearThumb(event, rangeEl)) {
+          event.preventDefault();
+        }
+      });
+      rangeEl.addEventListener("mousedown", (event) => {
+        if (!isClickNearThumb(event, rangeEl)) {
+          event.preventDefault();
+        }
+      });
+    };
+
+    blockTrackClick(minRange);
+    blockTrackClick(maxRange);
+    minRange.addEventListener("input", () => normalizeRangePair("min"));
+    maxRange.addEventListener("input", () => normalizeRangePair("max"));
+    minInput.addEventListener("change", normalizeNumberPair);
+    maxInput.addEventListener("change", normalizeNumberPair);
+
+    normalizeNumberPair(true);
+  })();
+</script>
 {% endblock %}

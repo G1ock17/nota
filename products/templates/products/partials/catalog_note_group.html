@@ -7,7 +7,7 @@
           type="checkbox"
           name="notes"
           value="{{ note.slug }}"
-          class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+          class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
           {% if note.slug in selected_notes %}checked{% endif %}
         >
         <span>{{ note.name }}</span>

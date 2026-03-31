@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import Brand, Category, FragranceNote, Product, ProductImage, Variant
+from .models import (
+    Brand,
+    Category,
+    FragranceNote,
+    Order,
+    OrderItem,
+    Product,
+    ProductImage,
+    Variant,
+)
 
 
 class ProductImageInline(admin.TabularInline):
@@ -11,6 +20,13 @@ class ProductImageInline(admin.TabularInline):
 class VariantInline(admin.TabularInline):
     model = Variant
     extra = 0
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ("variant", "quantity", "price", "line_total")
+    can_delete = False
 
 
 @admin.register(Category)
@@ -55,3 +71,22 @@ class ProductImageAdmin(admin.ModelAdmin):
 class VariantAdmin(admin.ModelAdmin):
     list_display = ("product", "volume", "price", "stock")
     list_filter = ("volume",)
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "email",
+        "status",
+        "tracking_number",
+        "delivery_method",
+        "total_price",
+        "created_at",
+    )
+    list_filter = ("status", "delivery_method", "created_at")
+    list_editable = ("status", "tracking_number")
+    search_fields = ("email", "first_name", "last_name", "phone", "user__username")
+    readonly_fields = ("created_at",)
+    inlines = (OrderItemInline,)

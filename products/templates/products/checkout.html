@@ -1,0 +1,211 @@
+{% extends "products/base_catalog.html" %}
+{% load static %}
+
+{% block title %}Оформление заказа — nota{% endblock %}
+
+{% block extra_css %}
+<style>
+  #checkout-saved-address {
+    color-scheme: dark;
+  }
+
+  #checkout-saved-address option {
+    background-color: #0B0B0B;
+    color: #E4DFD5;
+  }
+
+  #checkout-saved-address option:checked,
+  #checkout-saved-address option:hover,
+  #checkout-saved-address option:focus {
+    background: #121212 linear-gradient(0deg, #121212 0%, #121212 100%);
+    color: #C9A96E;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="mx-auto w-full max-w-7xl px-6 py-14 lg:px-12">
+    <div class="mb-10">
+      <h1 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Оформление заказа</h1>
+      <p class="mt-3 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]">Позиций: {{ item_count }}</p>
+    </div>
+
+    {% if cart_items %}
+      {% if checkout_error %}
+        <div class="mb-6 border border-[#C9A96E]/50 bg-[#141414] px-4 py-3 text-sm text-[#D7A3A3]" role="alert">
+          {{ checkout_error }}
+        </div>
+      {% endif %}
+      <form method="post" action="{% url 'products:checkout' %}" class="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_360px]">
+        {% csrf_token %}
+
+        <section class="space-y-8">
+          <div class="border border-[#C9A96E]/35 p-6">
+            <h2 class="font-serif text-3xl text-[#F5F1E8]">Контактная информация</h2>
+            <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div class="md:col-span-2">
+                <label for="checkout-email" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Email</label>
+                <input id="checkout-email" name="email" type="email" value="{{ checkout_form.email }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div>
+                <label for="checkout-first-name" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Имя</label>
+                <input id="checkout-first-name" name="first_name" type="text" value="{{ checkout_form.first_name }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div>
+                <label for="checkout-last-name" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Фамилия</label>
+                <input id="checkout-last-name" name="last_name" type="text" value="{{ checkout_form.last_name }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label for="checkout-phone" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Телефон</label>
+                <input id="checkout-phone" name="phone" type="tel" value="{{ checkout_form.phone }}" placeholder="+7..." required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-[#C9A96E]/35 p-6">
+            <h2 class="font-serif text-3xl text-[#F5F1E8]">Адрес доставки</h2>
+            {% if saved_addresses %}
+              <div class="mt-6">
+                <label for="checkout-saved-address" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Выбрать адрес из ЛК</label>
+                <select id="checkout-saved-address" name="selected_address_id" class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0">
+                  <option value="">Заполню вручную</option>
+                  {% for address in saved_addresses %}
+                    <option
+                      value="{{ address.id }}"
+                      data-country="{{ address.country }}"
+                      data-address-line1="{{ address.address_line1 }}"
+                      data-address-line2="{{ address.address_line2 }}"
+                      data-city="{{ address.city }}"
+                      data-region="{{ address.region }}"
+                      data-postal-code="{{ address.postal_code }}"
+                      {% if selected_address_id == address.id|stringformat:"s" %}selected{% endif %}
+                    >
+                      {{ address.country }}, {{ address.city }}, {{ address.address_line1 }}{% if address.is_default %} (основной){% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+            <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div class="md:col-span-2">
+                <label for="checkout-country" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Страна / регион</label>
+                <input id="checkout-country" name="country" type="text" value="{{ checkout_form.country }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label for="checkout-address" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Адрес</label>
+                <input id="checkout-address" name="address_line1" type="text" value="{{ checkout_form.address_line1 }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label for="checkout-address-extra" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Подъезд, этаж и т.д.</label>
+                <input id="checkout-address-extra" name="address_line2" type="text" value="{{ checkout_form.address_line2 }}" class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div>
+                <label for="checkout-city" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Населённый пункт</label>
+                <input id="checkout-city" name="city" type="text" value="{{ checkout_form.city }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div>
+                <label for="checkout-region" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Область / район</label>
+                <input id="checkout-region" name="region" type="text" value="{{ checkout_form.region }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+              <div>
+                <label for="checkout-postal" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Почтовый индекс</label>
+                <input id="checkout-postal" name="postal_code" type="text" value="{{ checkout_form.postal_code }}" required class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-[#C9A96E]/35 p-6">
+            <h2 class="font-serif text-3xl text-[#F5F1E8]">Параметры доставки</h2>
+            <div class="mt-6">
+              <label class="flex cursor-pointer items-center gap-3 border border-[#C9A96E]/35 px-4 py-3 has-[:checked]:border-[#C9A96E]">
+                <input type="radio" name="delivery_method" value="courier" {% if checkout_form.delivery_method == "courier" %}checked{% endif %} class="h-4 w-4 cursor-pointer border border-[#C9A96E]/50 bg-[#0B0B0B] accent-[#C9A96E] focus:ring-0 focus:ring-offset-0">
+                <span class="text-sm text-[#E4DFD5]">Доставка курьером</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="border border-[#C9A96E]/35 p-6">
+            <h2 class="font-serif text-3xl text-[#F5F1E8]">Примечание к заказу</h2>
+            <div class="mt-6">
+              <textarea name="order_note" rows="4" placeholder="Добавить примечание к заказу" class="w-full resize-y border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none">{{ checkout_form.order_note }}</textarea>
+            </div>
+          </div>
+        </section>
+
+        <aside class="h-fit border border-[#C9A96E]/35 p-6">
+          <h2 class="font-serif text-3xl text-[#F5F1E8]">Ваш заказ</h2>
+          <div class="mt-6 space-y-4 border-t border-[#C9A96E]/20 pt-6">
+            {% for item in cart_items %}
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
+                  <p class="mt-1 text-sm text-[#E4DFD5]">{{ item.variant.product.name }} x {{ item.quantity }}</p>
+                </div>
+                <p class="text-sm text-[#F5F1E8]">{{ item.line_total|floatformat:2 }} ₽</p>
+              </div>
+            {% endfor %}
+          </div>
+
+          <p class="mt-6 border-t border-[#C9A96E]/20 pt-6 font-serif text-4xl text-[#F5F1E8]">{{ total_price|floatformat:2 }} ₽</p>
+
+          <label class="mt-6 flex items-start gap-3 text-xs text-[#BDB6AA]">
+            <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 cursor-pointer border border-[#C9A96E]/50 bg-[#0B0B0B] accent-[#C9A96E] focus:ring-0 focus:ring-offset-0">
+            <span>
+              Продолжая покупку, вы соглашаетесь с нашими
+              <a href="#" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Правила и условия</a>
+              и
+              <a href="#" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Политика конфиденциальности</a>.
+            </span>
+          </label>
+
+          <div class="mt-8 grid grid-cols-1 gap-3">
+            <a href="{% url 'products:cart' %}" class="inline-flex items-center justify-center border border-[#C9A96E]/45 px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-[#C9A96E] transition-colors hover:bg-[#C9A96E]/10">Вернуться в корзину</a>
+            <button type="submit" class="btn-luxury w-full">Оформить заказ</button>
+          </div>
+
+          <p class="mt-4 text-xs text-[#BDB6AA]">Способы оплаты добавим следующим этапом.</p>
+        </aside>
+      </form>
+    {% else %}
+      <div class="border border-dashed border-[#C9A96E]/45 p-14 text-center">
+        <p class="font-serif text-3xl text-[#F5F1E8]">Корзина пуста</p>
+        <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex">Перейти в каталог</a>
+      </div>
+    {% endif %}
+  </main>
+
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const savedAddressSelect = document.getElementById("checkout-saved-address");
+  if (savedAddressSelect) {
+    const fields = {
+      country: document.getElementById("checkout-country"),
+      address_line1: document.getElementById("checkout-address"),
+      address_line2: document.getElementById("checkout-address-extra"),
+      city: document.getElementById("checkout-city"),
+      region: document.getElementById("checkout-region"),
+      postal_code: document.getElementById("checkout-postal"),
+    };
+
+    savedAddressSelect.addEventListener("change", () => {
+      const selectedOption = savedAddressSelect.options[savedAddressSelect.selectedIndex];
+      if (!savedAddressSelect.value || !selectedOption) {
+        return;
+      }
+      fields.country.value = selectedOption.dataset.country || "";
+      fields.address_line1.value = selectedOption.dataset.addressLine1 || "";
+      fields.address_line2.value = selectedOption.dataset.addressLine2 || "";
+      fields.city.value = selectedOption.dataset.city || "";
+      fields.region.value = selectedOption.dataset.region || "";
+      fields.postal_code.value = selectedOption.dataset.postalCode || "";
+    });
+  }
+</script>
+{% endblock %}

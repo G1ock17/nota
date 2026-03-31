@@ -1,5 +1,8 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -128,3 +131,58 @@ class Variant(models.Model):
 
     def __str__(self) -> str:
         return f"{self.product.name} {self.volume}"
+
+
+class Order(models.Model):
+    class DeliveryMethod(models.TextChoices):
+        COURIER = "courier", "Доставка курьером"
+
+    class Status(models.TextChoices):
+        NEW = "new", "Новый"
+        PAID = "paid", "Оплачен"
+        ASSEMBLING = "assembling", "В сборке"
+        SHIPPED = "shipped", "Отправлен"
+        DELIVERED = "delivered", "Доставлен"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+    email = models.EmailField()
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=32)
+    country = models.CharField(max_length=120)
+    address_line1 = models.CharField(max_length=255)
+    address_line2 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=120)
+    region = models.CharField(max_length=120)
+    postal_code = models.CharField(max_length=32)
+    delivery_method = models.CharField(
+        max_length=32,
+        choices=DeliveryMethod.choices,
+        default=DeliveryMethod.COURIER,
+    )
+    order_note = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    tracking_number = models.CharField(max_length=120, blank=True)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Order #{self.pk} - {self.user.username}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    variant = models.ForeignKey(Variant, on_delete=models.PROTECT, related_name="order_items")
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    line_total = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f"Order #{self.order_id}: {self.variant} x {self.quantity}"

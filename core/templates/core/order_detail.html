@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Заказ #{{ order.id }} — nota{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="mx-auto w-full max-w-6xl px-6 py-16 lg:px-12">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="font-serif text-4xl text-[#F5F1E8]">Заказ #{{ order.id }}</h1>
+        <p class="mt-2 text-sm text-[#BDB6AA]">{{ order.created_at|date:"d.m.Y H:i" }}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-serif text-3xl text-[#F5F1E8]">{{ order.total_price|floatformat:2 }} ₽</p>
+        <p class="mt-2 text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ order.get_status_display }}</p>
+      </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-[1fr_320px]">
+      <section class="space-y-4">
+        {% for item in order.items.all %}
+          <article class="grid grid-cols-1 gap-4 border border-[#C9A96E]/35 p-5 md:grid-cols-[110px_1fr_auto]">
+            <div class="aspect-[4/5] overflow-hidden border border-[#C9A96E]/25">
+              {% with imgs=item.variant.product.images.all %}
+                {% if imgs %}
+                  <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover">
+                {% else %}
+                  <div class="flex h-full items-center justify-center text-xs text-[#BDB6AA]">No image</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
+              <p class="mt-1 font-serif text-2xl text-[#F5F1E8]">{{ item.variant.product.name }}</p>
+              <p class="mt-1 text-sm text-[#BDB6AA]">{{ item.variant.get_volume_display }} x {{ item.quantity }}</p>
+            </div>
+            <p class="font-serif text-2xl text-[#F5F1E8]">{{ item.line_total|floatformat:2 }} ₽</p>
+          </article>
+        {% endfor %}
+      </section>
+
+      <aside class="h-fit border border-[#C9A96E]/35 p-6">
+        <h2 class="font-serif text-3xl text-[#F5F1E8]">Детали доставки</h2>
+        <p class="mt-5 text-sm text-[#BDB6AA]">Способ: {{ order.get_delivery_method_display }}</p>
+        <p class="mt-2 text-sm text-[#BDB6AA]">Адрес: {{ order.country }}, {{ order.city }}, {{ order.region }}, {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.postal_code }}</p>
+        <p class="mt-2 text-sm text-[#BDB6AA]">Телефон: {{ order.phone }}</p>
+        <p class="mt-2 text-sm text-[#BDB6AA]">Email: {{ order.email }}</p>
+        <p class="mt-4 border-t border-[#C9A96E]/20 pt-4 text-sm text-[#BDB6AA]">Трек-номер: {% if order.tracking_number %}{{ order.tracking_number }}{% else %}еще не присвоен{% endif %}</p>
+        {% if order.order_note %}
+          <p class="mt-4 text-sm text-[#BDB6AA]">Примечание: {{ order.order_note }}</p>
+        {% endif %}
+        <a href="{% url 'account' %}" class="btn-luxury mt-6 inline-flex w-full justify-center">Назад в кабинет</a>
+      </aside>
+    </div>
+  </main>
+</div>
+{% endblock %}

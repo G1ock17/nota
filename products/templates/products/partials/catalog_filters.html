@@ -1,7 +1,7 @@
 <aside id="catalog-sidebar-filters" class="w-full shrink-0">
   <div class="sticky top-6 space-y-8 border border-[#C9A96E]/35 bg-[#0B0B0B] p-6">
     <div class="flex items-center justify-between gap-2">
-      <h2 class="font-serif text-2xl text-[#F5F1E8]">Filters</h2>
+      <h2 class="font-serif text-2xl text-[#F5F1E8]">фильтры</h2>
       <a
         href="{% url 'products:catalog' %}"
         class="nav-link text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]"
@@ -9,7 +9,7 @@
     </div>
 
     <div>
-      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Category</span>
+      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Категории</span>
       <div class="space-y-2">
         {% for c in categories %}
           <label class="flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]">
@@ -17,7 +17,7 @@
               type="checkbox"
               name="category"
               value="{{ c.slug }}"
-              class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] focus:ring-0"
+              class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
               {% if c.slug in selected_categories %}checked{% endif %}
             >
             <span>{{ c.name }}</span>
@@ -28,9 +28,35 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 border-t border-[#C9A96E]/20 pt-6">
+    <div class="border-t border-[#C9A96E]/20 pt-6">
+      <div class="mb-4">
+        <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Диапазон цены</span>
+        <div class="relative px-1 pb-3">
+          <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-1 -translate-y-1/2 rounded bg-[#2A251D]"></div>
+          <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-1 -translate-y-1/2 rounded bg-[#C9A96E]"></div>
+          <input
+            type="range"
+            id="id_min_price_range"
+            min="{{ price_slider_min }}"
+            max="{{ price_slider_max }}"
+            value="{% if min_price %}{{ min_price }}{% else %}{{ price_slider_min }}{% endif %}"
+            step="1"
+            class="catalog-price-slider-thumb absolute inset-x-0 top-0 z-20 h-6 w-full appearance-none bg-transparent"
+          >
+          <input
+            type="range"
+            id="id_max_price_range"
+            min="{{ price_slider_min }}"
+            max="{{ price_slider_max }}"
+            value="{% if max_price %}{{ max_price }}{% else %}{{ price_slider_max }}{% endif %}"
+            step="1"
+            class="catalog-price-slider-thumb catalog-price-slider-thumb-max absolute inset-x-0 top-0 z-10 h-6 w-full appearance-none bg-transparent"
+          >
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
       <div>
-        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Price Min</label>
+        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Цена мин</label>
         <input
           type="number"
           name="min_price"
@@ -43,7 +69,7 @@
         >
       </div>
       <div>
-        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Price Max</label>
+        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Цена макс</label>
         <input
           type="number"
           name="max_price"
@@ -54,6 +80,7 @@
           placeholder="∞"
           class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
         >
+      </div>
       </div>
     </div>
   </div>

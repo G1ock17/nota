@@ -13,6 +13,7 @@
       name="sort"
       id="id_sort"
       class="catalog-sort-bar__select shrink-0 border border-[#C9A96E]/45 bg-[#0B0B0B] text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+      onchange="this.form.requestSubmit()"
     >
       <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Сначала новые</option>
       <option value="popularity" {% if current_sort == "popularity" %}selected{% endif %}>По популярности</option>

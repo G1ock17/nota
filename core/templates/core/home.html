@@ -8,14 +8,14 @@
     <main>
         <section class="relative border-b border-[#C9A96E]/25">
             <div class="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1920&q=80" alt="Luxury perfume" class="h-full w-full object-cover opacity-35">
+                <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1920&q=80" alt="Нишевая парфюмерия" class="h-full w-full object-cover opacity-35">
             </div>
             <div class="relative mx-auto flex min-h-[78vh] w-full max-w-7xl items-center justify-center px-6 py-28 text-center lg:px-12">
                 <div class="reveal max-w-4xl">
-                    <p class="mb-8 text-[11px] uppercase tracking-[0.28em] text-[#C9A96E]">Niche Perfume E-commerce</p>
-                    <h1 class="mb-10 font-serif text-5xl leading-tight text-[#F5F1E8] md:text-7xl">The Art of Scent in a Pure Luxury Form</h1>
-                    <p class="mx-auto mb-12 max-w-2xl text-sm leading-8 text-[#C6BFB2] md:text-base">Discover rare compositions from iconic perfume houses curated for those who value detail, silence, and timeless elegance.</p>
-                    <a href="{% url 'products:catalog' %}" class="btn-luxury">Explore Collection</a>
+                    <p class="mb-8 text-[11px] uppercase tracking-[0.28em] text-[#C9A96E]">Нишевый парфюмерный бутик</p>
+                    <h1 class="mb-10 font-serif text-5xl leading-tight text-[#F5F1E8] md:text-7xl">Искусство аромата в воплощении роскоши</h1>
+                    <p class="mx-auto mb-12 max-w-2xl text-sm leading-8 text-[#C6BFB2] md:text-base">Откройте редкие композиции от культовых парфюмерных домов, созданные для тех, кто ценит детали, тишину и вневременную элегантность.</p>
+                    <a href="{% url 'products:catalog' %}" class="btn-luxury">Смотреть коллекцию</a>
                 </div>
             </div>
         </section>
@@ -23,36 +23,36 @@
         <section id="featured" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="mb-16 flex items-end justify-between gap-6">
                 <div class="reveal max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Featured Perfumes</p>
-                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Curated Signatures</h2>
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Рекомендуемые ароматы</p>
+                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Избранные композиции</h2>
                 </div>
-                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-[#D9D2C6] md:inline-block">View All</a>
+                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-[#D9D2C6] md:inline-block">Смотреть все</a>
             </div>
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=800&q=80" family="Amber Woody" name="Noir Absolu" description="Dense amber, smoky cedar and polished leather for a long, magnetic trail." volume="100 ml" price="14 900 ₽" %}
-                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80" family="Floral Musk" name="Velvet Iris" description="Powdery iris with white musk and soft violet petals for a refined daily statement." volume="75 ml" price="11 700 ₽" %}
-                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1615634262417-f5b51e838f0d?auto=format&fit=crop&w=800&q=80" family="Fresh Citrus" name="Citrine Veil" description="Sparkling bergamot, neroli and mineral woods with a crisp contemporary finish." volume="90 ml" price="12 400 ₽" %}
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=800&q=80" family="Амброво-древесный" name="Noir Absolu" description="Насыщенная амбра, дымный кедр и гладкая кожа для длинного, притягательного шлейфа." volume="100 мл" price="14 900 ₽" %}
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80" family="Цветочно-мускусный" name="Velvet Iris" description="Пудровый ирис, белый мускус и мягкие лепестки фиалки для утонченного аромата на каждый день." volume="75 мл" price="11 700 ₽" %}
+                {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1615634262417-f5b51e838f0d?auto=format&fit=crop&w=800&q=80" family="Свежий цитрусовый" name="Citrine Veil" description="Искристый бергамот, нероли и минеральные древесные ноты с чистым современным звучанием." volume="90 мл" price="12 400 ₽" %}
             </div>
         </section>
 
         <section id="categories" class="border-y border-[#C9A96E]/25">
             <div class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
                 <div class="reveal mb-14 max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Categories</p>
-                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">By Identity</h2>
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Категории</p>
+                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">По характеру</h2>
                 </div>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Men</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Bold / Woody / Spicy</p>
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Мужские</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Яркие / Древесные / Пряные</p>
                     </a>
                     <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Women</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Floral / Powdery / Soft</p>
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Женские</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Цветочные / Пудровые / Мягкие</p>
                     </a>
                     <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Unisex</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Clean / Citrus / Musky</p>
+                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Унисекс</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Чистые / Цитрусовые / Мускусные</p>
                     </a>
                 </div>
             </div>
@@ -60,8 +60,8 @@
 
         <section id="brands" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="reveal mb-14 max-w-xl">
-                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Brands</p>
-                <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Prestige Houses</h2>
+                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Бренды</p>
+                <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Премиальные дома</h2>
             </div>
             <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
                 <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Amouage</div>

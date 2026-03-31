@@ -17,7 +17,7 @@
               height="500"
             >
           {% else %}
-            <div class="flex h-full w-full items-center justify-center text-sm text-[#BDB6AA]">No image</div>
+            <div class="flex h-full w-full items-center justify-center text-sm text-[#BDB6AA]">Нет изображения</div>
           {% endif %}
         {% endwith %}
       </div>
@@ -31,7 +31,7 @@
             {% if product.min_price != None %}
               от {{ product.min_price|floatformat:2 }} ₽
             {% else %}
-              out of stock
+              нет в наличии
             {% endif %}
           </p>
         </div>
@@ -39,8 +39,8 @@
     </article>
   {% empty %}
     <div class="col-span-full border border-dashed border-[#C9A96E]/45 p-12 text-center">
-      <p class="font-serif text-2xl text-[#F5F1E8]">Nothing found</p>
-      <p class="mt-2 text-sm text-[#BDB6AA]">Try changing filters or reset them.</p>
+      <p class="font-serif text-2xl text-[#F5F1E8]">Ничего не найдено</p>
+      <p class="mt-2 text-sm text-[#BDB6AA]">Попробуйте изменить фильтры или сбросить их.</p>
     </div>
   {% endfor %}
 </div>

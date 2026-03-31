@@ -6,10 +6,10 @@
             <span class="block h-px w-5 bg-current"></span>
         </button>
         <nav class="nav hidden items-center gap-10 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9] lg:flex">
-            <a href="{% url 'home' %}#featured" class="nav-link pb-1">Featured</a>
-            <a href="{% url 'home' %}#categories" class="nav-link pb-1">Categories</a>
-            <a href="{% url 'home' %}#brands" class="nav-link pb-1">Brands</a>
-            <a href="{% url 'products:catalog' %}" class="nav-link pb-1">Shop</a>
+            <a href="{% url 'home' %}#featured" class="nav-link pb-1">Рекомендуемое</a>
+            <a href="{% url 'home' %}#categories" class="nav-link pb-1">Категории</a>
+            <a href="{% url 'home' %}#brands" class="nav-link pb-1">Бренды</a>
+            <a href="{% url 'products:catalog' %}" class="nav-link pb-1">Каталог</a>
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"

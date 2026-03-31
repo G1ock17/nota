@@ -1,6 +1,6 @@
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import DecimalField, Min, Prefetch, Q, Sum, Value
+from django.db.models import DecimalField, Max, Min, Prefetch, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.views.generic import DetailView, ListView
 
@@ -164,6 +164,18 @@ class CatalogListView(ListView):
         ctx["selected_volume"] = self.request.GET.get("volume", "")
         ctx["min_price"] = self.request.GET.get("min_price", "")
         ctx["max_price"] = self.request.GET.get("max_price", "")
+        price_bounds = Variant.objects.filter(stock__gt=0).aggregate(
+            min_price=Min("price"),
+            max_price=Max("price"),
+        )
+        min_bound = price_bounds.get("min_price")
+        max_bound = price_bounds.get("max_price")
+        slider_min = int(min_bound) if min_bound is not None else 0
+        slider_max = int(max_bound) if max_bound is not None else 100000
+        if slider_max <= slider_min:
+            slider_max = slider_min + 1
+        ctx["price_slider_min"] = slider_min
+        ctx["price_slider_max"] = slider_max
         page_obj = ctx.get("page_obj")
         if page_obj is not None:
             ctx["catalog_pagination_entries"] = catalog_pagination_entries(page_obj)
