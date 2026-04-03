@@ -92,6 +92,12 @@ class Product(models.Model):
             self.slug = slugify(self.name)[:255]
         super().save(*args, **kwargs)
 
+    def first_in_stock_variant(self):
+        for variant in self.variants.all():
+            if variant.stock > 0:
+                return variant
+        return None
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(

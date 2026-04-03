@@ -252,27 +252,31 @@
         });
     }
 
-    var revealItems = document.querySelectorAll(".reveal");
-    if (revealItems.length) {
-        var observer = new IntersectionObserver(
-            function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("is-visible");
-                        observer.unobserve(entry.target);
-                    }
-                });
-            },
-            { threshold: 0.16 }
-        );
+    var revealObserver = new IntersectionObserver(
+        function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.16 }
+    );
 
-        revealItems.forEach(function (item) {
-            observer.observe(item);
+    function observeRevealElements(nodeList) {
+        nodeList.forEach(function (item) {
+            revealObserver.observe(item);
         });
     }
 
+    observeRevealElements(document.querySelectorAll(".reveal"));
+
     document.body.addEventListener("htmx:afterSwap", function (e) {
         var t = e.detail && e.detail.target;
+        if (t && t.id === "catalog-results") {
+            observeRevealElements(t.querySelectorAll(".reveal"));
+        }
         if (!t || t.id !== "cart-toast") return;
         window.clearTimeout(t._toastHide);
         t._toastHide = window.setTimeout(function () {

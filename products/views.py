@@ -28,6 +28,7 @@ def product_search_suggest(request):
                 filter=Q(variants__stock__gt=0),
             ),
         )
+        .filter(min_price__isnull=False)
         .distinct()
         .order_by("name")[:10]
     )
@@ -120,6 +121,7 @@ class CatalogListView(ListView):
                     filter=Q(variants__stock__gt=0),
                 ),
             )
+            .filter(min_price__isnull=False)
         )
 
         params = self.request.GET
@@ -212,7 +214,11 @@ class CatalogListView(ListView):
         ).order_by("name")
         ctx["current_sort"] = self.request.GET.get("sort", "newest")
         ctx["volume_choices"] = [
-            (v, v) for v in Variant.objects.values_list("volume", flat=True).distinct().order_by("volume")
+            (v, v)
+            for v in Variant.objects.filter(stock__gt=0)
+            .values_list("volume", flat=True)
+            .distinct()
+            .order_by("volume")
         ]
         ctx["selected_categories"] = self.request.GET.getlist("category")
         ctx["selected_brands"] = self.request.GET.getlist("brand")
@@ -220,13 +226,15 @@ class CatalogListView(ListView):
         ctx["selected_years"] = self.request.GET.getlist("year")
         ctx["selected_countries"] = self.request.GET.getlist("country")
         ctx["available_years"] = (
-            Product.objects.exclude(year__isnull=True)
+            Product.objects.filter(variants__stock__gt=0)
+            .exclude(year__isnull=True)
             .values_list("year", flat=True)
             .distinct()
             .order_by("-year")
         )
         ctx["available_countries"] = (
-            Product.objects.exclude(country="")
+            Product.objects.filter(variants__stock__gt=0)
+            .exclude(country="")
             .values_list("country", flat=True)
             .distinct()
             .order_by("country")
@@ -310,6 +318,7 @@ class ProductDetailView(DetailView):
                     filter=Q(variants__stock__gt=0),
                 ),
             )
+            .filter(min_price__isnull=False)
             .order_by("-created_at")[:4]
         )
         return ctx
