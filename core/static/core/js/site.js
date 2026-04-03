@@ -1,4 +1,239 @@
 (function () {
+    var searchRoots = document.querySelectorAll("[data-nav-search]");
+    if (searchRoots.length) {
+        var DEBOUNCE_MS = 240;
+        var MIN_QUERY = 2;
+
+        function formatSuggestPrice(minPriceStr) {
+            if (minPriceStr == null || minPriceStr === "") return "нет в наличии";
+            var n = parseFloat(String(minPriceStr), 10);
+            if (isNaN(n)) return "нет в наличии";
+            return "от " + n.toFixed(2).replace(".", ",") + " \u20BD";
+        }
+
+        function productHref(template, slug) {
+            return String(template).split("__slug__").join(encodeURIComponent(slug));
+        }
+
+        function getNavSearchPanel(root) {
+            return root._navSearchPanel || null;
+        }
+
+        function syncNavSearchPanelGeometry(root) {
+            var input = root.querySelector(".nav-search__input");
+            var panel = getNavSearchPanel(root);
+            if (!input || !panel || !panel.classList.contains("is-open")) return;
+            var r = input.getBoundingClientRect();
+            var gap = 4;
+            var margin = 10;
+            var minPanel = 420;
+            var maxPanel = Math.min(520, window.innerWidth - 2 * margin);
+            var w = Math.min(Math.max(r.width, minPanel), maxPanel);
+            var left = r.left;
+            if (left + w > window.innerWidth - margin) {
+                left = Math.max(margin, window.innerWidth - margin - w);
+            }
+            left = Math.max(margin, left);
+            panel.style.left = left + "px";
+            panel.style.top = r.bottom + gap + "px";
+            panel.style.width = w + "px";
+            var avail = window.innerHeight - r.bottom - gap - margin;
+            var cap = 360;
+            panel.style.maxHeight = Math.max(120, Math.min(cap, avail)) + "px";
+        }
+
+        function detachNavSearchPanelViewport(root) {
+            if (!root._navSearchOnViewportChange) return;
+            window.removeEventListener("scroll", root._navSearchOnViewportChange, true);
+            window.removeEventListener("resize", root._navSearchOnViewportChange);
+            root._navSearchOnViewportChange = null;
+        }
+
+        function closeSearchPanel(root) {
+            detachNavSearchPanelViewport(root);
+            var panel = getNavSearchPanel(root);
+            var input = root.querySelector(".nav-search__input");
+            if (!panel) return;
+            panel.classList.remove("is-open");
+            panel.innerHTML = "";
+            panel.setAttribute("hidden", "");
+            panel.style.left = "";
+            panel.style.top = "";
+            panel.style.width = "";
+            panel.style.maxHeight = "";
+            if (input) input.setAttribute("aria-expanded", "false");
+        }
+
+        function openSearchPanel(root, html) {
+            var panel = getNavSearchPanel(root);
+            var input = root.querySelector(".nav-search__input");
+            if (!panel) return;
+            panel.innerHTML = html;
+            panel.removeAttribute("hidden");
+            panel.classList.add("is-open");
+            if (input) input.setAttribute("aria-expanded", "true");
+            syncNavSearchPanelGeometry(root);
+            if (!root._navSearchOnViewportChange) {
+                root._navSearchOnViewportChange = function () {
+                    syncNavSearchPanelGeometry(root);
+                };
+                window.addEventListener("scroll", root._navSearchOnViewportChange, true);
+                window.addEventListener("resize", root._navSearchOnViewportChange);
+            }
+        }
+
+        function renderResults(root, items, detailTpl) {
+            if (!items.length) {
+                openSearchPanel(
+                    root,
+                    '<p class="nav-search__hint">Ничего не найдено</p>'
+                );
+                return;
+            }
+            var frag = document.createDocumentFragment();
+            items.forEach(function (item) {
+                var href = productHref(detailTpl, item.slug);
+                var a = document.createElement("a");
+                a.href = href;
+                a.className = "nav-search__row";
+
+                if (item.image_url) {
+                    var img = document.createElement("img");
+                    img.src = item.image_url;
+                    img.alt = "";
+                    img.className = "nav-search__thumb";
+                    img.width = 64;
+                    img.height = 64;
+                    img.loading = "lazy";
+                    a.appendChild(img);
+                } else {
+                    var ph = document.createElement("span");
+                    ph.className = "nav-search__thumb nav-search__thumb--empty";
+                    ph.setAttribute("aria-hidden", "true");
+                    ph.textContent = "—";
+                    a.appendChild(ph);
+                }
+
+                var meta = document.createElement("div");
+                meta.className = "nav-search__meta";
+
+                var brand = document.createElement("div");
+                brand.className = "nav-search__brand";
+                brand.textContent = item.brand || "";
+                meta.appendChild(brand);
+
+                var name = document.createElement("p");
+                name.className = "nav-search__name";
+                name.textContent = item.name || "";
+                meta.appendChild(name);
+
+                a.appendChild(meta);
+
+                var price = document.createElement("div");
+                price.className = "nav-search__price";
+                price.textContent = formatSuggestPrice(item.min_price);
+                a.appendChild(price);
+
+                frag.appendChild(a);
+            });
+
+            var wrap = document.createElement("div");
+            wrap.appendChild(frag);
+            openSearchPanel(root, wrap.innerHTML);
+        }
+
+        searchRoots.forEach(function (root) {
+            var panelEl = root.querySelector("[data-nav-search-panel]");
+            var input = root.querySelector(".nav-search__input");
+            var urlBase = root.getAttribute("data-search-url") || "";
+            var detailTpl = root.getAttribute("data-product-detail-template") || "";
+            if (!input || !urlBase || !detailTpl || !panelEl) return;
+            if (panelEl.parentElement !== document.body) {
+                document.body.appendChild(panelEl);
+            }
+            root._navSearchPanel = panelEl;
+
+            var debounceId = null;
+            var abortCtl = null;
+
+            function scheduleFetch(q) {
+                if (debounceId) window.clearTimeout(debounceId);
+                debounceId = window.setTimeout(function () {
+                    debounceId = null;
+                    runFetch(q);
+                }, DEBOUNCE_MS);
+            }
+
+            function runFetch(q) {
+                if (abortCtl) abortCtl.abort();
+                if (q.length < MIN_QUERY) {
+                    closeSearchPanel(root);
+                    return;
+                }
+                abortCtl = new AbortController();
+                var u = urlBase + (urlBase.indexOf("?") === -1 ? "?" : "&") + "q=" + encodeURIComponent(q);
+                fetch(u, {
+                    signal: abortCtl.signal,
+                    headers: { Accept: "application/json" },
+                    credentials: "same-origin",
+                })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error("search");
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        var items = (data && data.results) || [];
+                        renderResults(root, items, detailTpl);
+                    })
+                    .catch(function (err) {
+                        if (err && err.name === "AbortError") return;
+                        closeSearchPanel(root);
+                    });
+            }
+
+            input.addEventListener("input", function () {
+                var q = (input.value || "").trim();
+                if (q.length < MIN_QUERY) {
+                    if (debounceId) window.clearTimeout(debounceId);
+                    if (abortCtl) abortCtl.abort();
+                    closeSearchPanel(root);
+                    return;
+                }
+                scheduleFetch(q);
+            });
+
+            input.addEventListener("focus", function () {
+                var q = (input.value || "").trim();
+                if (q.length >= MIN_QUERY) scheduleFetch(q);
+            });
+
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    closeSearchPanel(root);
+                    input.blur();
+                }
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            var t = e.target;
+            searchRoots.forEach(function (root) {
+                var p = getNavSearchPanel(root);
+                if (root.contains(t) || (p && p.contains(t))) return;
+                closeSearchPanel(root);
+            });
+        });
+
+        document.addEventListener("focusin", function (e) {
+            var t = e.target;
+            searchRoots.forEach(function (root) {
+                var p = getNavSearchPanel(root);
+                if (root.contains(t) || (p && p.contains(t))) return;
+                closeSearchPanel(root);
+            });
+        });
+    }
+
     var toggle = document.querySelector(".nav-toggle");
     var nav = document.querySelector(".nav");
     if (toggle && nav) {
@@ -142,6 +377,42 @@
         }
     }
 
+    /**
+     * В модалках фильтров поднимает отмеченные пункты вверх списка (в пределах секции для нот).
+     */
+    function sortModalFilterRowsCheckedFirst(modal) {
+        if (!modal) return;
+        function reorderContainer(container, rows) {
+            if (!container || !rows.length) return;
+            var list = Array.prototype.slice.call(rows);
+            list.sort(function (a, b) {
+                var ia = a.querySelector('input[type="checkbox"]');
+                var ib = b.querySelector('input[type="checkbox"]');
+                var ca = ia && ia.checked;
+                var cb = ib && ib.checked;
+                if (ca === cb) return 0;
+                return ca ? -1 : 1;
+            });
+            list.forEach(function (row) {
+                container.appendChild(row);
+            });
+        }
+
+        if (modal.id === "filter-modal-notes") {
+            modal.querySelectorAll(".js-modal-notes-section").forEach(function (sec) {
+                var rows = sec.querySelectorAll(".js-modal-filter-row");
+                if (!rows.length) return;
+                reorderContainer(rows[0].parentElement, rows);
+            });
+            return;
+        }
+
+        var body = modal.querySelector(".filter-modal__body");
+        if (!body) return;
+        var rows = body.querySelectorAll(".js-modal-filter-row");
+        reorderContainer(body, rows);
+    }
+
     function syncBrandsModalFromSidebar() {
         var modal = document.getElementById("filter-modal-brands");
         if (!modal || !sidebar) return;
@@ -164,9 +435,36 @@
         });
     }
 
+    function syncYearsModalFromSidebar() {
+        var modal = document.getElementById("filter-modal-years");
+        if (!modal || !sidebar) return;
+        modal.querySelectorAll(".js-modal-year").forEach(function (cb) {
+            var side = sidebar.querySelector(
+                'input[name="year"][value="' + cb.value + '"]'
+            );
+            cb.checked = !!(side && side.checked);
+        });
+    }
+
+    function syncCountriesModalFromSidebar() {
+        var modal = document.getElementById("filter-modal-countries");
+        if (!modal || !sidebar) return;
+        modal.querySelectorAll(".js-modal-country").forEach(function (cb) {
+            var side = sidebar.querySelector(
+                'input[name="country"][value="' + cb.value + '"]'
+            );
+            cb.checked = !!(side && side.checked);
+        });
+    }
+
     function closeFilterModal(which) {
-        var id =
-            which === "brands" ? "filter-modal-brands" : "filter-modal-notes";
+        var ids = {
+            brands: "filter-modal-brands",
+            notes: "filter-modal-notes",
+            years: "filter-modal-years",
+            countries: "filter-modal-countries",
+        };
+        var id = ids[which];
         var m = document.getElementById(id);
         if (!m) return;
         m.classList.remove("is-open");
@@ -188,8 +486,15 @@
         closeAllFilterModals();
         if (which === "brands") syncBrandsModalFromSidebar();
         else if (which === "notes") syncNotesModalFromSidebar();
-        var id =
-            which === "brands" ? "filter-modal-brands" : "filter-modal-notes";
+        else if (which === "years") syncYearsModalFromSidebar();
+        else if (which === "countries") syncCountriesModalFromSidebar();
+        var ids = {
+            brands: "filter-modal-brands",
+            notes: "filter-modal-notes",
+            years: "filter-modal-years",
+            countries: "filter-modal-countries",
+        };
+        var id = ids[which];
         var m = document.getElementById(id);
         if (!m) return;
         m.classList.add("is-open");
@@ -200,6 +505,7 @@
             searchInp.value = "";
             filterModalList(m, "");
         }
+        sortModalFilterRowsCheckedFirst(m);
     }
 
     function onFilterModalSearchInput(e) {
@@ -208,6 +514,19 @@
         var modal = t.closest(".filter-modal");
         if (modal) filterModalList(modal, t.value);
     }
+
+    document.body.addEventListener("change", function (e) {
+        var t = e.target;
+        if (!t || t.type !== "checkbox") return;
+        var modal = t.closest(".filter-modal");
+        if (!modal || !modal.classList.contains("is-open")) return;
+        if (!modal.querySelector(".js-modal-filter-row")) return;
+        sortModalFilterRowsCheckedFirst(modal);
+        var searchInp = modal.querySelector(".filter-modal__search");
+        if (searchInp && searchInp.value) {
+            filterModalList(modal, searchInp.value);
+        }
+    });
 
     document.body.addEventListener("input", onFilterModalSearchInput, true);
     document.body.addEventListener("search", onFilterModalSearchInput, true);
@@ -243,11 +562,37 @@
         triggerCatalogFilterUpdate();
     }
 
+    function applyYearsModal() {
+        var modal = document.getElementById("filter-modal-years");
+        if (!modal || !sidebar) return;
+        modal.querySelectorAll(".js-modal-year").forEach(function (cb) {
+            var side = sidebar.querySelector(
+                'input[name="year"][value="' + cb.value + '"]'
+            );
+            if (side) side.checked = cb.checked;
+        });
+        closeFilterModal("years");
+        triggerCatalogFilterUpdate();
+    }
+
+    function applyCountriesModal() {
+        var modal = document.getElementById("filter-modal-countries");
+        if (!modal || !sidebar) return;
+        modal.querySelectorAll(".js-modal-country").forEach(function (cb) {
+            var side = sidebar.querySelector(
+                'input[name="country"][value="' + cb.value + '"]'
+            );
+            if (side) side.checked = cb.checked;
+        });
+        closeFilterModal("countries");
+        triggerCatalogFilterUpdate();
+    }
+
     function triggerCatalogFilterUpdate() {
         var form = document.getElementById("catalog-form");
         if (!form || !sidebar) return;
         var el = sidebar.querySelector(
-            'input[name="brand"], input[name="notes"], input[name="category"]'
+            'input[name="brand"], input[name="notes"], input[name="year"], input[name="country"], input[name="category"]'
         );
         if (el) {
             el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -273,6 +618,8 @@
             var w = applyBtn.getAttribute("data-filter-modal-apply");
             if (w === "brands") applyBrandsModal();
             else if (w === "notes") applyNotesModal();
+            else if (w === "years") applyYearsModal();
+            else if (w === "countries") applyCountriesModal();
         }
     });
 

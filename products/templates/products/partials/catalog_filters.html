@@ -127,5 +127,25 @@
         >
       </label>
     {% endfor %}
+    {% for year in available_years %}
+      <label>
+        <input
+          type="checkbox"
+          name="year"
+          value="{{ year }}"
+          {% if year|stringformat:"s" in selected_years %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
+    {% for country in available_countries %}
+      <label>
+        <input
+          type="checkbox"
+          name="country"
+          value="{{ country }}"
+          {% if country in selected_countries %}checked{% endif %}
+        >
+      </label>
+    {% endfor %}
   </div>
 </aside>

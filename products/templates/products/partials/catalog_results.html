@@ -1,10 +1,10 @@
 {% load static %}
 {% include "products/partials/catalog_sort_bar.html" %}
 
-<div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4">
   {% for product in product_list %}
-    <article class="group relative flex flex-col overflow-hidden border border-[#C9A96E]/35 bg-[#0B0B0B] transition duration-500 hover:scale-[1.03]">
-      <div class="relative aspect-[4/5] overflow-hidden border-b border-[#C9A96E]/25">
+    <article class="group relative flex flex-col overflow-hidden border border-[#C9A96E]/35 bg-[#0B0B0B] transition duration-500 hover:scale-[1.02]">
+      <div class="relative aspect-[3/4] overflow-hidden border-b border-[#C9A96E]/25">
         <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-10" aria-label="{{ product.name }}"></a>
         {% with imgs=product.images.all %}
           {% if imgs %}
@@ -13,21 +13,21 @@
               alt=""
               class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
               loading="lazy"
-              width="400"
-              height="500"
+              width="320"
+              height="427"
             >
           {% else %}
-            <div class="flex h-full w-full items-center justify-center text-sm text-[#BDB6AA]">Нет изображения</div>
+            <div class="flex h-full w-full items-center justify-center text-xs text-[#BDB6AA]">Нет изображения</div>
           {% endif %}
         {% endwith %}
       </div>
-      <div class="flex flex-1 flex-col p-6">
-        <p class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">{{ product.brand.name }}</p>
-        <h2 class="mt-2 font-serif text-2xl text-[#F5F1E8]">
+      <div class="flex flex-1 flex-col p-3 sm:p-4">
+        <p class="text-[9px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ product.brand.name }}</p>
+        <h2 class="mt-1.5 line-clamp-2 font-serif text-base leading-snug text-[#F5F1E8] sm:text-lg">
           <a href="{% url 'products:product_detail' product.slug %}" class="nav-link">{{ product.name }}</a>
         </h2>
-        <div class="mt-auto pt-4">
-          <p class="font-serif text-2xl text-[#F5F1E8]">
+        <div class="mt-auto pt-2">
+          <p class="font-serif text-base text-[#F5F1E8] sm:text-lg">
             {% if product.min_price != None %}
               от {{ product.min_price|floatformat:2 }} ₽
             {% else %}

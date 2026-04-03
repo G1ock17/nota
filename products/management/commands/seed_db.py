@@ -369,9 +369,9 @@ class Command(BaseCommand):
 
     def _seed_variants_bulk(self, products: list[Product]) -> None:
         volumes = [
-            (Variant.Volume.ML30, Decimal("40"), Decimal("80")),
-            (Variant.Volume.ML50, Decimal("70"), Decimal("120")),
-            (Variant.Volume.ML100, Decimal("100"), Decimal("250")),
+            ("30ml", Decimal("40"), Decimal("80")),
+            ("50ml", Decimal("70"), Decimal("120")),
+            ("100ml", Decimal("100"), Decimal("250")),
         ]
         variants: list[Variant] = []
         for p in products:

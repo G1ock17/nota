@@ -42,15 +42,15 @@
                     <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">По характеру</h2>
                 </div>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                    <a href="{% url 'products:catalog' %}?category=man" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
                         <h3 class="font-serif text-3xl text-[#F5F1E8]">Мужские</h3>
                         <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Яркие / Древесные / Пряные</p>
                     </a>
-                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                    <a href="{% url 'products:catalog' %}?category=woman" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
                         <h3 class="font-serif text-3xl text-[#F5F1E8]">Женские</h3>
                         <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Цветочные / Пудровые / Мягкие</p>
                     </a>
-                    <a href="{% url 'products:catalog' %}" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
+                    <a href="{% url 'products:catalog' %}?category=unisex" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
                         <h3 class="font-serif text-3xl text-[#F5F1E8]">Унисекс</h3>
                         <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Чистые / Цитрусовые / Мускусные</p>
                     </a>
@@ -63,11 +63,13 @@
                 <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Бренды</p>
                 <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Премиальные дома</h2>
             </div>
-            <div class="grid grid-cols-2 gap-5 md:grid-cols-4">
-                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Amouage</div>
-                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Byredo</div>
-                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Diptyque</div>
-                <div class="reveal border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-2xl text-[#DFD8CB]">Le Labo</div>
+            <div class="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+                {% for name, slug in featured_brands %}
+                <a
+                    href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}"
+                    class="reveal group border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-xl text-[#DFD8CB] transition duration-300 hover:border-[#C9A96E]/70 hover:text-[#F5F1E8] md:text-2xl"
+                >{{ name }}</a>
+                {% endfor %}
             </div>
         </section>
     </main>

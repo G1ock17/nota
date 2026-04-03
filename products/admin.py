@@ -53,10 +53,10 @@ class FragranceNoteAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "brand", "category", "created_at")
-    list_filter = ("category", "brand")
+    list_display = ("name", "slug", "brand", "category", "year", "country", "created_at")
+    list_filter = ("category", "brand", "year", "country")
     prepopulated_fields = {"slug": ("name",)}
-    search_fields = ("name", "description")
+    search_fields = ("name", "description", "country")
     filter_horizontal = ("notes",)
     inlines = (ProductImageInline, VariantInline)
 

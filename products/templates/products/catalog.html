@@ -5,7 +5,7 @@
 <div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
+  <main class="mx-auto w-full max-w-[min(100%,1680px)] px-5 py-16 sm:px-6 lg:px-8 xl:px-10">
     <div class="mb-12">
       <h1 class="font-serif text-4xl text-[#F5F1E8] sm:text-5xl">Каталог</h1>
       <p class="mt-4 max-w-2xl text-sm uppercase tracking-[0.14em] text-[#BDB6AA]">Роскошные ароматы. Четкие детали. Неподвластный времени дизайн.</p>
@@ -20,12 +20,12 @@
       hx-trigger="change from:select, change from:input[type=checkbox], change from:input[type=number], change from:input[type=range], input delay:400ms from:input[name=min_price], input delay:400ms from:input[name=max_price]"
       hx-push-url="true"
       hx-indicator="#catalog-loading"
-      class="grid grid-cols-1 gap-10 lg:grid-cols-[280px_1fr]"
+      class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(200px,240px)_minmax(0,1fr)] lg:gap-10 xl:gap-12"
     >
       {% include "products/partials/catalog_filters.html" %}
 
-      <div class="min-w-0 flex-1">
-        <div class="relative">
+      <div class="flex min-w-0 justify-center">
+        <div class="relative w-full max-w-[1360px]">
           <div
             id="catalog-loading"
             class="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-[#0B0B0B]/70 pt-16 opacity-0 transition-opacity duration-200"

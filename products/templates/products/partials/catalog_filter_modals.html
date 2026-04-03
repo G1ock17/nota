@@ -113,3 +113,85 @@
     </div>
   </div>
 </div>
+
+<div id="filter-modal-years" class="filter-modal" aria-hidden="true">
+  <div class="filter-modal__backdrop" data-filter-modal-close="years"></div>
+  <div class="filter-modal__panel" role="dialog" aria-labelledby="filter-modal-years-title">
+    <div class="flex items-start justify-between gap-4 border-b border-[#C9A96E]/25 pb-4">
+      <h2 id="filter-modal-years-title" class="font-serif text-2xl text-[#F5F1E8]">Год</h2>
+      <button type="button" class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]" data-filter-modal-close="years">Закрыть</button>
+    </div>
+    <div class="mt-4">
+      <label for="filter-modal-years-search" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Поиск</label>
+      <input
+        id="filter-modal-years-search"
+        type="search"
+        class="filter-modal__search w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none"
+        placeholder="Год выпуска…"
+        autocomplete="off"
+      >
+    </div>
+    <div class="filter-modal__body mt-4 max-h-[55vh] space-y-2 overflow-y-auto pr-1">
+      {% for year in available_years %}
+        <label
+          class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+          data-filter-text="{{ year }}"
+        >
+          <input
+            type="checkbox"
+            class="js-modal-year h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
+            value="{{ year }}"
+          >
+          <span>{{ year }}</span>
+        </label>
+      {% empty %}
+        <p class="text-sm text-[#BDB6AA]">Нет годов</p>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex gap-3 border-t border-[#C9A96E]/25 pt-4">
+      <button type="button" class="btn-luxury flex-1" data-filter-modal-apply="years">Применить</button>
+      <button type="button" class="flex-1 border border-[#C9A96E]/45 py-3 text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]" data-filter-modal-close="years">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="filter-modal-countries" class="filter-modal" aria-hidden="true">
+  <div class="filter-modal__backdrop" data-filter-modal-close="countries"></div>
+  <div class="filter-modal__panel" role="dialog" aria-labelledby="filter-modal-countries-title">
+    <div class="flex items-start justify-between gap-4 border-b border-[#C9A96E]/25 pb-4">
+      <h2 id="filter-modal-countries-title" class="font-serif text-2xl text-[#F5F1E8]">Страна</h2>
+      <button type="button" class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]" data-filter-modal-close="countries">Закрыть</button>
+    </div>
+    <div class="mt-4">
+      <label for="filter-modal-countries-search" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Поиск</label>
+      <input
+        id="filter-modal-countries-search"
+        type="search"
+        class="filter-modal__search w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] placeholder:text-[#6f685a] focus:border-[#C9A96E] focus:outline-none"
+        placeholder="Страна производства…"
+        autocomplete="off"
+      >
+    </div>
+    <div class="filter-modal__body mt-4 max-h-[55vh] space-y-2 overflow-y-auto pr-1">
+      {% for country in available_countries %}
+        <label
+          class="js-modal-filter-row flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]"
+          data-filter-text="{{ country|lower }}"
+        >
+          <input
+            type="checkbox"
+            class="js-modal-country h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
+            value="{{ country }}"
+          >
+          <span>{{ country }}</span>
+        </label>
+      {% empty %}
+        <p class="text-sm text-[#BDB6AA]">Нет стран</p>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex gap-3 border-t border-[#C9A96E]/25 pt-4">
+      <button type="button" class="btn-luxury flex-1" data-filter-modal-apply="countries">Применить</button>
+      <button type="button" class="flex-1 border border-[#C9A96E]/45 py-3 text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]" data-filter-modal-close="countries">Отмена</button>
+    </div>
+  </div>
+</div>

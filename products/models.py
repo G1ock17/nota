@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
@@ -74,6 +76,8 @@ class Product(models.Model):
         on_delete=models.PROTECT,
         related_name="products",
     )
+    year = models.PositiveIntegerField(null=True, blank=True)
+    country = models.CharField(max_length=120, blank=True)
     notes = models.ManyToManyField(FragranceNote, related_name="products", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -106,17 +110,12 @@ class ProductImage(models.Model):
 
 
 class Variant(models.Model):
-    class Volume(models.TextChoices):
-        ML30 = "30ml", "30 ml"
-        ML50 = "50ml", "50 ml"
-        ML100 = "100ml", "100 ml"
-
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         related_name="variants",
     )
-    volume = models.CharField(max_length=16, choices=Volume.choices)
+    volume = models.CharField(max_length=32)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
 
@@ -131,6 +130,17 @@ class Variant(models.Model):
 
     def __str__(self) -> str:
         return f"{self.product.name} {self.volume}"
+
+    def get_volume_display(self) -> str:
+        """
+        Backward-compatible display helper after removing fixed choices.
+        Shows `50 ml` for values like `50ml`, otherwise returns raw value.
+        """
+        value = (self.volume or "").strip()
+        match = re.match(r"^(\d+(?:[.,]\d+)?)\s*ml$", value, flags=re.I)
+        if match:
+            return f"{match.group(1).replace(',', '.')} ml"
+        return value
 
 
 class Order(models.Model):

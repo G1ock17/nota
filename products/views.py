@@ -2,9 +2,51 @@ from decimal import Decimal, InvalidOperation
 
 from django.db.models import DecimalField, Max, Min, Prefetch, Q, Sum, Value
 from django.db.models.functions import Coalesce
+from django.http import JsonResponse
 from django.views.generic import DetailView, ListView
 
 from .models import Brand, Category, Product, ProductImage, Variant, FragranceNote
+
+
+def product_search_suggest(request):
+    q = (request.GET.get("q") or "").strip()
+    if len(q) < 2:
+        return JsonResponse({"results": []})
+
+    qs = (
+        Product.objects.filter(Q(name__icontains=q) | Q(brand__name__icontains=q))
+        .select_related("brand")
+        .prefetch_related(
+            Prefetch(
+                "images",
+                queryset=ProductImage.objects.order_by("-is_main", "id"),
+            ),
+        )
+        .annotate(
+            min_price=Min(
+                "variants__price",
+                filter=Q(variants__stock__gt=0),
+            ),
+        )
+        .distinct()
+        .order_by("name")[:10]
+    )
+
+    results = []
+    for product in qs:
+        img = product.images.first()
+        min_p = product.min_price
+        results.append(
+            {
+                "slug": product.slug,
+                "name": product.name,
+                "brand": product.brand.name,
+                "image_url": img.image.url if img else "",
+                "min_price": str(min_p) if min_p is not None else None,
+            }
+        )
+
+    return JsonResponse({"results": results})
 
 
 def catalog_pagination_entries(page_obj):
@@ -94,10 +136,22 @@ class CatalogListView(ListView):
         if note_slugs:
             qs = qs.filter(notes__slug__in=note_slugs).distinct()
 
+        years = []
+        for year_raw in params.getlist("year"):
+            try:
+                years.append(int(year_raw))
+            except (TypeError, ValueError):
+                continue
+        if years:
+            qs = qs.filter(year__in=years)
+
+        countries = [country.strip() for country in params.getlist("country") if country.strip()]
+        if countries:
+            qs = qs.filter(country__in=countries)
+
         volume = params.get("volume")
         if volume:
-            if volume in dict(Variant.Volume.choices):
-                qs = qs.filter(variants__volume=volume).distinct()
+            qs = qs.filter(variants__volume=volume).distinct()
 
         price_q = Q()
         min_p = params.get("min_price")
@@ -157,10 +211,26 @@ class CatalogListView(ListView):
             type=FragranceNote.NoteType.BASE
         ).order_by("name")
         ctx["current_sort"] = self.request.GET.get("sort", "newest")
-        ctx["volume_choices"] = Variant.Volume.choices
+        ctx["volume_choices"] = [
+            (v, v) for v in Variant.objects.values_list("volume", flat=True).distinct().order_by("volume")
+        ]
         ctx["selected_categories"] = self.request.GET.getlist("category")
         ctx["selected_brands"] = self.request.GET.getlist("brand")
         ctx["selected_notes"] = self.request.GET.getlist("notes")
+        ctx["selected_years"] = self.request.GET.getlist("year")
+        ctx["selected_countries"] = self.request.GET.getlist("country")
+        ctx["available_years"] = (
+            Product.objects.exclude(year__isnull=True)
+            .values_list("year", flat=True)
+            .distinct()
+            .order_by("-year")
+        )
+        ctx["available_countries"] = (
+            Product.objects.exclude(country="")
+            .values_list("country", flat=True)
+            .distinct()
+            .order_by("country")
+        )
         ctx["selected_volume"] = self.request.GET.get("volume", "")
         ctx["min_price"] = self.request.GET.get("min_price", "")
         ctx["max_price"] = self.request.GET.get("max_price", "")
