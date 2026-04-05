@@ -10,26 +10,7 @@ from products.models import Order
 from products.cart_utils import cart_total_items, get_cart
 
 from .models import DeliveryAddress, UserProfile
-
-# Премиальные бренды на главной: (отображаемое имя, slug для ?brand=… в каталоге)
-FEATURED_HOME_BRANDS = [
-    ("Amouage", "amouage"),
-    ("Byredo", "byredo"),
-    ("Diptyque", "diptyque"),
-    ("Le Labo", "le-labo"),
-    ("Creed", "creed"),
-    ("Tom Ford", "tom-ford"),
-    ("Xerjoff", "xerjoff"),
-    ("Chanel", "chanel"),
-    ("Kilian", "kilian"),
-    ("Frédéric Malle", "frederic-malle"),
-    ("Parfums de Marly", "parfums-de-marly"),
-    ("Christian Dior", "christian-dior"),
-    ("Mancera", "mancera"),
-    ("Montale", "montale"),
-    ("Nishane", "nishane"),
-    ("Guerlain", "guerlain"),
-]
+from .brand_constants import FEATURED_HOME_BRANDS
 
 
 def home(request):

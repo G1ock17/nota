@@ -14,26 +14,31 @@
       <span>{{ product.brand.name }}</span>
     </div>
 
-    <section class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,35%)] lg:items-start">
+    <section class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,34%)] lg:items-start">
       <div class="min-w-0 w-full">
-        <div data-product-gallery class="w-full max-w-md sm:max-w-lg">
+        <div data-product-gallery class="w-full max-w-[min(100%,34rem)] mx-auto">
           {% with imgs=product.images.all %}
           {% if imgs %}
-            <div class="mb-5 aspect-[4/5] overflow-hidden border border-[#C9A96E]/35">
+            <button
+              type="button"
+              class="group mb-5 mx-auto block w-fit max-w-full overflow-hidden border border-[#C9A96E]/35 p-0 text-left align-top cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0B0B]"
+              data-gallery-lightbox-trigger
+              aria-label="Открыть фото в полном размере"
+            >
               <img
                 src="{{ imgs.0.image.url }}"
                 alt="{{ product.name }}"
-                class="gallery-main-image h-full w-full object-cover"
+                class="gallery-main-image block h-auto w-auto max-h-[min(29rem,53vh)] max-w-[min(100%,34rem)] object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                 loading="eager"
                 data-gallery-main
               >
-            </div>
+            </button>
             {% if imgs|length > 1 %}
-              <div class="grid grid-cols-4 gap-3">
+              <div class="flex flex-wrap justify-center gap-2.5">
                 {% for img in imgs|slice:":5" %}
                   <button
                     type="button"
-                    class="gallery-thumb aspect-square overflow-hidden border border-[#C9A96E]/30 {% if forloop.first %}is-active{% endif %}"
+                    class="gallery-thumb aspect-square h-14 w-14 max-h-14 max-w-14 shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:h-16 sm:w-16 sm:max-h-16 sm:max-w-16 {% if forloop.first %}is-active{% endif %}"
                     data-gallery-thumb
                     data-image-url="{{ img.image.url }}"
                     data-image-alt="{{ product.name }} {{ forloop.counter }}"
@@ -44,9 +49,60 @@
                 {% endfor %}
               </div>
             {% endif %}
+            <div
+              class="product-image-lightbox"
+              data-product-image-lightbox
+              role="dialog"
+              aria-modal="true"
+              aria-label="Просмотр фото"
+            >
+              <div class="product-image-lightbox__backdrop" data-product-image-lightbox-close tabindex="-1" aria-hidden="true"></div>
+              <button type="button" class="product-image-lightbox__close" data-product-image-lightbox-close aria-label="Закрыть">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <div class="product-image-lightbox__frame">
+                <p class="product-image-lightbox__title">{{ product.name }}</p>
+                <div class="product-image-lightbox__stage">
+                  {% if imgs|length > 1 %}
+                  <button type="button" class="product-image-lightbox__nav product-image-lightbox__nav--prev" data-lightbox-prev aria-label="Предыдущее фото">
+                    <span aria-hidden="true">‹</span>
+                  </button>
+                  {% endif %}
+                  <div class="product-image-lightbox__photo-box">
+                    <div class="product-image-lightbox__zoom-wrap" aria-hidden="true">
+                      <img src="" alt="" class="product-image-lightbox__img" data-product-image-lightbox-img width="1200" height="1600" decoding="async">
+                    </div>
+                  </div>
+                  {% if imgs|length > 1 %}
+                  <button type="button" class="product-image-lightbox__nav product-image-lightbox__nav--next" data-lightbox-next aria-label="Следующее фото">
+                    <span aria-hidden="true">›</span>
+                  </button>
+                  {% endif %}
+                </div>
+                {% if imgs|length > 1 %}
+                <div class="product-image-lightbox__thumbs" role="tablist" aria-label="Галерея фото">
+                  {% for img in imgs|slice:":5" %}
+                  <button
+                    type="button"
+                    role="tab"
+                    class="product-image-lightbox__thumb {% if forloop.first %}is-active{% endif %}"
+                    data-lightbox-slide-thumb
+                    data-slide-index="{{ forloop.counter0 }}"
+                    data-image-url="{{ img.image.url }}"
+                    data-image-alt="{{ product.name }} {{ forloop.counter }}"
+                    aria-label="Фото {{ forloop.counter }}"
+                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                  >
+                    <img src="{{ img.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy">
+                  </button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
           {% else %}
-            <div class="aspect-[4/5] border border-[#C9A96E]/35">
-              <div class="flex h-full items-center justify-center text-sm text-[#BDB6AA]">Нет изображения</div>
+            <div class="mx-auto flex min-h-[min(29rem,53vh)] w-full max-w-[min(100%,34rem)] items-center justify-center border border-[#C9A96E]/35 py-16">
+              <div class="text-sm text-[#BDB6AA]">Нет изображения</div>
             </div>
           {% endif %}
           {% endwith %}

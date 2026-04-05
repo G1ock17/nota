@@ -1,4 +1,4 @@
-<header class="relative z-50 overflow-visible border-b border-[#C9A96E]/40">
+<header class="site-header relative z-50 overflow-visible border-b border-[#C9A96E]/40">
     <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3 overflow-visible px-6 py-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-0 lg:px-12">
         <a href="{% url 'home' %}" class="order-1 shrink-0 font-serif text-3xl uppercase tracking-[0.22em] text-[#C9A96E] nav-link">nota</a>
         <button type="button" class="nav-toggle order-2 ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E] lg:hidden" aria-label="Открыть меню" aria-expanded="false">
@@ -7,11 +7,13 @@
         </button>
 
         <div
-            class="hidden min-w-0 lg:order-2 lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9]"
+            class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9]"
         >
             <a href="{% url 'home' %}#featured" class="nav-link shrink-0 pb-1">Рекомендуемое</a>
             <a href="{% url 'home' %}#categories" class="nav-link shrink-0 pb-1">Категории</a>
-            <a href="{% url 'home' %}#brands" class="nav-link shrink-0 pb-1">Бренды</a>
+            <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
+                <a href="{% url 'home' %}#brands" class="nav-link shrink-0 pb-1">Бренды</a>
+            </div>
             <a href="{% url 'products:catalog' %}" class="nav-link shrink-0 pb-1">Каталог</a>
         </div>
 
@@ -122,5 +124,36 @@
               {% include "core/partials/nav_cart_badge.html" with count=cart_item_count only %}
             </a>
         </nav>
+    </div>
+
+    <div
+        id="nav-mega-brands"
+        class="nav-mega nav-mega--dock hidden lg:block"
+        data-nav-brands-panel
+        role="region"
+        aria-label="Бренды в каталоге"
+        aria-hidden="true"
+    >
+        <div class="nav-mega__inner mx-auto w-full max-w-7xl px-6 py-6 lg:px-12">
+            <div class="nav-mega__grid">
+                {% for item in nav_mega_brands %}
+                <a
+                    href="{% url 'products:catalog' %}?brand={{ item.slug|urlencode }}"
+                    class="nav-mega__item"
+                >
+                    <img
+                        class="nav-mega__thumb"
+                        src="{{ item.thumb_url }}"
+                        alt=""
+                        width="40"
+                        height="40"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                    <span class="nav-mega__name">{{ item.name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </header>
