@@ -1,12 +1,15 @@
+from urllib.parse import urlencode
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
-from django.db.models import Sum
+from django.db.models import Prefetch, Sum
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic.edit import FormView
 
-from products.models import Order
+from products.models import Favorite, Order, ProductImage, Variant
 from products.cart_utils import cart_total_items, get_cart
 
 from .models import DeliveryAddress, UserProfile
@@ -21,11 +24,32 @@ class SiteLoginView(LoginView):
     template_name = 'core/login.html'
     redirect_authenticated_user = True
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        n = ctx.get(self.redirect_field_name) or self.request.GET.get(self.redirect_field_name, "")
+        ctx["next"] = n
+        return ctx
+
 
 class RegisterView(FormView):
     template_name = 'core/register.html'
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["next"] = self.request.GET.get("next", "")
+        return ctx
+
+    def get_success_url(self):
+        next_path = (self.request.POST.get("next") or self.request.GET.get("next") or "").strip()
+        if next_path and url_has_allowed_host_and_scheme(
+            next_path,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return f"{reverse('login')}?{urlencode({'next': next_path})}"
+        return str(reverse_lazy("login"))
 
     def form_valid(self, form):
         form.save()
@@ -159,6 +183,22 @@ def account(request):
         or 0
     )
 
+    favorite_entries = list(
+        Favorite.objects.filter(user=request.user)
+        .select_related("product__brand", "product__category")
+        .prefetch_related(
+            Prefetch(
+                "product__images",
+                queryset=ProductImage.objects.order_by("-is_main", "id"),
+            ),
+            Prefetch(
+                "product__variants",
+                queryset=Variant.objects.order_by("volume"),
+            ),
+        )
+        .order_by("-created_at")
+    )
+
     return render(
         request,
         "core/account.html",
@@ -171,6 +211,7 @@ def account(request):
             "cart_count": cart_count,
             "order_items_count": order_items_count,
             "addresses": addresses,
+            "favorite_entries": favorite_entries,
         },
     )
 

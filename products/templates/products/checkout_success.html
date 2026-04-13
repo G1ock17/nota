@@ -1,0 +1,22 @@
+{% extends "products/base_catalog.html" %}
+
+{% block title %}Заказ оформлен — nota{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="mx-auto w-full max-w-lg px-6 py-20 text-center lg:px-12">
+    <h1 class="font-serif text-3xl text-[#F5F1E8] md:text-4xl">Спасибо за заказ</h1>
+    <p class="mt-4 text-sm leading-relaxed text-[#BDB6AA]">
+      Мы получили вашу заявку{% if order_id %} (№&nbsp;{{ order_id }}){% endif %}. Свяжемся с вами для подтверждения и доставки.
+    </p>
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <a href="{% url 'products:catalog' %}" class="btn-luxury inline-flex justify-center">В каталог</a>
+      <a href="{% url 'home' %}" class="inline-flex items-center justify-center border border-[#C9A96E]/45 px-5 py-3 text-[10px] uppercase tracking-[0.18em] text-[#C9A96E] transition-colors hover:bg-[#C9A96E]/10">На главную</a>
+    </div>
+  </main>
+
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}

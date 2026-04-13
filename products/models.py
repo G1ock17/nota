@@ -160,7 +160,13 @@ class Order(models.Model):
         SHIPPED = "shipped", "Отправлен"
         DELIVERED = "delivered", "Доставлен"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="orders",
+        null=True,
+        blank=True,
+    )
     email = models.EmailField()
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
@@ -190,7 +196,8 @@ class Order(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self) -> str:
-        return f"Order #{self.pk} - {self.user.username}"
+        who = self.user.username if self.user_id else self.email
+        return f"Order #{self.pk} - {who}"
 
 
 class OrderItem(models.Model):
@@ -202,3 +209,29 @@ class OrderItem(models.Model):
 
     def __str__(self) -> str:
         return f"Order #{self.order_id}: {self.variant} x {self.quantity}"
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="product_favorites",
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="favorite_entries",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "product"],
+                name="unique_favorite_user_product",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} ♥ {self.product_id}"

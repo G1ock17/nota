@@ -110,56 +110,18 @@ def product_search_suggest(request):
     return JsonResponse({"results": results})
 
 
-def catalog_pagination_entries(page_obj):
-    """
-    Numbers to show under the catalog: current ±2 (up to 5 pages), plus first/last
-    and ellipses when there is a gap. None in the list means an ellipsis span.
-    """
-    paginator = page_obj.paginator
-    num_pages = paginator.num_pages
-    current = page_obj.number
-    if num_pages <= 1:
-        return []
-
-    half = 2
-    left = max(1, current - half)
-    right = min(num_pages, current + half)
-    target_width = min(5, num_pages)
-    while right - left + 1 < target_width:
-        if left > 1:
-            left -= 1
-        elif right < num_pages:
-            right += 1
-        else:
-            break
-
-    window = list(range(left, right + 1))
-    last = num_pages
-    entries = []
-
-    if left > 1:
-        entries.append(1)
-        if window[0] > 2:
-            entries.append(None)
-    entries.extend(window)
-    if right < last:
-        if right < last - 1:
-            entries.append(None)
-        entries.append(last)
-
-    return entries
-
-
 class CatalogListView(ListView):
     model = Product
     template_name = "products/catalog.html"
     context_object_name = "product_list"
-    paginate_by = 12
+    paginate_by = 24
 
     def get_template_names(self):
-        if self.request.headers.get("HX-Request"):
-            return ["products/partials/catalog_results.html"]
-        return [self.template_name]
+        if not self.request.headers.get("HX-Request"):
+            return [self.template_name]
+        if self.request.GET.get("load_more") == "1":
+            return ["products/partials/catalog_load_more.html"]
+        return ["products/partials/catalog_results.html"]
 
     def get_queryset(self):
         qs = (
@@ -260,6 +222,8 @@ class CatalogListView(ListView):
         req = self.request.GET.copy()
         if "page" in req:
             del req["page"]
+        if "load_more" in req:
+            del req["load_more"]
         ctx["filter_query"] = req.urlencode()
         ctx["categories"] = Category.objects.all()
         ctx["brands"] = Brand.objects.all()
@@ -316,11 +280,6 @@ class CatalogListView(ListView):
             slider_max = slider_min + 1
         ctx["price_slider_min"] = slider_min
         ctx["price_slider_max"] = slider_max
-        page_obj = ctx.get("page_obj")
-        if page_obj is not None:
-            ctx["catalog_pagination_entries"] = catalog_pagination_entries(page_obj)
-        else:
-            ctx["catalog_pagination_entries"] = []
         return ctx
 
 

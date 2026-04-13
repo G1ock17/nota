@@ -1,0 +1,12 @@
+{% spaceless %}
+{% if button == "catalog" %}
+{% include "products/partials/favorite_btn_catalog.html" %}
+{% else %}
+{% include "products/partials/favorite_btn_detail.html" %}
+{% endif %}
+{% endspaceless %}
+{% if favorite_toast_added %}
+<div id="cart-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm empty:hidden" aria-live="polite" hx-swap-oob="true">
+{% include "products/partials/favorite_toast_added.html" %}
+</div>
+{% endif %}

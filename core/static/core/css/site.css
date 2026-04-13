@@ -459,6 +459,14 @@ body {
     display: flex;
 }
 
+.favorite-auth-modal {
+    z-index: 220;
+}
+
+.favorite-auth-modal__panel {
+    max-width: min(100%, 24rem);
+}
+
 .filter-modal__backdrop {
     position: absolute;
     inset: 0;
@@ -652,5 +660,107 @@ body {
     .site-header--scroll-hidden {
         transform: translateY(-100%);
         pointer-events: none;
+    }
+}
+
+/* Избранное: ряд с «В корзину» и квадратная кнопка; плитка на карточке каталога */
+.product-detail-actions {
+    align-items: stretch;
+}
+
+.product-detail-actions--solo {
+    justify-content: flex-end;
+}
+
+.favorite-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    box-sizing: border-box;
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+}
+
+.favorite-btn:focus {
+    outline: none;
+}
+
+.favorite-btn:focus-visible {
+    outline: 2px solid rgba(201, 169, 110, 0.75);
+    outline-offset: 2px;
+}
+
+.favorite-btn--detail {
+    width: 3.25rem;
+    min-height: 3.25rem;
+    border: 1px solid #c9a96e;
+    background: transparent;
+    color: #c9a96e;
+}
+
+.favorite-btn--detail:hover {
+    background: #c9a96e;
+    color: #0b0b0b;
+}
+
+.favorite-btn--detail.is-active {
+    background: #c9a96e;
+    color: #0b0b0b;
+}
+
+.favorite-btn__heart {
+    display: block;
+    flex-shrink: 0;
+}
+
+.favorite-btn__heart--sm {
+    margin-top: 1px;
+}
+
+.favorite-btn--catalog {
+    position: absolute;
+    z-index: 10;
+    top: 0.35rem;
+    right: 0.35rem;
+    width: auto;
+    height: auto;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.2rem;
+    border: none;
+    background: transparent;
+    color: #f2efe8;
+    box-shadow: none;
+    transition: color 180ms ease, transform 180ms ease;
+}
+
+.favorite-btn--catalog .favorite-btn__heart {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
+        drop-shadow(0 0 1px rgba(0, 0, 0, 0.35));
+}
+
+.favorite-btn--catalog:hover {
+    color: #c9a96e;
+    transform: scale(1.06);
+}
+
+.favorite-btn--catalog.is-active {
+    color: #c9a96e;
+}
+
+@media (min-width: 640px) {
+    .favorite-btn--catalog {
+        top: 0.5rem;
+        right: 0.5rem;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+        padding: 0.25rem;
     }
 }

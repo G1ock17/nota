@@ -1,0 +1,46 @@
+<article class="reveal group flex h-full flex-col border border-[#C9A96E]/35 p-3 transition duration-500 ease-out hover:scale-[1.03] sm:p-4 lg:p-6">
+  <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:mb-6">
+    <a
+      href="{% url 'products:product_detail' product.slug %}"
+      class="absolute inset-0 z-0 block"
+      aria-label="{{ product.name }} — открыть карточку"
+      tabindex="-1"
+    ></a>
+    {% with imgs=product.images.all %}
+      {% if imgs %}
+        <img
+          src="{{ imgs.0.image.url }}"
+          alt="{{ product.name }}"
+          class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none"
+          loading="lazy"
+          width="320"
+          height="400"
+        >
+      {% else %}
+        <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-[#BDB6AA] pointer-events-none">Нет изображения</div>
+      {% endif %}
+    {% endwith %}
+    {% include "products/partials/favorite_btn_catalog.html" %}
+  </div>
+  <a
+    href="{% url 'products:product_detail' product.slug %}"
+    class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/50"
+  >
+    <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-[#C9A96E] sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ product.brand.name }}</p>
+    <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-[#F3EFE7] sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ product.name }}</h3>
+    <div class="mt-auto flex flex-col gap-1.5 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:pt-6">
+      <span class="text-[10px] uppercase tracking-[0.14em] text-[#C9A96E] sm:text-xs sm:tracking-[0.2em]">
+        {% with v=product.first_in_stock_variant %}
+          {% if v %}{{ v.get_volume_display }}{% else %}—{% endif %}
+        {% endwith %}
+      </span>
+      <span class="font-serif text-sm text-[#F3EFE7] sm:text-lg lg:text-xl">
+        {% if product.min_price != None %}
+          от {{ product.min_price|floatformat:2 }} ₽
+        {% else %}
+          нет в наличии
+        {% endif %}
+      </span>
+    </div>
+  </a>
+</article>

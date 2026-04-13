@@ -1,0 +1,16 @@
+{% for product in product_list %}
+{% include "products/partials/catalog_product_card.html" with product=product %}
+{% endfor %}
+<div id="catalog-load-more-shell" class="mt-10 flex justify-center" hx-swap-oob="true">
+  {% if page_obj.has_next %}
+    <button
+      type="button"
+      class="btn-luxury px-8 py-3 text-[10px] sm:text-[11px]"
+      hx-get="{% url 'products:catalog' %}?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}&load_more=1"
+      hx-target="#catalog-product-grid"
+      hx-swap="beforeend"
+      hx-push-url="false"
+      hx-indicator="#catalog-loading"
+    >Показать больше товаров</button>
+  {% endif %}
+</div>

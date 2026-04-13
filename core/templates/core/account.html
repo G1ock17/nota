@@ -96,10 +96,67 @@
         </div>
 
         <div id="favorites-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-[#F5F1E8]">Избранное</h2>
-          <div class="mt-6 border border-dashed border-[#C9A96E]/45 p-8 text-center">
-            <p class="text-sm text-[#BDB6AA]">Раздел в разработке.</p>
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <h2 class="font-serif text-4xl text-[#F5F1E8]">Избранное</h2>
+            {% if favorite_entries %}
+              <p class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">В списке: {{ favorite_entries|length }}</p>
+            {% endif %}
           </div>
+          {% if favorite_entries %}
+            <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
+              {% for fav in favorite_entries %}
+                {% with p=fav.product %}
+                  <article class="group flex h-full flex-col border border-[#C9A96E]/35 p-3 sm:p-4">
+                    <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:mb-4">
+                      <a
+                        href="{% url 'products:product_detail' p.slug %}"
+                        class="absolute inset-0 z-0 block"
+                        aria-label="{{ p.name }} — открыть карточку"
+                        tabindex="-1"
+                      ></a>
+                      {% with imgs=p.images.all %}
+                        {% if imgs %}
+                          <img
+                            src="{{ imgs.0.image.url }}"
+                            alt="{{ p.name }}"
+                            class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none"
+                            loading="lazy"
+                            width="320"
+                            height="400"
+                          >
+                        {% else %}
+                          <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-[#BDB6AA] pointer-events-none">Нет изображения</div>
+                        {% endif %}
+                      {% endwith %}
+                      {% include "products/partials/favorite_btn_account.html" with product=p %}
+                    </div>
+                    <a
+                      href="{% url 'products:product_detail' p.slug %}"
+                      class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/50"
+                    >
+                      <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-[#C9A96E] sm:text-[10px] sm:tracking-[0.22em]">{{ p.brand.name }}</p>
+                      <h3 class="line-clamp-3 min-h-0 flex-1 font-serif text-base leading-snug text-[#F3EFE7] sm:text-lg">{{ p.name }}</h3>
+                      <div class="mt-3 border-t border-[#C9A96E]/20 pt-3">
+                        {% with v=p.first_in_stock_variant %}
+                          {% if v %}
+                            <span class="font-serif text-sm text-[#F3EFE7] sm:text-lg">от {{ v.price|floatformat:2 }} ₽</span>
+                          {% else %}
+                            <span class="text-xs uppercase tracking-[0.14em] text-[#BDB6AA]">Нет в наличии</span>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                    </a>
+                  </article>
+                {% endwith %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="mt-8 border border-dashed border-[#C9A96E]/45 p-10 text-center">
+              <p class="font-serif text-xl text-[#F5F1E8] sm:text-2xl">Пока пусто</p>
+              <p class="mt-2 text-sm text-[#BDB6AA]">Добавляйте товары в избранное на странице каталога или карточке аромата.</p>
+              <a href="{% url 'products:catalog' %}" class="btn-luxury mt-6 inline-flex">В каталог</a>
+            </div>
+          {% endif %}
         </div>
 
         <div id="gift-tab" class="lk-tab-pane hidden">
@@ -262,11 +319,53 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 <script>
   const tabButtons = document.querySelectorAll(".lk-tab-btn, [data-tab]");
   const tabPanes = document.querySelectorAll(".lk-tab-pane");
 
-  function openTab(tabId) {
+  const TAB_TO_SECTION = {
+    "profile-tab": "profile",
+    "orders-tab": "orders",
+    "favorites-tab": "favorites",
+    "gift-tab": "gift",
+    "notify-tab": "notify",
+    "addresses-tab": "addresses",
+    "profile-data-tab": "profile-data",
+  };
+  const SECTION_TO_TAB = {
+    profile: "profile-tab",
+    orders: "orders-tab",
+    favorites: "favorites-tab",
+    gift: "gift-tab",
+    notify: "notify-tab",
+    addresses: "addresses-tab",
+    "profile-data": "profile-data-tab",
+  };
+
+  function currentSectionFromUrl() {
+    return new URLSearchParams(window.location.search).get("section") || "profile";
+  }
+
+  function syncUrlForTab(tabId, skipHistory) {
+    if (skipHistory) return;
+    var sec = TAB_TO_SECTION[tabId];
+    if (sec === undefined) return;
+    var cur = currentSectionFromUrl();
+    if (sec === cur) return;
+    var url = new URL(window.location.href);
+    if (sec === "profile") {
+      url.searchParams.delete("section");
+    } else {
+      url.searchParams.set("section", sec);
+    }
+    var qs = url.searchParams.toString();
+    var path = url.pathname + (qs ? "?" + qs : "");
+    history.pushState({ accountTab: tabId }, "", path);
+  }
+
+  function openTab(tabId, options) {
+    options = options || {};
     tabPanes.forEach((pane) => pane.classList.add("hidden"));
     document.querySelectorAll(".lk-tab-btn[data-tab]").forEach((btn) => {
       btn.classList.remove("border-l-[#C9A96E]", "bg-[#121212]", "text-[#C9A96E]");
@@ -279,18 +378,29 @@
     if (activeButton) {
       activeButton.classList.add("border-l-[#C9A96E]", "bg-[#121212]", "text-[#C9A96E]");
     }
+    syncUrlForTab(tabId, options.skipHistory);
   }
 
   tabButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const tabId = button.getAttribute("data-tab");
       if (tabId) {
-        openTab(tabId);
+        openTab(tabId, { skipHistory: false });
       }
     });
   });
 
-  openTab("profile-tab");
+  window.addEventListener("popstate", function () {
+    var sec = currentSectionFromUrl();
+    var tabId = SECTION_TO_TAB[sec] || "profile-tab";
+    openTab(tabId, { skipHistory: true });
+  });
+
+  (function initAccountTabFromUrl() {
+    var sec = currentSectionFromUrl();
+    var tabId = SECTION_TO_TAB[sec] || "profile-tab";
+    openTab(tabId, { skipHistory: true });
+  })();
 
   const addAddressBtn = document.getElementById("toggle-add-address-btn");
   const addAddressForm = document.getElementById("add-address-form");

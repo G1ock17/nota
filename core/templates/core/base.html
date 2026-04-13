@@ -27,6 +27,7 @@
 <body>
     <form id="htmx-csrf" hidden>{% csrf_token %}</form>
     <div id="cart-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm empty:hidden" aria-live="polite"></div>
+    {% include "products/partials/favorite_auth_modal.html" %}
     {% block body %}{% endblock %}
     <script src="{% static 'core/js/site.js' %}"></script>
     {% block extra_js %}{% endblock %}

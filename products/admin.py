@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     Brand,
     Category,
+    Favorite,
     FragranceNote,
     Order,
     OrderItem,
@@ -71,6 +72,14 @@ class ProductImageAdmin(admin.ModelAdmin):
 class VariantAdmin(admin.ModelAdmin):
     list_display = ("product", "volume", "price", "stock")
     list_filter = ("volume",)
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username", "product__name")
+    autocomplete_fields = ("user", "product")
 
 
 @admin.register(Order)

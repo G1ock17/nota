@@ -353,16 +353,39 @@
 
     observeRevealElements(document.querySelectorAll(".reveal"));
 
+    function scheduleCartToastAutoHide() {
+        var toastEl = document.getElementById("cart-toast");
+        if (!toastEl) return;
+        window.clearTimeout(toastEl._toastHide);
+        var msHint = toastEl.querySelector("[data-toast-autohide-ms]");
+        var hideMs = msHint
+            ? parseInt(msHint.getAttribute("data-toast-autohide-ms"), 10) || 5000
+            : 4500;
+        toastEl._toastHide = window.setTimeout(function () {
+            var live = document.getElementById("cart-toast");
+            if (live) live.innerHTML = "";
+        }, hideMs);
+    }
+
     document.body.addEventListener("htmx:afterSwap", function (e) {
         var t = e.detail && e.detail.target;
         if (t && t.id === "catalog-results") {
             observeRevealElements(t.querySelectorAll(".reveal"));
         }
-        if (!t || t.id !== "cart-toast") return;
-        window.clearTimeout(t._toastHide);
-        t._toastHide = window.setTimeout(function () {
-            t.innerHTML = "";
-        }, 4500);
+        if (t && t.id === "catalog-product-grid") {
+            observeRevealElements(t.querySelectorAll(".reveal"));
+        }
+        if (t && t.id === "cart-toast") {
+            scheduleCartToastAutoHide();
+        }
+    });
+
+    document.body.addEventListener("htmx:oobAfterSwap", function (e) {
+        var d = e.detail || {};
+        if (!d.target || d.target.id !== "cart-toast") return;
+        window.requestAnimationFrame(function () {
+            scheduleCartToastAutoHide();
+        });
     });
 
     document.querySelectorAll("[data-product-gallery]").forEach(function (gallery) {
@@ -1265,5 +1288,72 @@
             mq.addListener(onResizeOrMq);
         }
         onResizeOrMq();
+    })();
+
+    (function () {
+        var modal = document.getElementById("favorite-auth-modal");
+        if (!modal) return;
+
+        var postAuthPath = modal.getAttribute("data-post-auth-path") || "";
+        var loginPath = modal.getAttribute("data-login-path") || "";
+        var registerPath = modal.getAttribute("data-register-path") || "";
+        var loginLink = document.getElementById("favorite-auth-modal-login");
+        var registerLink = document.getElementById("favorite-auth-modal-register");
+
+        function currentReturnPath() {
+            return window.location.pathname + window.location.search;
+        }
+
+        function buildPostAuthQuery(productId, returnPath) {
+            var params = new URLSearchParams();
+            params.set("product", String(productId));
+            params.set("next", returnPath || "/products/");
+            var q = params.toString();
+            var sep = postAuthPath.indexOf("?") >= 0 ? "&" : "?";
+            return postAuthPath + sep + q;
+        }
+
+        function syncLinks(productId) {
+            if (!loginLink || !registerLink) return;
+            var ret = currentReturnPath();
+            var target = buildPostAuthQuery(productId, ret);
+            loginLink.setAttribute("href", loginPath + "?next=" + encodeURIComponent(target));
+            registerLink.setAttribute("href", registerPath + "?next=" + encodeURIComponent(target));
+        }
+
+        function openModal(productId) {
+            syncLinks(productId);
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.documentElement.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.documentElement.style.overflow = "";
+        }
+
+        document.addEventListener("click", function (e) {
+            var t = e.target;
+            if (!t || !t.closest) return;
+            var opener = t.closest("[data-favorite-auth-modal-open]");
+            if (opener) {
+                e.preventDefault();
+                var pid = opener.getAttribute("data-product-id");
+                if (!pid) return;
+                openModal(pid);
+                return;
+            }
+            if (t.closest("[data-favorite-auth-modal-close]")) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape") return;
+            if (!modal.classList.contains("is-open")) return;
+            closeModal();
+        });
     })();
 })();

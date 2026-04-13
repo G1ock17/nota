@@ -19,6 +19,9 @@
 
     <form method="post" action="{% url 'register' %}" class="mt-10 space-y-6">
       {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
 
       <div>
         <label for="id_username" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Логин</label>
@@ -71,7 +74,7 @@
 
     <p class="mt-6 text-sm text-[#BDB6AA]">
       Уже есть аккаунт?
-      <a href="{% url 'login' %}" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Войти</a>
+      <a href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Войти</a>
     </p>
   </main>
 </div>

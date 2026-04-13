@@ -1,13 +1,94 @@
 from decimal import Decimal
+from urllib.parse import urlencode
 
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .cart_utils import CART_SESSION_KEY, add_variant, cart_total_items, get_cart, set_variant_quantity
 from .models import Order, OrderItem, Variant
-from core.models import DeliveryAddress
+from core.models import DeliveryAddress, UserProfile
+
+GUEST_CHECKOUT_ADDRESS_KEY = "guest_checkout_address"
+
+
+def _guest_address_complete(data) -> bool:
+    if not data or not isinstance(data, dict):
+        return False
+    required = ["country", "city", "region", "postal_code", "address_line1"]
+    return all((data.get(f) or "").strip() for f in required)
+
+
+def _format_guest_checkout_address(data: dict) -> str:
+    parts = [
+        (data.get("country") or "").strip(),
+        (data.get("region") or "").strip(),
+        (data.get("city") or "").strip(),
+        (data.get("address_line1") or "").strip(),
+    ]
+    extra = (data.get("address_line2") or "").strip()
+    if extra:
+        parts.append(extra)
+    parts.append((data.get("postal_code") or "").strip())
+    return "Адрес: " + ", ".join(p for p in parts if p)
+
+
+def _address_prefill_from_model(address):
+    if not address:
+        return {
+            "country": "",
+            "city": "",
+            "region": "",
+            "postal_code": "",
+            "address_line1": "",
+            "address_line2": "",
+        }
+    return {
+        "country": address.country,
+        "city": address.city,
+        "region": address.region,
+        "postal_code": address.postal_code,
+        "address_line1": address.address_line1,
+        "address_line2": address.address_line2 or "",
+    }
+
+
+def _address_prefill_from_session_dict(data: dict):
+    if not data:
+        data = {}
+    return {
+        "country": (data.get("country") or "").strip(),
+        "city": (data.get("city") or "").strip(),
+        "region": (data.get("region") or "").strip(),
+        "postal_code": (data.get("postal_code") or "").strip(),
+        "address_line1": (data.get("address_line1") or "").strip(),
+        "address_line2": (data.get("address_line2") or "").strip(),
+    }
+
+
+def _user_checkout_address(user):
+    saved = list(
+        DeliveryAddress.objects.filter(user=user).order_by("-is_default", "-created_at")
+    )
+    default = next((a for a in saved if a.is_default), None)
+    if not default and saved:
+        default = saved[0]
+    return default
+
+
+def _format_checkout_address(address: DeliveryAddress) -> str:
+    parts = [
+        address.country,
+        address.region,
+        address.city,
+        address.address_line1,
+    ]
+    extra = (address.address_line2 or "").strip()
+    if extra:
+        parts.append(extra)
+    parts.append(address.postal_code)
+    return "Адрес: " + ", ".join(p for p in parts if p)
 
 
 @require_POST
@@ -70,6 +151,7 @@ def cart_add(request):
 
 def cart_detail(request):
     raw_cart = get_cart(request)
+    checkout_next_query = urlencode({"next": reverse("products:checkout")})
     variant_ids = []
     for key in raw_cart.keys():
         try:
@@ -112,11 +194,103 @@ def cart_detail(request):
             "cart_items": items,
             "total_price": total_price,
             "item_count": cart_total_items(raw_cart),
+            "checkout_next_query": checkout_next_query,
         },
     )
 
 
-@login_required(login_url="register")
+@require_POST
+def checkout_save_address(request):
+    address_id_raw = request.POST.get("address_id", "").strip()
+    country = request.POST.get("country", "").strip()
+    city = request.POST.get("city", "").strip()
+    region = request.POST.get("region", "").strip()
+    postal_code = request.POST.get("postal_code", "").strip()
+    address_line1 = request.POST.get("address_line1", "").strip()
+    address_line2 = request.POST.get("address_line2", "").strip()
+
+    if not all([country, city, region, postal_code, address_line1]):
+        return JsonResponse(
+            {"ok": False, "error": "Заполните все поля адреса."},
+            status=400,
+        )
+
+    if not request.user.is_authenticated:
+        request.session[GUEST_CHECKOUT_ADDRESS_KEY] = {
+            "country": country,
+            "city": city,
+            "region": region,
+            "postal_code": postal_code,
+            "address_line1": address_line1,
+            "address_line2": address_line2,
+        }
+        request.session.modified = True
+        summary = _format_guest_checkout_address(request.session[GUEST_CHECKOUT_ADDRESS_KEY])
+        return JsonResponse({"ok": True, "guest": True, "summary": summary})
+
+    address = None
+    if address_id_raw:
+        try:
+            aid = int(address_id_raw)
+        except (TypeError, ValueError):
+            return JsonResponse({"ok": False, "error": "Некорректный адрес."}, status=400)
+        address = DeliveryAddress.objects.filter(pk=aid, user=request.user).first()
+        if not address:
+            return JsonResponse(
+                {"ok": False, "error": "Адрес не найден. Обновите страницу."},
+                status=400,
+            )
+
+    if not address:
+        address = _user_checkout_address(request.user)
+
+    if address:
+        address.country = country
+        address.city = city
+        address.region = region
+        address.postal_code = postal_code
+        address.address_line1 = address_line1
+        address.address_line2 = address_line2
+        address.save(
+            update_fields=[
+                "country",
+                "city",
+                "region",
+                "postal_code",
+                "address_line1",
+                "address_line2",
+            ]
+        )
+    else:
+        address = DeliveryAddress.objects.create(
+            user=request.user,
+            country=country,
+            city=city,
+            region=region,
+            postal_code=postal_code,
+            address_line1=address_line1,
+            address_line2=address_line2,
+            is_default=True,
+        )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "address_id": address.pk,
+            "summary": _format_checkout_address(address),
+        }
+    )
+
+
+def checkout_success(request):
+    order_id = request.session.pop("checkout_last_order_id", None)
+    return render(
+        request,
+        "products/checkout_success.html",
+        {"order_id": order_id},
+    )
+
+
 def checkout_detail(request):
     raw_cart = get_cart(request)
     variant_ids = []
@@ -128,9 +302,9 @@ def checkout_detail(request):
 
     variants = {
         v.pk: v
-        for v in Variant.objects.filter(pk__in=variant_ids).select_related(
-            "product", "product__brand"
-        )
+        for v in Variant.objects.filter(pk__in=variant_ids)
+        .select_related("product", "product__brand")
+        .prefetch_related("product__images")
     }
 
     items = []
@@ -154,28 +328,62 @@ def checkout_detail(request):
             }
         )
 
-    saved_addresses = list(
-        DeliveryAddress.objects.filter(user=request.user).order_by("-is_default", "-created_at")
-    )
-    default_address = next((address for address in saved_addresses if address.is_default), None)
-    if not default_address and saved_addresses:
-        default_address = saved_addresses[0]
+    def initial_checkout_form():
+        if request.user.is_authenticated:
+            profile, _ = UserProfile.objects.get_or_create(user=request.user)
+            return {
+                "email": request.user.email or "",
+                "first_name": request.user.first_name or "",
+                "last_name": request.user.last_name or "",
+                "phone": (profile.phone or "").strip(),
+                "order_note": "",
+            }
+        return {
+            "email": "",
+            "first_name": "",
+            "last_name": "",
+            "phone": "",
+            "order_note": "",
+        }
 
-    checkout_form = {
-        "email": request.user.email or "",
-        "first_name": request.user.first_name or "",
-        "last_name": request.user.last_name or "",
-        "phone": "",
-        "country": default_address.country if default_address else "",
-        "address_line1": default_address.address_line1 if default_address else "",
-        "address_line2": default_address.address_line2 if default_address else "",
-        "city": default_address.city if default_address else "",
-        "region": default_address.region if default_address else "",
-        "postal_code": default_address.postal_code if default_address else "",
-        "delivery_method": Order.DeliveryMethod.COURIER,
-        "order_note": "",
-    }
-    selected_address_id = str(default_address.id) if default_address else ""
+    def build_checkout_context(form_data):
+        guest_data = request.session.get(GUEST_CHECKOUT_ADDRESS_KEY) or {}
+        is_auth = request.user.is_authenticated
+        if is_auth:
+            checkout_address = _user_checkout_address(request.user)
+            checkout_address_summary = (
+                _format_checkout_address(checkout_address) if checkout_address else ""
+            )
+            checkout_has_address = checkout_address is not None
+            address_prefill = _address_prefill_from_model(checkout_address)
+        else:
+            checkout_address = None
+            checkout_address_summary = (
+                _format_guest_checkout_address(guest_data)
+                if _guest_address_complete(guest_data)
+                else ""
+            )
+            checkout_has_address = _guest_address_complete(guest_data)
+            address_prefill = _address_prefill_from_session_dict(guest_data)
+
+        return {
+            "cart_items": items,
+            "total_price": total_price,
+            "item_count": cart_total_items(raw_cart),
+            "checkout_form": form_data,
+            "checkout_address": checkout_address,
+            "checkout_address_summary": checkout_address_summary,
+            "checkout_has_address": checkout_has_address,
+            "address_prefill": address_prefill,
+            "checkout_guest": not is_auth,
+        }
+
+    checkout_form = initial_checkout_form()
+
+    def render_checkout(**extra):
+        ctx = build_checkout_context(checkout_form)
+        ctx.update(extra)
+        return render(request, "products/checkout.html", ctx)
 
     if request.method == "POST":
         if not items:
@@ -185,83 +393,77 @@ def checkout_detail(request):
             "first_name": request.POST.get("first_name", "").strip(),
             "last_name": request.POST.get("last_name", "").strip(),
             "phone": request.POST.get("phone", "").strip(),
-            "country": request.POST.get("country", "").strip(),
-            "address_line1": request.POST.get("address_line1", "").strip(),
-            "address_line2": request.POST.get("address_line2", "").strip(),
-            "city": request.POST.get("city", "").strip(),
-            "region": request.POST.get("region", "").strip(),
-            "postal_code": request.POST.get("postal_code", "").strip(),
-            "delivery_method": request.POST.get(
-                "delivery_method",
-                Order.DeliveryMethod.COURIER,
-            ),
             "order_note": request.POST.get("order_note", "").strip(),
         }
-        selected_address_id = request.POST.get("selected_address_id", "").strip()
 
-        required_fields = [
-            "email",
-            "first_name",
-            "last_name",
-            "phone",
-            "country",
-            "address_line1",
-            "city",
-            "region",
-            "postal_code",
-        ]
+        required_contact = ["email", "first_name", "last_name", "phone"]
+
         if not request.POST.get("terms_accepted"):
-            return render(
-                request,
-                "products/checkout.html",
-                {
-                    "cart_items": items,
-                    "total_price": total_price,
-                    "item_count": cart_total_items(raw_cart),
-                    "checkout_error": "Подтвердите согласие с правилами и политикой.",
-                    "checkout_form": checkout_form,
-                    "saved_addresses": saved_addresses,
-                    "selected_address_id": selected_address_id,
-                },
+            return render_checkout(
+                checkout_error="Подтвердите согласие с правилами и политикой.",
             )
-        if any(not request.POST.get(field, "").strip() for field in required_fields):
-            return render(
-                request,
-                "products/checkout.html",
-                {
-                    "cart_items": items,
-                    "total_price": total_price,
-                    "item_count": cart_total_items(raw_cart),
-                    "checkout_error": "Заполните все обязательные поля оформления заказа.",
-                    "checkout_form": checkout_form,
-                    "saved_addresses": saved_addresses,
-                    "selected_address_id": selected_address_id,
-                },
+        if any(not checkout_form[f] for f in required_contact):
+            return render_checkout(
+                checkout_error="Заполните имя, фамилию, email и телефон.",
             )
 
-        delivery_method = request.POST.get(
-            "delivery_method",
-            Order.DeliveryMethod.COURIER,
-        )
-        valid_delivery_methods = {
-            value for value, _ in Order.DeliveryMethod.choices
-        }
-        if delivery_method not in valid_delivery_methods:
-            delivery_method = Order.DeliveryMethod.COURIER
+        country = ""
+        address_line1 = ""
+        address_line2 = ""
+        city = ""
+        region = ""
+        postal_code = ""
+
+        if request.user.is_authenticated:
+            address_id_raw = request.POST.get("checkout_address_id", "").strip()
+            delivery_address = None
+            if address_id_raw:
+                try:
+                    aid = int(address_id_raw)
+                except (TypeError, ValueError):
+                    aid = None
+                if aid is not None:
+                    delivery_address = DeliveryAddress.objects.filter(
+                        pk=aid, user=request.user
+                    ).first()
+            if not delivery_address:
+                return render_checkout(
+                    checkout_error="Укажите и сохраните адрес доставки.",
+                )
+            country = delivery_address.country
+            address_line1 = delivery_address.address_line1
+            address_line2 = delivery_address.address_line2 or ""
+            city = delivery_address.city
+            region = delivery_address.region
+            postal_code = delivery_address.postal_code
+            order_user = request.user
+        else:
+            gd = request.session.get(GUEST_CHECKOUT_ADDRESS_KEY)
+            if not _guest_address_complete(gd):
+                return render_checkout(
+                    checkout_error="Укажите и сохраните адрес доставки.",
+                )
+            country = gd["country"].strip()
+            address_line1 = gd["address_line1"].strip()
+            address_line2 = (gd.get("address_line2") or "").strip()
+            city = gd["city"].strip()
+            region = gd["region"].strip()
+            postal_code = gd["postal_code"].strip()
+            order_user = None
 
         order = Order.objects.create(
-            user=request.user,
+            user=order_user,
             email=checkout_form["email"],
             first_name=checkout_form["first_name"],
             last_name=checkout_form["last_name"],
             phone=checkout_form["phone"],
-            country=checkout_form["country"],
-            address_line1=checkout_form["address_line1"],
-            address_line2=checkout_form["address_line2"],
-            city=checkout_form["city"],
-            region=checkout_form["region"],
-            postal_code=checkout_form["postal_code"],
-            delivery_method=delivery_method,
+            country=country,
+            address_line1=address_line1,
+            address_line2=address_line2,
+            city=city,
+            region=region,
+            postal_code=postal_code,
+            delivery_method=Order.DeliveryMethod.COURIER,
             order_note=checkout_form["order_note"],
             total_price=total_price,
         )
@@ -277,22 +479,16 @@ def checkout_detail(request):
                 for item in items
             ]
         )
-        request.session["cart"] = {}
+        request.session[CART_SESSION_KEY] = {}
+        if not request.user.is_authenticated:
+            request.session.pop(GUEST_CHECKOUT_ADDRESS_KEY, None)
+            request.session["checkout_last_order_id"] = order.pk
         request.session.modified = True
-        return redirect("account")
+        if request.user.is_authenticated:
+            return redirect("account")
+        return redirect("products:checkout_success")
 
-    return render(
-        request,
-        "products/checkout.html",
-        {
-            "cart_items": items,
-            "total_price": total_price,
-            "item_count": cart_total_items(raw_cart),
-            "checkout_form": checkout_form,
-            "saved_addresses": saved_addresses,
-            "selected_address_id": selected_address_id,
-        },
-    )
+    return render_checkout()
 
 
 @require_POST

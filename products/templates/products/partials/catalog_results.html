@@ -1,49 +1,9 @@
 {% load static %}
 {% include "products/partials/catalog_sort_bar.html" %}
 
-<div class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+<div id="catalog-product-grid" class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
   {% for product in product_list %}
-    <article class="reveal group flex h-full flex-col border border-[#C9A96E]/35 p-3 transition duration-500 ease-out hover:scale-[1.03] sm:p-4 lg:p-6">
-      <a
-        href="{% url 'products:product_detail' product.slug %}"
-        class="flex h-full min-h-0 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/50"
-      >
-        <div class="mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:mb-6">
-          {% with imgs=product.images.all %}
-            {% if imgs %}
-              <img
-                src="{{ imgs.0.image.url }}"
-                alt="{{ product.name }}"
-                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                loading="lazy"
-                width="320"
-                height="400"
-              >
-            {% else %}
-              <div class="flex h-full w-full items-center justify-center text-xs text-[#BDB6AA]">Нет изображения</div>
-            {% endif %}
-          {% endwith %}
-        </div>
-        <div class="flex min-h-0 flex-1 flex-col">
-          <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-[#C9A96E] sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ product.brand.name }}</p>
-          <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-[#F3EFE7] sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ product.name }}</h3>
-          <div class="mt-auto flex flex-col gap-1.5 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:pt-6">
-            <span class="text-[10px] uppercase tracking-[0.14em] text-[#C9A96E] sm:text-xs sm:tracking-[0.2em]">
-              {% with v=product.first_in_stock_variant %}
-                {% if v %}{{ v.get_volume_display }}{% else %}—{% endif %}
-              {% endwith %}
-            </span>
-            <span class="font-serif text-sm text-[#F3EFE7] sm:text-lg lg:text-xl">
-              {% if product.min_price != None %}
-                от {{ product.min_price|floatformat:2 }} ₽
-              {% else %}
-                нет в наличии
-              {% endif %}
-            </span>
-          </div>
-        </div>
-      </a>
-    </article>
+    {% include "products/partials/catalog_product_card.html" with product=product %}
   {% empty %}
     <div class="col-span-full border border-dashed border-[#C9A96E]/45 p-12 text-center">
       <p class="font-serif text-2xl text-[#F5F1E8]">Ничего не найдено</p>
@@ -52,43 +12,16 @@
   {% endfor %}
 </div>
 
-{% if page_obj.has_other_pages %}
-  <nav class="catalog-pagination mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Страницы">
-    {% if page_obj.has_previous %}
-      <a
-        href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
-        hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
-        hx-target="#catalog-results"
-        hx-push-url="true"
-        class="btn-luxury px-4 py-2"
-      >Назад</a>
-    {% endif %}
-    {% for entry in catalog_pagination_entries %}
-      {% if entry is None %}
-        <span class="px-1 text-sm text-[#6f685a]" aria-hidden="true">…</span>
-      {% elif entry == page_obj.number %}
-        <span
-          class="inline-flex min-w-[2.5rem] items-center justify-center border border-[#C9A96E] bg-[#C9A96E] px-3 py-2 text-xs uppercase tracking-[0.12em] text-[#0B0B0B]"
-          aria-current="page"
-        >{{ entry }}</span>
-      {% else %}
-        <a
-          href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ entry }}"
-          hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ entry }}"
-          hx-target="#catalog-results"
-          hx-push-url="true"
-          class="inline-flex min-w-[2.5rem] items-center justify-center border border-[#C9A96E]/45 px-3 py-2 text-xs uppercase tracking-[0.12em] text-[#C9A96E] transition-colors hover:border-[#C9A96E] hover:bg-[#C9A96E]/10"
-        >{{ entry }}</a>
-      {% endif %}
-    {% endfor %}
-    {% if page_obj.has_next %}
-      <a
-        href="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}"
-        hx-get="?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}"
-        hx-target="#catalog-results"
-        hx-push-url="true"
-        class="btn-luxury px-4 py-2"
-      >Далее</a>
-    {% endif %}
-  </nav>
-{% endif %}
+<div id="catalog-load-more-shell" class="mt-10 flex justify-center">
+  {% if page_obj.has_next %}
+    <button
+      type="button"
+      class="btn-luxury px-8 py-3 text-[10px] sm:text-[11px]"
+      hx-get="{% url 'products:catalog' %}?{% if filter_query %}{{ filter_query }}&{% endif %}page={{ page_obj.next_page_number }}&load_more=1"
+      hx-target="#catalog-product-grid"
+      hx-swap="beforeend"
+      hx-push-url="false"
+      hx-indicator="#catalog-loading"
+    >Показать больше товаров</button>
+  {% endif %}
+</div>

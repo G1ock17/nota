@@ -59,7 +59,7 @@
 
     <p class="mt-6 text-sm text-[#BDB6AA]">
       Нет аккаунта?
-      <a href="{% url 'register' %}" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Зарегистрироваться</a>
+      <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Зарегистрироваться</a>
     </p>
   </main>
 </div>

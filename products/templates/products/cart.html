@@ -3,6 +3,110 @@
 
 {% block title %}Корзина — nota{% endblock %}
 
+{% block extra_css %}
+<style>
+  #cart-checkout-gate {
+    position: relative;
+    max-width: 22rem;
+    width: calc(100vw - 2rem);
+    border: 1px solid rgba(201, 169, 110, 0.85);
+    background: #0b0b0b;
+    color: #e4dfd5;
+    padding: 0;
+  }
+  #cart-checkout-gate::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+  }
+  .cart-checkout-gate-inner {
+    padding: 1.5rem 1.35rem 1.6rem;
+  }
+  .cart-checkout-gate-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #f5f1e8;
+    line-height: 1.35;
+  }
+  .cart-checkout-gate-text {
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #bdb6aa;
+  }
+  .cart-checkout-gate-primary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.35rem;
+    border: none;
+    background: #c9a96e;
+    padding: 0.95rem 1rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #0b0b0b;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .cart-checkout-gate-primary:hover {
+    background: #d8bb86;
+    color: #0b0b0b;
+  }
+  .cart-checkout-gate-secondary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.75rem;
+    border: 1px solid rgba(201, 169, 110, 0.85);
+    background: transparent;
+    padding: 0.85rem 1rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c9a96e;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .cart-checkout-gate-secondary:hover {
+    background: rgba(201, 169, 110, 0.08);
+    border-color: #c9a96e;
+  }
+  .cart-checkout-gate-register {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #bdb6aa;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .cart-checkout-gate-register:hover {
+    color: #c9a96e;
+  }
+  .cart-checkout-gate-close {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    border: none;
+    background: transparent;
+    color: #bdb6aa;
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem;
+  }
+  .cart-checkout-gate-close:hover {
+    color: #c9a96e;
+  }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
   {% include "core/partials/navbar.html" %}
@@ -94,12 +198,21 @@
         style="padding-bottom: env(safe-area-inset-bottom, 0px);"
       >
         <div class="pointer-events-auto border-t border-[#C9A96E]/35 bg-[#0B0B0B]/95 px-4 py-3 backdrop-blur-sm">
-          <a
-            href="{% url 'products:checkout' %}"
-            class="btn-luxury flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
-          >
-            Оформить заказ
-          </a>
+          {% if user.is_authenticated %}
+            <a
+              href="{% url 'products:checkout' %}"
+              class="btn-luxury flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
+            >
+              Оформить заказ
+            </a>
+          {% else %}
+            <button
+              type="button"
+              class="btn-luxury js-open-cart-checkout-gate flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
+            >
+              Оформить заказ
+            </button>
+          {% endif %}
         </div>
       </div>
 
@@ -158,11 +271,28 @@
           <aside class="h-fit border border-[#C9A96E]/35 p-6">
             <h2 class="font-serif text-3xl text-[#F5F1E8]">Итого</h2>
             <p class="mt-6 border-t border-[#C9A96E]/20 pt-6 font-serif text-4xl text-[#F5F1E8]">{{ total_price|floatformat:2 }} ₽</p>
-            <a href="{% url 'products:checkout' %}" class="btn-luxury mt-8 inline-flex w-full justify-center">Оформить заказ</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'products:checkout' %}" class="btn-luxury mt-8 inline-flex w-full justify-center">Оформить заказ</a>
+            {% else %}
+              <button type="button" class="btn-luxury js-open-cart-checkout-gate mt-8 inline-flex w-full justify-center">Оформить заказ</button>
+            {% endif %}
             <p class="mt-4 text-xs text-[#BDB6AA]">Безопасное оформление и выбор деталей доставки на следующем шаге.</p>
           </aside>
         </div>
       </div>
+
+      <dialog id="cart-checkout-gate" class="z-[200]" aria-labelledby="cart-checkout-gate-heading">
+        <div class="cart-checkout-gate-inner">
+          <button type="button" class="cart-checkout-gate-close" id="cart-checkout-gate-close" aria-label="Закрыть">&times;</button>
+          <h2 id="cart-checkout-gate-heading" class="cart-checkout-gate-title">Покупайте со скидкой</h2>
+          <p class="cart-checkout-gate-text">
+            Зарегистрируйтесь, чтобы получить скидку по карте лояльности, копить бонусы и оплачивать покупки подарочными картами.
+          </p>
+          <a class="cart-checkout-gate-primary" href="{% url 'login' %}?{{ checkout_next_query }}">Войти</a>
+          <a class="cart-checkout-gate-register" href="{% url 'register' %}?{{ checkout_next_query }}">Регистрация</a>
+          <a class="cart-checkout-gate-secondary" href="{% url 'products:checkout' %}">Продолжить как гость</a>
+        </div>
+      </dialog>
 
       {% endwith %}
     {% else %}
@@ -189,6 +319,21 @@
 {% if cart_items %}
 <script>
 (function () {
+  var gate = document.getElementById("cart-checkout-gate");
+  var gateClose = document.getElementById("cart-checkout-gate-close");
+  if (gate) {
+    document.querySelectorAll(".js-open-cart-checkout-gate").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (gate.showModal) gate.showModal();
+      });
+    });
+    if (gateClose) {
+      gateClose.addEventListener("click", function () {
+        if (gate.close) gate.close();
+      });
+    }
+  }
+
   var root = document.getElementById("cart-mobile-root");
   if (!root) return;
   var items = root.querySelectorAll('.cart-mobile-item-cb[data-role="item"]');
