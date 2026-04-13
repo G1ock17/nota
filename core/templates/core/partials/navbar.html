@@ -1,10 +1,24 @@
-<header class="site-header relative z-50 overflow-visible border-b border-[#C9A96E]/40">
+<header class="site-header relative z-50 bg-[#0B0B0B] max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:top-0 max-lg:z-[100] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out overflow-visible border-b border-[#C9A96E]/40">
     <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3 overflow-visible px-6 py-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-0 lg:px-12">
         <a href="{% url 'home' %}" class="order-1 shrink-0 font-serif text-3xl uppercase tracking-[0.22em] text-[#C9A96E] nav-link">nota</a>
-        <button type="button" class="nav-toggle order-2 ml-auto inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E] lg:hidden" aria-label="Открыть меню" aria-expanded="false">
-            <span class="sr-only">Открыть меню</span>
-            <span class="block h-px w-5 bg-current"></span>
-        </button>
+        <div class="order-2 ml-auto flex shrink-0 items-center gap-2 lg:hidden">
+            <button
+                type="button"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E] transition-colors hover:border-[#E4DFD5] hover:text-[#E4DFD5]"
+                data-nav-search-mobile-trigger
+                aria-label="Открыть поиск"
+                aria-expanded="false"
+                aria-controls="nav-search-input"
+            >
+                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+            </button>
+            <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E]" aria-label="Открыть меню" aria-expanded="false">
+                <span class="sr-only">Открыть меню</span>
+                <span class="block h-px w-5 bg-current"></span>
+            </button>
+        </div>
 
         <div
             class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9]"
@@ -18,7 +32,7 @@
         </div>
 
         <div
-            class="nav-search relative order-3 min-w-0 w-full basis-full lg:order-3 lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto"
+            class="nav-search relative order-3 min-w-0 w-full basis-full max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:z-[95] max-lg:hidden max-lg:border-b max-lg:border-[#C9A96E]/40 max-lg:bg-[#0B0B0B] max-lg:px-4 max-lg:py-3 max-lg:shadow-[0_8px_24px_rgba(0,0,0,0.35)] max-lg:[&.nav-search--drawer-open]:block lg:order-3 lg:block lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto lg:border-b-0 lg:px-0 lg:py-0 lg:shadow-none"
             data-nav-search
             data-search-url="{% url 'products:search_suggest' %}"
             data-product-detail-template="{% url 'products:product_detail' slug='__slug__' %}"
@@ -157,3 +171,8 @@
         </div>
     </div>
 </header>
+<div
+    id="site-header-mobile-spacer"
+    class="site-header-mobile-spacer hidden max-lg:block max-lg:w-full max-lg:bg-[#0B0B0B]"
+    aria-hidden="true"
+></div>

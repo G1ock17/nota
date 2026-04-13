@@ -1,14 +1,14 @@
 {% load static %}
 {% include "products/partials/catalog_sort_bar.html" %}
 
-<div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+<div class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
   {% for product in product_list %}
-    <article class="reveal group flex h-full flex-col border border-[#C9A96E]/35 p-6 transition duration-500 ease-out hover:scale-[1.03]">
+    <article class="reveal group flex h-full flex-col border border-[#C9A96E]/35 p-3 transition duration-500 ease-out hover:scale-[1.03] sm:p-4 lg:p-6">
       <a
         href="{% url 'products:product_detail' product.slug %}"
         class="flex h-full min-h-0 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/50"
       >
-        <div class="mb-6 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30">
+        <div class="mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:mb-6">
           {% with imgs=product.images.all %}
             {% if imgs %}
               <img
@@ -25,15 +25,15 @@
           {% endwith %}
         </div>
         <div class="flex min-h-0 flex-1 flex-col">
-          <p class="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">{{ product.brand.name }}</p>
-          <h3 class="line-clamp-3 min-h-[6rem] font-serif text-2xl leading-snug text-[#F3EFE7]">{{ product.name }}</h3>
-          <div class="mt-auto flex items-center justify-between pt-6">
-            <span class="text-xs uppercase tracking-[0.2em] text-[#C9A96E]">
+          <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-[#C9A96E] sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ product.brand.name }}</p>
+          <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-[#F3EFE7] sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ product.name }}</h3>
+          <div class="mt-auto flex flex-col gap-1.5 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:pt-6">
+            <span class="text-[10px] uppercase tracking-[0.14em] text-[#C9A96E] sm:text-xs sm:tracking-[0.2em]">
               {% with v=product.first_in_stock_variant %}
                 {% if v %}{{ v.get_volume_display }}{% else %}—{% endif %}
               {% endwith %}
             </span>
-            <span class="font-serif text-xl text-[#F3EFE7]">
+            <span class="font-serif text-sm text-[#F3EFE7] sm:text-lg lg:text-xl">
               {% if product.min_price != None %}
                 от {{ product.min_price|floatformat:2 }} ₽
               {% else %}

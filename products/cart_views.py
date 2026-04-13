@@ -5,7 +5,7 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
-from .cart_utils import add_variant, cart_total_items, get_cart, set_variant_quantity
+from .cart_utils import CART_SESSION_KEY, add_variant, cart_total_items, get_cart, set_variant_quantity
 from .models import Order, OrderItem, Variant
 from core.models import DeliveryAddress
 
@@ -293,6 +293,13 @@ def checkout_detail(request):
             "selected_address_id": selected_address_id,
         },
     )
+
+
+@require_POST
+def cart_clear(request):
+    request.session[CART_SESSION_KEY] = {}
+    request.session.modified = True
+    return redirect("products:cart")
 
 
 @require_POST

@@ -8,6 +8,66 @@ from django.views.generic import DetailView, ListView
 from .models import Brand, Category, Product, ProductImage, Variant, FragranceNote
 
 
+def parse_notes_filter_params(params):
+    """
+    Разбирает GET-параметры notes: значение может быть одним slug или группой «slug1,slug2»
+    (одна логическая нота в разных реестрах). Поддерживается и старый формат — несколько ?notes=.
+    """
+    result = []
+    for raw in params.getlist("notes"):
+        raw = (raw or "").strip()
+        if not raw:
+            continue
+        if "," in raw:
+            for part in raw.split(","):
+                t = part.strip()
+                if t:
+                    result.append(t)
+        else:
+            result.append(raw)
+    seen = set()
+    out = []
+    for s in result:
+        if s not in seen:
+            seen.add(s)
+            out.append(s)
+    return out
+
+
+def build_notes_catalog_unique():
+    """
+    Одна строка фильтра на уникальное имя ноты; в value — все slug этой ноты из разных реестров
+    (через запятую), чтобы каталог отбирал товары с любой из связей.
+    Только ноты, у которых есть хотя бы один товар в наличии (как в списке каталога).
+    """
+    groups = {}
+    note_qs = (
+        FragranceNote.objects.filter(products__variants__stock__gt=0)
+        .distinct()
+        .order_by("name")
+    )
+    for n in note_qs:
+        key = (n.name or "").strip().lower()
+        if not key:
+            key = f"__slug__{n.slug}"
+        if key not in groups:
+            display = (n.name or "").strip() or n.slug
+            groups[key] = {"name": display, "slugs": []}
+        if n.slug not in groups[key]["slugs"]:
+            groups[key]["slugs"].append(n.slug)
+    result = []
+    for _key in sorted(groups.keys(), key=lambda k: groups[k]["name"].lower()):
+        slugs = sorted(groups[_key]["slugs"])
+        result.append(
+            {
+                "name": groups[_key]["name"],
+                "slugs": slugs,
+                "value": ",".join(slugs),
+            }
+        )
+    return result
+
+
 def product_search_suggest(request):
     q = (request.GET.get("q") or "").strip()
     if len(q) < 2:
@@ -134,7 +194,7 @@ class CatalogListView(ListView):
         if brand_slugs:
             qs = qs.filter(brand__slug__in=brand_slugs)
 
-        note_slugs = params.getlist("notes")
+        note_slugs = parse_notes_filter_params(params)
         if note_slugs:
             qs = qs.filter(notes__slug__in=note_slugs).distinct()
 
@@ -203,15 +263,17 @@ class CatalogListView(ListView):
         ctx["filter_query"] = req.urlencode()
         ctx["categories"] = Category.objects.all()
         ctx["brands"] = Brand.objects.all()
-        ctx["notes_top"] = FragranceNote.objects.filter(
-            type=FragranceNote.NoteType.TOP
-        ).order_by("name")
-        ctx["notes_middle"] = FragranceNote.objects.filter(
-            type=FragranceNote.NoteType.MIDDLE
-        ).order_by("name")
-        ctx["notes_base"] = FragranceNote.objects.filter(
-            type=FragranceNote.NoteType.BASE
-        ).order_by("name")
+        notes_catalog_unique = build_notes_catalog_unique()
+        ctx["notes_catalog_unique"] = notes_catalog_unique
+        selected_notes_raw = self.request.GET.getlist("notes")
+        expanded_slugs = set(parse_notes_filter_params(self.request.GET))
+        selected_group_values = set()
+        for g in notes_catalog_unique:
+            gv = g["value"]
+            if gv in selected_notes_raw or (set(g["slugs"]) & expanded_slugs):
+                selected_group_values.add(gv)
+        ctx["notes_selected_group_values"] = list(selected_group_values)
+        ctx["notes_filter_selected_count"] = len(selected_group_values)
         ctx["current_sort"] = self.request.GET.get("sort", "newest")
         ctx["volume_choices"] = [
             (v, v)
@@ -222,7 +284,7 @@ class CatalogListView(ListView):
         ]
         ctx["selected_categories"] = self.request.GET.getlist("category")
         ctx["selected_brands"] = self.request.GET.getlist("brand")
-        ctx["selected_notes"] = self.request.GET.getlist("notes")
+        ctx["selected_notes"] = selected_notes_raw
         ctx["selected_years"] = self.request.GET.getlist("year")
         ctx["selected_countries"] = self.request.GET.getlist("country")
         ctx["available_years"] = (

@@ -7,73 +7,224 @@
 <div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-7xl px-6 py-14 lg:px-12">
-    <div class="mb-10">
-      <h1 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Корзина</h1>
-      <p class="mt-3 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]">Позиций: {{ item_count }}</p>
-    </div>
-
+  <main class="mx-auto w-full max-w-7xl lg:px-12">
     {% if cart_items %}
-      <div class="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_340px]">
-        <section class="space-y-4">
+      {% with line_total=cart_items|length %}
+
+      {# ——— Мобильная корзина ——— #}
+      <div id="cart-mobile-root" class="xl:hidden bg-[#0B0B0B] pb-28 text-[#E4DFD5]">
+        <div class="border-b border-[#C9A96E]/25 px-4 py-5">
+          <h1 class="font-serif text-2xl text-[#F5F1E8]">Корзина</h1>
+          <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]">Позиций в заказе: {{ line_total }}</p>
+        </div>
+
+        <div class="flex items-center justify-between border-b border-[#C9A96E]/25 px-4 py-3">
+          <label class="flex cursor-pointer items-center gap-2.5 text-sm text-[#E4DFD5]">
+            <input
+              type="checkbox"
+              id="cart-mobile-select-all"
+              class="cart-mobile-item-cb h-[1.125rem] w-[1.125rem] border-[#C9A96E]/55 bg-[#0B0B0B] text-[#C9A96E] accent-[#C9A96E] focus:ring-1 focus:ring-[#C9A96E]/50"
+              checked
+              data-role="select-all"
+            >
+            <span>Выбрать всё (<span data-role="selected-label">{{ line_total }}</span>/{{ line_total }})</span>
+          </label>
+          <form method="post" action="{% url 'products:cart_clear' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="text-sm text-[#BDB6AA] transition-colors hover:text-[#C9A96E]">Удалить всё</button>
+          </form>
+        </div>
+
+        <div class="px-4">
           {% for item in cart_items %}
-            <article class="grid grid-cols-1 gap-4 border border-[#C9A96E]/35 p-5 md:grid-cols-[130px_1fr]">
-              <div class="aspect-[4/5] overflow-hidden border border-[#C9A96E]/25">
-                {% with imgs=item.variant.product.images.all %}
-                  {% if imgs %}
-                    <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy">
-                  {% else %}
-                    <div class="flex h-full items-center justify-center text-xs text-[#BDB6AA]">Нет изображения</div>
-                  {% endif %}
-                {% endwith %}
+            <article class="border-b border-[#C9A96E]/20 py-5 last:border-b-0">
+              <div class="mb-3 flex items-center justify-between">
+                <input
+                  type="checkbox"
+                  class="cart-mobile-item-cb h-[1.125rem] w-[1.125rem] border-[#C9A96E]/55 bg-[#0B0B0B] text-[#C9A96E] accent-[#C9A96E] focus:ring-1 focus:ring-[#C9A96E]/50"
+                  checked
+                  data-role="item"
+                  aria-label="Выбрать {{ item.variant.product.name }}"
+                >
+                <form method="post" action="{% url 'products:cart_update' %}" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
+                  <button type="submit" name="action" value="remove" class="text-xs text-[#BDB6AA] transition-colors hover:text-[#C9A96E]">Удалить</button>
+                </form>
               </div>
 
-              <div class="flex flex-col gap-3">
-                <div>
-                  <p class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
-                  <h2 class="mt-2 font-serif text-3xl text-[#F5F1E8]">{{ item.variant.product.name }}</h2>
-                  <p class="mt-2 text-sm text-[#BDB6AA]">{{ item.variant.get_volume_display }}</p>
+              <div class="flex gap-3.5">
+                <div class="h-[5.5rem] w-[5.5rem] shrink-0 overflow-hidden border border-[#C9A96E]/25 bg-[#141414]">
+                  {% with imgs=item.variant.product.images.all %}
+                    {% if imgs %}
+                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy">
+                    {% else %}
+                      <div class="flex h-full items-center justify-center px-1 text-center text-[10px] text-[#BDB6AA]">Нет фото</div>
+                    {% endif %}
+                  {% endwith %}
                 </div>
 
-                <div class="mt-auto flex flex-wrap items-center justify-between gap-4">
-                  <form method="post" action="{% url 'products:cart_update' %}" class="flex items-center gap-2">
-                    {% csrf_token %}
-                    <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
-                    <button type="submit" name="action" value="dec" class="h-9 w-9 border border-[#C9A96E]/45 text-[#C9A96E]">-</button>
-                    <input
-                      type="number"
-                      min="1"
-                      name="quantity"
-                      value="{{ item.quantity }}"
-                      class="h-9 w-16 border border-[#C9A96E]/45 bg-[#0B0B0B] px-2 text-center text-sm text-[#E4DFD5]"
-                    >
-                    <button type="submit" name="action" value="set" class="h-9 border border-[#C9A96E]/45 px-3 text-[10px] uppercase tracking-[0.15em] text-[#C9A96E]">Обновить</button>
-                    <button type="submit" name="action" value="inc" class="h-9 w-9 border border-[#C9A96E]/45 text-[#C9A96E]">+</button>
-                    <button type="submit" name="action" value="remove" class="h-9 border border-[#C9A96E]/45 px-3 text-[10px] uppercase tracking-[0.15em] text-[#BDB6AA]">Удалить</button>
-                  </form>
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <p class="text-[9px] uppercase tracking-[0.18em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
+                  <h2 class="font-serif text-base leading-snug text-[#F5F1E8]">{{ item.variant.product.name }}</h2>
+                  {% if item.variant.get_volume_display %}
+                    <p class="text-[10px] uppercase tracking-[0.14em] text-[#BDB6AA]">{{ item.variant.get_volume_display }}</p>
+                  {% endif %}
+                  <p class="text-xs text-[#BDB6AA]">Количество: {{ item.quantity }} шт.</p>
 
-                  <p class="font-serif text-2xl text-[#F5F1E8]">{{ item.line_total|floatformat:2 }} ₽</p>
+                  <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <form method="post" action="{% url 'products:cart_update' %}" class="inline-flex overflow-hidden border border-[#C9A96E]/45 text-sm">
+                      {% csrf_token %}
+                      <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
+                      <button type="submit" name="action" value="dec" class="min-h-9 min-w-9 bg-[#0B0B0B] px-2 text-[#C9A96E] transition-colors hover:bg-[#C9A96E]/10" aria-label="Уменьшить количество">−</button>
+                      <span class="flex min-w-[2.25rem] items-center justify-center border-x border-[#C9A96E]/45 bg-[#0B0B0B] tabular-nums text-[#E4DFD5]">{{ item.quantity }}</span>
+                      <button type="submit" name="action" value="inc" class="min-h-9 min-w-9 bg-[#0B0B0B] px-2 text-[#C9A96E] transition-colors hover:bg-[#C9A96E]/10" aria-label="Увеличить количество">+</button>
+                    </form>
+                    <p class="font-serif text-base tabular-nums text-[#F5F1E8]">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
+                  </div>
                 </div>
               </div>
             </article>
           {% endfor %}
-        </section>
-
-        <aside class="h-fit border border-[#C9A96E]/35 p-6">
-          <h2 class="font-serif text-3xl text-[#F5F1E8]">Итого</h2>
-          <p class="mt-6 border-t border-[#C9A96E]/20 pt-6 font-serif text-4xl text-[#F5F1E8]">{{ total_price|floatformat:2 }} ₽</p>
-          <a href="{% url 'products:checkout' %}" class="btn-luxury mt-8 inline-flex w-full justify-center">Оформить заказ</a>
-          <p class="mt-4 text-xs text-[#BDB6AA]">Безопасное оформление и выбор деталей доставки на следующем шаге.</p>
-        </aside>
+        </div>
       </div>
+
+      <div
+        class="pointer-events-none fixed inset-x-0 bottom-0 z-40 xl:hidden"
+        style="padding-bottom: env(safe-area-inset-bottom, 0px);"
+      >
+        <div class="pointer-events-auto border-t border-[#C9A96E]/35 bg-[#0B0B0B]/95 px-4 py-3 backdrop-blur-sm">
+          <a
+            href="{% url 'products:checkout' %}"
+            class="btn-luxury flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
+          >
+            Оформить заказ
+          </a>
+        </div>
+      </div>
+
+      {# ——— Десктоп ——— #}
+      <div class="hidden px-6 py-14 xl:block">
+        <div class="mb-10">
+          <h1 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Корзина</h1>
+          <p class="mt-3 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]">Позиций: {{ item_count }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_340px]">
+          <section class="space-y-4">
+            {% for item in cart_items %}
+              <article class="grid grid-cols-1 gap-4 border border-[#C9A96E]/35 p-5 md:grid-cols-[130px_1fr]">
+                <div class="aspect-[4/5] overflow-hidden border border-[#C9A96E]/25">
+                  {% with imgs=item.variant.product.images.all %}
+                    {% if imgs %}
+                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy">
+                    {% else %}
+                      <div class="flex h-full items-center justify-center text-xs text-[#BDB6AA]">Нет изображения</div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+
+                <div class="flex flex-col gap-3">
+                  <div>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
+                    <h2 class="mt-2 font-serif text-3xl text-[#F5F1E8]">{{ item.variant.product.name }}</h2>
+                    <p class="mt-2 text-sm text-[#BDB6AA]">{{ item.variant.get_volume_display }}</p>
+                  </div>
+
+                  <div class="mt-auto flex flex-wrap items-center justify-between gap-4">
+                    <form method="post" action="{% url 'products:cart_update' %}" class="flex items-center gap-2">
+                      {% csrf_token %}
+                      <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
+                      <button type="submit" name="action" value="dec" class="h-9 w-9 border border-[#C9A96E]/45 text-[#C9A96E]">-</button>
+                      <input
+                        type="number"
+                        min="1"
+                        name="quantity"
+                        value="{{ item.quantity }}"
+                        class="h-9 w-16 border border-[#C9A96E]/45 bg-[#0B0B0B] px-2 text-center text-sm text-[#E4DFD5]"
+                      >
+                      <button type="submit" name="action" value="set" class="h-9 border border-[#C9A96E]/45 px-3 text-[10px] uppercase tracking-[0.15em] text-[#C9A96E]">Обновить</button>
+                      <button type="submit" name="action" value="inc" class="h-9 w-9 border border-[#C9A96E]/45 text-[#C9A96E]">+</button>
+                      <button type="submit" name="action" value="remove" class="h-9 border border-[#C9A96E]/45 px-3 text-[10px] uppercase tracking-[0.15em] text-[#BDB6AA]">Удалить</button>
+                    </form>
+
+                    <p class="font-serif text-2xl text-[#F5F1E8]">{{ item.line_total|floatformat:2 }} ₽</p>
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </section>
+
+          <aside class="h-fit border border-[#C9A96E]/35 p-6">
+            <h2 class="font-serif text-3xl text-[#F5F1E8]">Итого</h2>
+            <p class="mt-6 border-t border-[#C9A96E]/20 pt-6 font-serif text-4xl text-[#F5F1E8]">{{ total_price|floatformat:2 }} ₽</p>
+            <a href="{% url 'products:checkout' %}" class="btn-luxury mt-8 inline-flex w-full justify-center">Оформить заказ</a>
+            <p class="mt-4 text-xs text-[#BDB6AA]">Безопасное оформление и выбор деталей доставки на следующем шаге.</p>
+          </aside>
+        </div>
+      </div>
+
+      {% endwith %}
     {% else %}
-      <div class="border border-dashed border-[#C9A96E]/45 p-14 text-center">
-        <p class="font-serif text-3xl text-[#F5F1E8]">Ваша корзина пуста</p>
-        <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex">Перейти в каталог</a>
+      <div class="xl:hidden border-b border-[#C9A96E]/25 bg-[#0B0B0B] px-4 py-16 text-center">
+        <p class="font-serif text-2xl text-[#F5F1E8]">Ваша корзина пуста</p>
+        <p class="mt-2 text-xs text-[#BDB6AA]">Добавьте ароматы из каталога</p>
+        <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex w-full max-w-xs justify-center">Перейти в каталог</a>
+      </div>
+      <div class="hidden px-6 py-14 xl:block">
+        <div class="border border-dashed border-[#C9A96E]/45 p-14 text-center">
+          <p class="font-serif text-3xl text-[#F5F1E8]">Ваша корзина пуста</p>
+          <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex">Перейти в каталог</a>
+        </div>
       </div>
     {% endif %}
   </main>
 
   {% include "core/partials/footer.html" %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{% if cart_items %}
+<script>
+(function () {
+  var root = document.getElementById("cart-mobile-root");
+  if (!root) return;
+  var items = root.querySelectorAll('.cart-mobile-item-cb[data-role="item"]');
+  var master = root.querySelector('[data-role="select-all"]');
+  var label = root.querySelector("[data-role=selected-label]");
+  if (!items.length || !master || !label) return;
+
+  function selectedCount() {
+    var n = 0;
+    items.forEach(function (cb) {
+      if (cb.checked) n += 1;
+    });
+    return n;
+  }
+
+  function sync() {
+    var n = selectedCount();
+    label.textContent = String(n);
+    master.checked = n === items.length;
+    master.indeterminate = n > 0 && n < items.length;
+  }
+
+  master.addEventListener("change", function () {
+    var on = master.checked;
+    items.forEach(function (cb) {
+      cb.checked = on;
+    });
+    sync();
+  });
+
+  items.forEach(function (cb) {
+    cb.addEventListener("change", sync);
+  });
+
+  sync();
+})();
+</script>
+{% endif %}
 {% endblock %}
