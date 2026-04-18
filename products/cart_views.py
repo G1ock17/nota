@@ -98,7 +98,7 @@ def cart_add(request):
         try:
             variant_pk = int(variant_id_raw)
         except (TypeError, ValueError):
-            return HttpResponseBadRequest("Invalid variant")
+            return HttpResponseBadRequest("Некорректный вариант")
         variant = (
             Variant.objects.filter(pk=variant_pk, stock__gt=0)
             .select_related("product", "product__brand")
@@ -108,7 +108,7 @@ def cart_add(request):
         try:
             product_id = int(request.POST.get("product_id", ""))
         except (TypeError, ValueError):
-            return HttpResponseBadRequest("Invalid product")
+            return HttpResponseBadRequest("Некорректный товар")
         variant = (
             Variant.objects.filter(product_id=product_id, stock__gt=0)
             .select_related("product", "product__brand")
@@ -126,7 +126,7 @@ def cart_add(request):
                 {"error": "Нет в наличии"},
                 status=200,
             )
-        return HttpResponseBadRequest("Out of stock")
+        return HttpResponseBadRequest("Нет в наличии")
 
     cart = add_variant(request, variant.pk, 1)
     count = cart_total_items(cart)
@@ -146,7 +146,7 @@ def cart_add(request):
             status=200,
         )
 
-    return HttpResponseBadRequest("HTMX required")
+    return HttpResponseBadRequest("Требуется HTMX")
 
 
 def cart_detail(request):
@@ -503,7 +503,7 @@ def cart_update(request):
     try:
         variant_id = int(request.POST.get("variant_id", ""))
     except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid variant")
+        return HttpResponseBadRequest("Некорректный вариант")
 
     action = request.POST.get("action", "").strip().lower()
     cart = get_cart(request)

@@ -11,13 +11,13 @@ from .models import Favorite, Product
 @require_POST
 def favorite_toggle(request):
     if not request.user.is_authenticated:
-        return HttpResponseBadRequest("Auth required")
+        return HttpResponseBadRequest("Требуется вход")
 
     product_id_raw = request.POST.get("product_id")
     try:
         product_pk = int(product_id_raw)
     except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid product")
+        return HttpResponseBadRequest("Некорректный товар")
 
     product = get_object_or_404(Product, pk=product_pk)
     button = (request.POST.get("button") or "detail").strip()

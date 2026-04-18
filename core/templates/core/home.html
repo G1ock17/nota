@@ -2,19 +2,19 @@
 {% load static %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+<div class="min-h-screen bg-background text-foreground">
     {% include "core/partials/navbar.html" %}
 
     <main>
-        <section class="relative border-b border-[#C9A96E]/25">
+        <section class="relative border-b border-edge">
             <div class="absolute inset-0">
                 <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=1920&q=80" alt="Нишевая парфюмерия" class="h-full w-full object-cover opacity-35">
             </div>
             <div class="relative mx-auto flex min-h-[78vh] w-full max-w-7xl items-center justify-center px-6 py-28 text-center lg:px-12">
                 <div class="reveal max-w-4xl">
-                    <p class="mb-8 text-[11px] uppercase tracking-[0.28em] text-[#C9A96E]">Нишевый парфюмерный бутик</p>
-                    <h1 class="mb-10 font-serif text-5xl leading-tight text-[#F5F1E8] md:text-7xl">Искусство аромата в воплощении роскоши</h1>
-                    <p class="mx-auto mb-12 max-w-2xl text-sm leading-8 text-[#C6BFB2] md:text-base">Откройте редкие композиции от культовых парфюмерных домов, созданные для тех, кто ценит детали, тишину и вневременную элегантность.</p>
+                    <p class="mb-8 text-[11px] uppercase tracking-[0.28em] text-accent">Нишевый парфюмерный бутик</p>
+                    <h1 class="mb-10 font-serif text-5xl leading-tight text-heading md:text-7xl">Искусство аромата в воплощении роскоши</h1>
+                    <p class="mx-auto mb-12 max-w-2xl text-sm leading-8 text-mist md:text-base">Откройте редкие композиции от культовых парфюмерных домов, созданные для тех, кто ценит детали, тишину и вневременную элегантность.</p>
                     <a href="{% url 'products:catalog' %}" class="btn-luxury">Смотреть коллекцию</a>
                 </div>
             </div>
@@ -23,10 +23,10 @@
         <section id="featured" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="mb-16 flex items-end justify-between gap-6">
                 <div class="reveal max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Рекомендуемые ароматы</p>
-                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Избранные композиции</h2>
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Рекомендуемые ароматы</p>
+                    <h2 class="font-serif text-4xl text-heading md:text-5xl">Избранные композиции</h2>
                 </div>
-                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-[#D9D2C6] md:inline-block">Смотреть все</a>
+                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-drift md:inline-block">Смотреть все</a>
             </div>
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
                 {% include "core/partials/product_card.html" with image="https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=800&q=80" family="Амброво-древесный" name="Noir Absolu" description="Насыщенная амбра, дымный кедр и гладкая кожа для длинного, притягательного шлейфа." volume="100 мл" price="14 900 ₽" %}
@@ -35,24 +35,24 @@
             </div>
         </section>
 
-        <section id="categories" class="border-y border-[#C9A96E]/25">
+        <section id="categories" class="border-y border-edge">
             <div class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
                 <div class="reveal mb-14 max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Категории</p>
-                    <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">По характеру</h2>
+                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Категории</p>
+                    <h2 class="font-serif text-4xl text-heading md:text-5xl">По характеру</h2>
                 </div>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <a href="{% url 'products:catalog' %}?category=man" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Мужские</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Яркие / Древесные / Пряные</p>
+                    <a href="{% url 'products:catalog' %}?category=man" class="reveal group border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-heading">Мужские</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Яркие / Древесные / Пряные</p>
                     </a>
-                    <a href="{% url 'products:catalog' %}?category=woman" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Женские</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Цветочные / Пудровые / Мягкие</p>
+                    <a href="{% url 'products:catalog' %}?category=woman" class="reveal group border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-heading">Женские</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Цветочные / Пудровые / Мягкие</p>
                     </a>
-                    <a href="{% url 'products:catalog' %}?category=unisex" class="reveal group border border-[#C9A96E]/35 p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-[#F5F1E8]">Унисекс</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-[#BDB6AA]">Чистые / Цитрусовые / Мускусные</p>
+                    <a href="{% url 'products:catalog' %}?category=unisex" class="reveal group border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
+                        <h3 class="font-serif text-3xl text-heading">Унисекс</h3>
+                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Чистые / Цитрусовые / Мускусные</p>
                     </a>
                 </div>
             </div>
@@ -60,14 +60,14 @@
 
         <section id="brands" class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="reveal mb-14 max-w-xl">
-                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-[#C9A96E]">Бренды</p>
-                <h2 class="font-serif text-4xl text-[#F5F1E8] md:text-5xl">Премиальные дома</h2>
+                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Бренды</p>
+                <h2 class="font-serif text-4xl text-heading md:text-5xl">Премиальные дома</h2>
             </div>
             <div class="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
                 {% for name, slug in featured_brands %}
                 <a
                     href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}"
-                    class="reveal group border border-[#C9A96E]/35 px-4 py-8 text-center font-serif text-xl text-[#DFD8CB] transition duration-300 hover:border-[#C9A96E]/70 hover:text-[#F5F1E8] md:text-2xl"
+                    class="reveal group border border-edge px-4 py-8 text-center font-serif text-xl text-drift transition duration-300 hover:border-edge-strong hover:text-heading md:text-2xl"
                 >{{ name }}</a>
                 {% endfor %}
             </div>

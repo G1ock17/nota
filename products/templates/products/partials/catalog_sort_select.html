@@ -1,7 +1,7 @@
 <select
   name="sort"
   id="{{ sort_select_id }}"
-  class="catalog-sort-bar__select {{ sort_select_extra_class }} shrink-0 border border-[#C9A96E]/45 bg-[#0B0B0B] text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+  class="catalog-sort-bar__select {{ sort_select_extra_class }} shrink-0 border border-edge-strong bg-background text-foreground focus:border-accent focus:outline-none"
   onchange="this.form.requestSubmit()"
 >
   <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Сначала новые</option>

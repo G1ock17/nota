@@ -6,16 +6,16 @@
 {% block extra_css %}
 <style>
   .checkout-root {
-    --checkout-bg: #0b0b0b;
-    --checkout-bg-soft: #141414;
-    --checkout-text: #e4dfd5;
-    --checkout-text-muted: #bdb6aa;
-    --checkout-heading: #f5f1e8;
-    --checkout-accent: #c9a96e;
-    --checkout-accent-hover: #d8bb86;
-    --checkout-line: rgba(201, 169, 110, 0.32);
-    --checkout-line-focus: rgba(201, 169, 110, 0.85);
-    --checkout-error: #d7a3a3;
+    --checkout-bg: var(--color-bg);
+    --checkout-bg-soft: rgb(var(--color-surface-1-rgb));
+    --checkout-text: var(--color-text);
+    --checkout-text-muted: var(--color-text-muted);
+    --checkout-heading: rgb(var(--color-heading-rgb));
+    --checkout-accent: var(--color-accent);
+    --checkout-accent-hover: var(--color-accent-hover);
+    --checkout-line: var(--color-border);
+    --checkout-line-focus: var(--color-border-strong);
+    --checkout-error: var(--color-danger);
   }
 
   .checkout-input,
@@ -40,7 +40,7 @@
 
   .checkout-input::placeholder,
   .checkout-textarea::placeholder {
-    color: rgba(189, 182, 170, 0.55);
+    color: rgb(var(--color-text-muted-rgb) / 0.55);
   }
 
   .checkout-ghost-btn {
@@ -60,7 +60,7 @@
   }
 
   .checkout-ghost-btn:hover:not(:disabled) {
-    background: rgba(201, 169, 110, 0.08);
+    background: rgb(var(--color-accent-rgb) / 0.08);
     border-color: var(--checkout-accent);
     color: var(--checkout-accent-hover);
   }
@@ -94,7 +94,7 @@
   }
 
   .checkout-address-edit-btn:hover {
-    background: rgba(201, 169, 110, 0.08);
+    background: rgb(var(--color-accent-rgb) / 0.08);
     border-color: var(--checkout-accent);
     color: var(--checkout-accent-hover);
   }
@@ -154,18 +154,18 @@
 {% endblock %}
 
 {% block body %}
-<div class="checkout-root min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+<div class="checkout-root min-h-screen bg-background text-foreground">
   {% include "core/partials/navbar.html" %}
 
   <main class="mx-auto w-full max-w-6xl px-6 py-12 md:py-16 lg:px-10">
     {% if cart_items %}
       <header class="mb-12 text-center md:mb-16">
-        <h1 class="font-serif text-3xl tracking-tight text-[#F5F1E8] md:text-4xl lg:text-[2.75rem]">Оформление заказа</h1>
-        <p class="mt-3 text-[10px] uppercase tracking-[0.28em] text-[#BDB6AA]">Завершите оформление</p>
+        <h1 class="font-serif text-3xl tracking-tight text-heading md:text-4xl lg:text-[2.75rem]">Оформление заказа</h1>
+        <p class="mt-3 text-[10px] uppercase tracking-[0.28em] text-muted">Завершите оформление</p>
       </header>
 
       {% if checkout_error %}
-        <div class="mx-auto mb-8 max-w-2xl border border-[#C9A96E]/40 bg-[#141414] px-4 py-3 text-center text-sm text-[#D7A3A3]" role="alert">
+        <div class="mx-auto mb-8 max-w-2xl border border-edge-strong bg-surface px-4 py-3 text-center text-sm text-danger" role="alert">
           {{ checkout_error }}
         </div>
       {% endif %}
@@ -175,53 +175,53 @@
         <input type="hidden" name="checkout_address_id" id="checkout-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
 
         <aside>
-          <h2 class="border-b border-[rgba(201,169,110,0.32)] pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-[#C9A96E]">Сводка заказа</h2>
+          <h2 class="border-b border-edge pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Сводка заказа</h2>
 
           <ul class="mt-8 space-y-8">
             {% for item in cart_items %}
               <li class="flex gap-4">
-                <div class="h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden border border-[rgba(201,169,110,0.28)] bg-[#141414]">
+                <div class="h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden border border-edge bg-surface">
                   {% with imgs=item.variant.product.images.all %}
                     {% if imgs %}
                       <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy" width="72" height="72">
                     {% else %}
-                      <div class="flex h-full items-center justify-center px-1 text-center text-[9px] uppercase tracking-wider text-[#BDB6AA]">Нет фото</div>
+                      <div class="flex h-full items-center justify-center px-1 text-center text-[9px] uppercase tracking-wider text-muted">Нет фото</div>
                     {% endif %}
                   {% endwith %}
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="text-[9px] uppercase tracking-[0.18em] text-[#C9A96E]">{{ item.variant.product.brand.name }}</p>
-                  <p class="mt-1 font-serif text-base leading-snug text-[#F5F1E8]">{{ item.variant.product.name }}</p>
+                  <p class="text-[9px] uppercase tracking-[0.18em] text-accent">{{ item.variant.product.brand.name }}</p>
+                  <p class="mt-1 font-serif text-base leading-snug text-heading">{{ item.variant.product.name }}</p>
                   {% if item.variant.get_volume_display %}
-                    <p class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-[#BDB6AA]">{{ item.variant.get_volume_display }}</p>
+                    <p class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted">{{ item.variant.get_volume_display }}</p>
                   {% endif %}
-                  <p class="mt-2 text-xs text-[#BDB6AA]">Кол-во: {{ item.quantity }}</p>
-                  <p class="mt-1 text-xs text-[#BDB6AA]">Цена: {{ item.variant.price|floatformat:2 }}&nbsp;₽</p>
+                  <p class="mt-2 text-xs text-muted">Кол-во: {{ item.quantity }}</p>
+                  <p class="mt-1 text-xs text-muted">Цена: {{ item.variant.price|floatformat:2 }}&nbsp;₽</p>
                 </div>
-                <p class="shrink-0 self-start font-serif text-base tabular-nums text-[#F5F1E8]">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
+                <p class="shrink-0 self-start font-serif text-base tabular-nums text-heading">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
               </li>
             {% endfor %}
           </ul>
 
-          <div class="mt-10 space-y-3 border-t border-[rgba(201,169,110,0.22)] pt-6">
-            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-[#BDB6AA]">
+          <div class="mt-10 space-y-3 border-t border-edge pt-6">
+            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-muted">
               <span>Промежуточный итог</span>
-              <span class="tabular-nums text-[#E4DFD5]">{{ total_price|floatformat:2 }}&nbsp;₽</span>
+              <span class="tabular-nums text-foreground">{{ total_price|floatformat:2 }}&nbsp;₽</span>
             </div>
-            <div class="flex items-end justify-between gap-4 border-t border-[rgba(201,169,110,0.22)] pt-4">
-              <span class="text-sm font-medium uppercase tracking-[0.2em] text-[#F5F1E8]">Итого</span>
-              <span class="font-serif text-2xl tabular-nums text-[#F5F1E8] md:text-3xl">{{ total_price|floatformat:2 }}&nbsp;₽</span>
+            <div class="flex items-end justify-between gap-4 border-t border-edge pt-4">
+              <span class="text-sm font-medium uppercase tracking-[0.2em] text-heading">Итого</span>
+              <span class="font-serif text-2xl tabular-nums text-heading md:text-3xl">{{ total_price|floatformat:2 }}&nbsp;₽</span>
             </div>
           </div>
 
-          <a href="{% url 'products:cart' %}" class="mt-10 inline-block text-[10px] uppercase tracking-[0.2em] text-[#BDB6AA] transition-colors hover:text-[#C9A96E]">← В корзину</a>
+          <a href="{% url 'products:cart' %}" class="mt-10 inline-block text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-accent">← В корзину</a>
         </aside>
 
         <section>
-          <h2 class="border-b border-[rgba(201,169,110,0.32)] pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-[#C9A96E]">Доставка и контакты</h2>
+          <h2 class="border-b border-edge pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Доставка и контакты</h2>
 
           <div class="checkout-address-card mt-10">
-            <p id="checkout-address-summary" class="text-sm leading-relaxed text-[#C9A96E]">
+            <p id="checkout-address-summary" class="text-sm leading-relaxed text-accent">
               {% if checkout_address_summary %}
                 {{ checkout_address_summary }}
               {% else %}
@@ -236,44 +236,44 @@
           <div class="mt-10 space-y-8">
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-8">
               <div>
-                <label for="checkout-first-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Имя</label>
+                <label for="checkout-first-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Имя</label>
                 <input id="checkout-first-name" name="first_name" type="text" value="{{ checkout_form.first_name }}" required class="checkout-input" autocomplete="given-name">
               </div>
               <div>
-                <label for="checkout-last-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Фамилия</label>
+                <label for="checkout-last-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Фамилия</label>
                 <input id="checkout-last-name" name="last_name" type="text" value="{{ checkout_form.last_name }}" required class="checkout-input" autocomplete="family-name">
               </div>
             </div>
 
             <div>
-              <label for="checkout-email" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Email</label>
+              <label for="checkout-email" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Email</label>
               <input id="checkout-email" name="email" type="email" value="{{ checkout_form.email }}" required class="checkout-input" autocomplete="email">
             </div>
 
             <div>
-              <label for="checkout-phone" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Телефон</label>
+              <label for="checkout-phone" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Телефон</label>
               <input id="checkout-phone" name="phone" type="tel" value="{{ checkout_form.phone }}" placeholder="+7…" required class="checkout-input" autocomplete="tel">
             </div>
 
             <div>
-              <label for="checkout-note" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Комментарий к заказу</label>
+              <label for="checkout-note" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Комментарий к заказу</label>
               <textarea id="checkout-note" name="order_note" rows="3" placeholder="Пожелания по доставке" class="checkout-textarea resize-y">{{ checkout_form.order_note }}</textarea>
             </div>
           </div>
 
-          <label class="mt-10 flex items-start gap-3 text-xs leading-relaxed text-[#BDB6AA]">
-            <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border border-[#C9A96E]/50 bg-[#0B0B0B] accent-[#C9A96E] focus:ring-0 focus:ring-offset-0">
+          <label class="mt-10 flex items-start gap-3 text-xs leading-relaxed text-muted">
+            <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
             <span>
               Соглашаюсь с
-              <a href="#" class="text-[#C9A96E] underline-offset-2 transition-colors hover:text-[#D8BB86]">правилами</a>
+              <a href="#" class="text-accent underline-offset-2 transition-colors hover:text-accent-hover">правилами</a>
               и
-              <a href="#" class="text-[#C9A96E] underline-offset-2 transition-colors hover:text-[#D8BB86]">политикой конфиденциальности</a>.
+              <a href="#" class="text-accent underline-offset-2 transition-colors hover:text-accent-hover">политикой конфиденциальности</a>.
             </span>
           </label>
 
           <div class="mt-8">
             <button type="submit" id="checkout-submit-btn" class="checkout-ghost-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
-            <p class="mt-3 text-center text-[10px] uppercase tracking-[0.16em] text-[#BDB6AA]">Оплату подключим на следующем шаге</p>
+            <p class="mt-3 text-center text-[10px] uppercase tracking-[0.16em] text-muted">Оплату подключим на следующем шаге</p>
           </div>
         </section>
       </form>
@@ -281,7 +281,7 @@
       <dialog id="checkout-address-modal" aria-labelledby="checkout-address-modal-title">
         <div class="checkout-modal-inner">
           <div class="checkout-modal-head">
-            <h3 id="checkout-address-modal-title" class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#C9A96E]">Адрес доставки</h3>
+            <h3 id="checkout-address-modal-title" class="text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Адрес доставки</h3>
             <button type="button" class="checkout-modal-close" id="checkout-address-modal-close" aria-label="Закрыть">&times;</button>
           </div>
           <p id="checkout-modal-error" role="alert"></p>
@@ -290,42 +290,42 @@
             <input type="hidden" name="address_id" id="modal-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
             <div class="space-y-6">
               <div>
-                <label for="modal-country" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Страна / регион</label>
+                <label for="modal-country" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Страна / регион</label>
                 <input id="modal-country" name="country" type="text" value="{{ address_prefill.country }}" required class="checkout-input" autocomplete="country-name">
               </div>
               <div>
-                <label for="modal-address-line1" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Адрес</label>
+                <label for="modal-address-line1" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Адрес</label>
                 <input id="modal-address-line1" name="address_line1" type="text" value="{{ address_prefill.address_line1 }}" required class="checkout-input" autocomplete="street-address">
               </div>
               <div>
-                <label for="modal-address-line2" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Подъезд, этаж и т.д.</label>
+                <label for="modal-address-line2" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Подъезд, этаж и т.д.</label>
                 <input id="modal-address-line2" name="address_line2" type="text" value="{{ address_prefill.address_line2 }}" class="checkout-input" autocomplete="address-line2" placeholder="Необязательно">
               </div>
               <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-6">
                 <div>
-                  <label for="modal-city" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Город</label>
+                  <label for="modal-city" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Город</label>
                   <input id="modal-city" name="city" type="text" value="{{ address_prefill.city }}" required class="checkout-input" autocomplete="address-level2">
                 </div>
                 <div>
-                  <label for="modal-postal" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Индекс</label>
+                  <label for="modal-postal" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Индекс</label>
                   <input id="modal-postal" name="postal_code" type="text" value="{{ address_prefill.postal_code }}" required class="checkout-input" autocomplete="postal-code">
                 </div>
               </div>
               <div>
-                <label for="modal-region" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Область / район</label>
+                <label for="modal-region" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Область / район</label>
                 <input id="modal-region" name="region" type="text" value="{{ address_prefill.region }}" required class="checkout-input" autocomplete="address-level1">
               </div>
             </div>
             <div class="mt-8 flex flex-col gap-3">
               <button type="submit" class="checkout-ghost-btn">Сохранить адрес</button>
-              <button type="button" class="text-center text-[10px] uppercase tracking-[0.2em] text-[#BDB6AA] transition-colors hover:text-[#C9A96E]" id="checkout-address-modal-cancel">Отмена</button>
+              <button type="button" class="text-center text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-accent" id="checkout-address-modal-cancel">Отмена</button>
             </div>
           </form>
         </div>
       </dialog>
     {% else %}
-      <div class="border border-dashed border-[rgba(201,169,110,0.4)] px-8 py-16 text-center md:py-20">
-        <p class="font-serif text-2xl text-[#F5F1E8] md:text-3xl">Корзина пуста</p>
+      <div class="border border-dashed border-edge-strong px-8 py-16 text-center md:py-20">
+        <p class="font-serif text-2xl text-heading md:text-3xl">Корзина пуста</p>
         <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex">Перейти в каталог</a>
       </div>
     {% endif %}

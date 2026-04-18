@@ -4,15 +4,15 @@
 {% block title %}Вход — nota{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+<div class="min-h-screen bg-background text-foreground">
   {% include "core/partials/navbar.html" %}
 
   <main class="mx-auto w-full max-w-md px-6 py-16 lg:px-12">
-    <h1 class="font-serif text-4xl text-[#F5F1E8]">Вход</h1>
-    <p class="mt-3 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]">Войдите в аккаунт</p>
+    <h1 class="font-serif text-4xl text-heading">Вход</h1>
+    <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">Войдите в аккаунт</p>
 
     {% if form.non_field_errors %}
-      <div class="mt-6 border border-[#C9A96E]/50 bg-[#141414] px-4 py-3 text-sm text-[#D7A3A3]" role="alert">
+      <div class="mt-6 border border-edge-strong bg-surface px-4 py-3 text-sm text-danger" role="alert">
         {{ form.non_field_errors }}
       </div>
     {% endif %}
@@ -24,7 +24,7 @@
       {% endif %}
 
       <div>
-        <label for="id_username" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Логин</label>
+        <label for="id_username" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Логин</label>
         <input
           type="text"
           name="username"
@@ -32,34 +32,34 @@
           value="{{ form.username.value|default:'' }}"
           required
           autocomplete="username"
-          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         >
         {% if form.username.errors %}
-          <p class="mt-2 text-xs text-[#D7A3A3]">{{ form.username.errors.0 }}</p>
+          <p class="mt-2 text-xs text-danger">{{ form.username.errors.0 }}</p>
         {% endif %}
       </div>
 
       <div>
-        <label for="id_password" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Пароль</label>
+        <label for="id_password" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Пароль</label>
         <input
           type="password"
           name="password"
           id="id_password"
           required
           autocomplete="current-password"
-          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         >
         {% if form.password.errors %}
-          <p class="mt-2 text-xs text-[#D7A3A3]">{{ form.password.errors.0 }}</p>
+          <p class="mt-2 text-xs text-danger">{{ form.password.errors.0 }}</p>
         {% endif %}
       </div>
 
       <button type="submit" class="btn-luxury w-full">Войти</button>
     </form>
 
-    <p class="mt-6 text-sm text-[#BDB6AA]">
+    <p class="mt-6 text-sm text-muted">
       Нет аккаунта?
-      <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="text-[#C9A96E] hover:text-[#D8BB86] transition-colors">Зарегистрироваться</a>
+      <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="text-accent hover:text-accent-hover transition-colors">Зарегистрироваться</a>
     </p>
   </main>
 </div>

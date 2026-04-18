@@ -1,21 +1,21 @@
 <aside
   id="catalog-sidebar-filters"
-  class="catalog-mobile-filters-aside order-3 w-full shrink-0 max-lg:pointer-events-none max-lg:fixed max-lg:inset-0 max-lg:z-[150] max-lg:flex max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:flex-col max-lg:translate-y-full max-lg:overflow-hidden max-lg:bg-[#0B0B0B] max-lg:pt-[env(safe-area-inset-top,0px)] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out max-lg:[&.is-open]:translate-y-0 max-lg:[&.is-open]:pointer-events-auto lg:order-none lg:static lg:h-auto lg:max-h-none lg:translate-y-0 lg:pt-0 lg:pointer-events-auto lg:overflow-visible lg:shadow-none"
+  class="catalog-mobile-filters-aside order-3 w-full shrink-0 max-lg:pointer-events-none max-lg:fixed max-lg:inset-0 max-lg:z-[150] max-lg:flex max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:flex-col max-lg:translate-y-full max-lg:overflow-hidden max-lg:bg-background max-lg:pt-[env(safe-area-inset-top,0px)] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out max-lg:[&.is-open]:translate-y-0 max-lg:[&.is-open]:pointer-events-auto lg:order-none lg:static lg:h-auto lg:max-h-none lg:translate-y-0 lg:pt-0 lg:pointer-events-auto lg:overflow-visible lg:shadow-none"
 >
   <div
-    class="min-h-0 flex-1 space-y-8 overflow-y-auto border border-[#C9A96E]/35 bg-[#0B0B0B] p-6 max-lg:rounded-none max-lg:border-0 lg:sticky lg:top-6"
+    class="min-h-0 flex-1 space-y-8 overflow-y-auto border border-edge bg-background p-6 max-lg:rounded-none max-lg:border-0 lg:sticky lg:top-6"
     style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));"
   >
     <div class="flex items-center justify-between gap-2 lg:justify-between">
-      <h2 class="font-serif text-2xl text-[#F5F1E8]">фильтры</h2>
+      <h2 class="font-serif text-2xl text-heading">фильтры</h2>
       <div class="flex items-center gap-3">
         <a
           href="{% url 'products:catalog' %}"
-          class="nav-link text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]"
+          class="nav-link text-[10px] uppercase tracking-[0.2em] text-accent"
         >Очистить</a>
         <button
           type="button"
-          class="text-[10px] uppercase tracking-[0.2em] text-[#C9A96E] lg:hidden"
+          class="text-[10px] uppercase tracking-[0.2em] text-accent lg:hidden"
           data-catalog-mobile-filters-close
         >
           Готово
@@ -24,36 +24,36 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2 lg:hidden">
-      <label for="id_sort_mobile" class="shrink-0 whitespace-nowrap text-[10px] uppercase text-[#C9A96E]">Сортировка</label>
+      <label for="id_sort_mobile" class="shrink-0 whitespace-nowrap text-[10px] uppercase text-accent">Сортировка</label>
       {% include "products/partials/catalog_sort_select.html" with sort_select_id="id_sort_mobile" sort_select_extra_class="catalog-sort-bar-mobile-sort" %}
     </div>
 
-    <div class="max-lg:border-t max-lg:border-[#C9A96E]/20 max-lg:pt-6">
-      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Категории</span>
+    <div class="max-lg:border-t max-lg:border-edge max-lg:pt-6">
+      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">Категории</span>
       <div class="space-y-2">
         {% for c in categories %}
-          <label class="flex cursor-pointer items-center gap-2 text-sm text-[#E4DFD5]">
+          <label class="flex cursor-pointer items-center gap-2 text-sm text-foreground">
             <input
               type="checkbox"
               name="category"
               value="{{ c.slug }}"
-              class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:outline-none focus:ring-0 focus:ring-offset-0"
+              class="h-4 w-4 border border-edge-strong bg-transparent text-accent accent-accent focus:outline-none focus:ring-0 focus:ring-offset-0"
               {% if c.slug in selected_categories %}checked{% endif %}
             >
             <span>{{ c.name }}</span>
           </label>
         {% empty %}
-          <p class="text-sm text-[#BDB6AA]">—</p>
+          <p class="text-sm text-muted">—</p>
         {% endfor %}
       </div>
     </div>
 
-    <div class="border-t border-[#C9A96E]/20 pt-6">
+    <div class="border-t border-edge pt-6">
       <div class="mb-4">
-        <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Диапазон цены</span>
+        <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">Диапазон цены</span>
         <div class="relative px-1 pb-3">
-          <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-1 -translate-y-1/2 rounded bg-[#2A251D]"></div>
-          <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-1 -translate-y-1/2 rounded bg-[#C9A96E]"></div>
+          <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-1 -translate-y-1/2 rounded bg-track"></div>
+          <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-1 -translate-y-1/2 rounded bg-accent"></div>
           <input
             type="range"
             id="id_min_price_range"
@@ -76,7 +76,7 @@
       </div>
       <div class="grid grid-cols-2 gap-3">
       <div>
-        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Цена мин</label>
+        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Цена мин</label>
         <input
           type="number"
           name="min_price"
@@ -85,11 +85,11 @@
           min="0"
           step="0.01"
           placeholder="0"
-          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         >
       </div>
       <div>
-        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E]">Цена макс</label>
+        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Цена макс</label>
         <input
           type="number"
           name="max_price"
@@ -98,14 +98,14 @@
           min="0"
           step="0.01"
           placeholder="∞"
-          class="w-full border border-[#C9A96E]/45 bg-[#0B0B0B] px-3 py-2 text-sm text-[#E4DFD5] focus:border-[#C9A96E] focus:outline-none"
+          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         >
       </div>
       </div>
     </div>
 
-    <div class="border-t border-[#C9A96E]/20 pt-6 lg:hidden">
-      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">По параметрам</span>
+    <div class="border-t border-edge pt-6 lg:hidden">
+      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">По параметрам</span>
       {% include "products/partials/catalog_filter_modal_triggers.html" %}
     </div>
   </div>

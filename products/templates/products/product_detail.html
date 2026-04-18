@@ -4,15 +4,15 @@
 {% block title %}{{ product.name }} — nota{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0B0B0B] text-[#E4DFD5]">
+<div class="min-h-screen bg-background text-foreground">
   {% include "core/partials/navbar.html" %}
 
   <main class="mx-auto w-full max-w-7xl px-6 py-14 lg:px-12">
-    <nav class="mb-8 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]" aria-label="Навигация по каталогу">
-      <a href="{% url 'products:catalog' %}" class="nav-link">Catalog</a>
-      <span class="mx-2 text-[#6f685a]" aria-hidden="true">/</span>
+    <nav class="mb-8 text-xs uppercase tracking-[0.16em] text-muted" aria-label="Навигация по каталогу">
+      <a href="{% url 'products:catalog' %}" class="nav-link">Каталог</a>
+      <span class="mx-2 text-dim" aria-hidden="true">/</span>
       <a href="{% url 'products:catalog' %}?category={{ product.category.slug }}" class="nav-link">{{ product.category.name }}</a>
-      <span class="mx-2 text-[#6f685a]" aria-hidden="true">/</span>
+      <span class="mx-2 text-dim" aria-hidden="true">/</span>
       <a href="{% url 'products:catalog' %}?category={{ product.category.slug }}&amp;brand={{ product.brand.slug }}" class="nav-link">{{ product.brand.name }}</a>
     </nav>
 
@@ -23,7 +23,7 @@
           {% if imgs %}
             <button
               type="button"
-              class="group mb-5 mx-auto block w-fit max-w-full overflow-hidden border border-[#C9A96E]/35 p-0 text-left align-top cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0B0B]"
+              class="group mb-5 mx-auto block w-fit max-w-full overflow-hidden border border-edge p-0 text-left align-top cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               data-gallery-lightbox-trigger
               aria-label="Открыть фото в полном размере"
             >
@@ -40,7 +40,7 @@
                 {% for img in imgs|slice:":5" %}
                   <button
                     type="button"
-                    class="gallery-thumb aspect-square h-14 w-14 max-h-14 max-w-14 shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:h-16 sm:w-16 sm:max-h-16 sm:max-w-16 {% if forloop.first %}is-active{% endif %}"
+                    class="gallery-thumb aspect-square h-14 w-14 max-h-14 max-w-14 shrink-0 overflow-hidden border border-edge sm:h-16 sm:w-16 sm:max-h-16 sm:max-w-16 {% if forloop.first %}is-active{% endif %}"
                     data-gallery-thumb
                     data-image-url="{{ img.image.url }}"
                     data-image-alt="{{ product.name }} {{ forloop.counter }}"
@@ -103,68 +103,68 @@
               </div>
             </div>
           {% else %}
-            <div class="mx-auto flex min-h-[min(29rem,53vh)] w-full max-w-[min(100%,34rem)] items-center justify-center border border-[#C9A96E]/35 py-16">
-              <div class="text-sm text-[#BDB6AA]">Нет изображения</div>
+            <div class="mx-auto flex min-h-[min(29rem,53vh)] w-full max-w-[min(100%,34rem)] items-center justify-center border border-edge py-16">
+              <div class="text-sm text-muted">Нет изображения</div>
             </div>
           {% endif %}
           {% endwith %}
         </div>
 
-        <p class="mt-7 w-full border-t border-[#C9A96E]/20 pt-7 text-sm leading-7 text-[#BDB6AA]">
-          {{ product.description|default:"Refined niche composition with premium raw materials and long-lasting projection." }}
+        <p class="mt-7 w-full border-t border-edge pt-7 text-sm leading-7 text-muted">
+          {{ product.description|default:"Нишевая композиция из отборных материалов с благородным шлейфом и устойчивой стойкостью." }}
         </p>
       </div>
 
-      <div class="min-w-0 border border-[#C9A96E]/35 p-8 lg:p-10">
-        <p class="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">{{ product.brand.name }}</p>
-        <h1 class="font-serif text-4xl leading-tight text-[#F5F1E8] md:text-5xl">{{ product.name }}</h1>
-        <p class="mt-3 text-xs uppercase tracking-[0.16em] text-[#BDB6AA]">
+      <div class="min-w-0 border border-edge p-8 lg:p-10">
+        <p class="mb-3 text-[10px] uppercase tracking-[0.22em] text-accent">{{ product.brand.name }}</p>
+        <h1 class="font-serif text-4xl leading-tight text-heading md:text-5xl">{{ product.name }}</h1>
+        <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">
           {% if product.year %}{{ product.year }}{% else %}—{% endif %} / {% if product.country %}{{ product.country }}{% else %}—{% endif %}
         </p>
 
         {% if in_stock_variants %}
-          <p id="detail-product-price" class="mt-6 font-serif text-3xl text-[#F5F1E8]">
+          <p id="detail-product-price" class="mt-6 font-serif text-3xl text-heading">
             {{ in_stock_variants.0.price|floatformat:2 }} ₽
           </p>
-          <div id="product-volume-picker" class="mt-6 space-y-3 border-t border-[#C9A96E]/20 pt-6">
-            <p class="text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Объём</p>
+          <div id="product-volume-picker" class="mt-6 space-y-3 border-t border-edge pt-6">
+            <p class="text-[10px] uppercase tracking-[0.22em] text-accent">Объём</p>
             {% for v in in_stock_variants %}
-              <label class="flex cursor-pointer items-center justify-between gap-4 border border-[#C9A96E]/35 px-4 py-3 has-[:checked]:border-[#C9A96E]">
-                <span class="flex items-center gap-3 text-sm text-[#E4DFD5]">
+              <label class="flex cursor-pointer items-center justify-between gap-4 border border-edge px-4 py-3 has-[:checked]:border-accent">
+                <span class="flex items-center gap-3 text-sm text-foreground">
                   <input
                     type="radio"
                     name="variant_id"
                     value="{{ v.id }}"
                     data-price-display="{{ v.price|floatformat:2 }} ₽"
-                    class="h-4 w-4 border border-[#C9A96E]/50 bg-transparent text-[#C9A96E] accent-[#C9A96E] focus:ring-0"
+                    class="h-4 w-4 border border-edge-strong bg-transparent text-accent accent-accent focus:ring-0"
                     {% if forloop.first %}checked{% endif %}
                   >
                   <span>{{ v.get_volume_display }}</span>
                 </span>
-                <span class="font-serif text-lg text-[#F5F1E8]">{{ v.price|floatformat:2 }} ₽</span>
+                <span class="font-serif text-lg text-heading">{{ v.price|floatformat:2 }} ₽</span>
               </label>
             {% endfor %}
           </div>
         {% else %}
-          <p class="mt-6 font-serif text-3xl text-[#BDB6AA]">Нет в наличии</p>
+          <p class="mt-6 font-serif text-3xl text-muted">Нет в наличии</p>
         {% endif %}
 
-        <div class="mt-8 space-y-6 border-t border-[#C9A96E]/20 pt-8">
+        <div class="mt-8 space-y-6 border-t border-edge pt-8">
           <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Верхние ноты</h2>
-            <p class="text-sm text-[#D8D1C5]">
+            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Верхние ноты</h2>
+            <p class="text-sm text-note">
               {% for note in top_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
             </p>
           </div>
           <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Средние ноты</h2>
-            <p class="text-sm text-[#D8D1C5]">
+            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Средние ноты</h2>
+            <p class="text-sm text-note">
               {% for note in middle_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
             </p>
           </div>
           <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-[#C9A96E]">Базовые ноты</h2>
-            <p class="text-sm text-[#D8D1C5]">
+            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Базовые ноты</h2>
+            <p class="text-sm text-note">
               {% for note in base_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
             </p>
           </div>
@@ -189,11 +189,11 @@
     </section>
 
     <section class="mt-20">
-      <h2 class="mb-8 w-full font-serif text-3xl text-[#F5F1E8]">Похожие товары</h2>
+      <h2 class="mb-8 w-full font-serif text-3xl text-heading">Похожие ароматы</h2>
       <div class="grid grid-cols-2 gap-3 sm:gap-6 md:gap-7 xl:grid-cols-4">
         {% for item in related_products %}
-          <article class="group flex h-full flex-col border border-[#C9A96E]/35 p-3 sm:p-4">
-            <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-[#C9A96E]/30 sm:mb-6">
+          <article class="group flex h-full flex-col border border-edge p-3 sm:p-4">
+            <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-edge sm:mb-6">
               <a
                 href="{% url 'products:product_detail' item.slug %}"
                 class="absolute inset-0 z-0 block"
@@ -204,19 +204,19 @@
                 {% if rel_imgs %}
                   <img src="{{ rel_imgs.0.image.url }}" alt="{{ item.name }}" class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" loading="lazy">
                 {% else %}
-                  <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-[#BDB6AA] pointer-events-none">Нет изображения</div>
+                  <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-muted pointer-events-none">Нет изображения</div>
                 {% endif %}
               {% endwith %}
               {% include "products/partials/favorite_btn_catalog.html" with product=item %}
             </div>
             <a
               href="{% url 'products:product_detail' item.slug %}"
-              class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E]/50"
+              class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong"
             >
-              <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-[#C9A96E] sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ item.brand.name }}</p>
-              <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-[#F3EFE7] sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ item.name }}</h3>
+              <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-accent sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ item.brand.name }}</p>
+              <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-cream sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ item.name }}</h3>
               <div class="mt-auto pt-3 sm:pt-6">
-                <span class="font-serif text-sm text-[#F3EFE7] sm:text-lg lg:text-xl">
+                <span class="font-serif text-sm text-cream sm:text-lg lg:text-xl">
                   {% if item.min_price != None %}
                     от {{ item.min_price|floatformat:2 }} ₽
                   {% else %}
@@ -227,7 +227,7 @@
             </a>
           </article>
         {% empty %}
-          <p class="col-span-full text-sm text-[#BDB6AA]">No related products yet.</p>
+          <p class="col-span-full text-sm text-muted">Похожих ароматов пока нет.</p>
         {% endfor %}
       </div>
     </section>

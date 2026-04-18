@@ -1,10 +1,10 @@
-<header class="site-header relative z-50 bg-[#0B0B0B] max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:top-0 max-lg:z-[100] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out overflow-visible border-b border-[#C9A96E]/40">
+<header class="site-header relative z-50 bg-background max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:top-0 max-lg:z-[100] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out overflow-visible border-b border-edge-strong">
     <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3 overflow-visible px-6 py-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-0 lg:px-12">
-        <a href="{% url 'home' %}" class="order-1 shrink-0 font-serif text-3xl uppercase tracking-[0.22em] text-[#C9A96E] nav-link">nota</a>
+        <a href="{% url 'home' %}" class="order-1 shrink-0 font-serif text-3xl uppercase tracking-[0.22em] text-accent nav-link">nota</a>
         <div class="order-2 ml-auto flex shrink-0 items-center gap-2 lg:hidden">
             <button
                 type="button"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E] transition-colors hover:border-[#E4DFD5] hover:text-[#E4DFD5]"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-accent text-accent transition-colors hover:border-foreground hover:text-foreground"
                 data-nav-search-mobile-trigger
                 aria-label="Открыть поиск"
                 aria-expanded="false"
@@ -14,14 +14,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
             </button>
-            <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#C9A96E] text-[#C9A96E]" aria-label="Открыть меню" aria-expanded="false">
+            <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 items-center justify-center border border-accent text-accent" aria-label="Открыть меню" aria-expanded="false">
                 <span class="sr-only">Открыть меню</span>
                 <span class="block h-px w-5 bg-current"></span>
             </button>
         </div>
 
         <div
-            class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9]"
+            class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-nav"
         >
             <a href="{% url 'home' %}#featured" class="nav-link shrink-0 pb-1">Рекомендуемое</a>
             <a href="{% url 'home' %}#categories" class="nav-link shrink-0 pb-1">Категории</a>
@@ -32,14 +32,14 @@
         </div>
 
         <div
-            class="nav-search relative order-3 min-w-0 w-full basis-full max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:z-[95] max-lg:hidden max-lg:border-b max-lg:border-[#C9A96E]/40 max-lg:bg-[#0B0B0B] max-lg:px-4 max-lg:py-3 max-lg:shadow-[0_8px_24px_rgba(0,0,0,0.35)] max-lg:[&.nav-search--drawer-open]:block lg:order-3 lg:block lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto lg:border-b-0 lg:px-0 lg:py-0 lg:shadow-none"
+            class="nav-search relative order-3 min-w-0 w-full basis-full max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:z-[95] max-lg:hidden max-lg:border-b max-lg:border-edge-strong max-lg:bg-background max-lg:px-4 max-lg:py-3 max-lg:shadow-[0_8px_24px_rgba(0,0,0,0.35)] max-lg:[&.nav-search--drawer-open]:block lg:order-3 lg:block lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto lg:border-b-0 lg:px-0 lg:py-0 lg:shadow-none"
             data-nav-search
             data-search-url="{% url 'products:search_suggest' %}"
             data-product-detail-template="{% url 'products:product_detail' slug='__slug__' %}"
         >
             <label class="sr-only" for="nav-search-input">Поиск по каталогу</label>
             <div class="relative">
-                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#C9A96E]/70" aria-hidden="true">
+                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-accent/70" aria-hidden="true">
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
@@ -48,7 +48,7 @@
                     id="nav-search-input"
                     type="search"
                     name="nav_q"
-                    class="nav-search__input w-full border border-[#C9A96E]/35 bg-[#0B0B0B] py-2.5 pl-10 pr-3 text-sm text-[#F5F1E8] placeholder:text-[#8A8278] focus:border-[#C9A96E] focus:outline-none focus:ring-1 focus:ring-[#C9A96E]/50"
+                    class="nav-search__input w-full border border-edge bg-background py-2.5 pl-10 pr-3 text-sm text-heading placeholder:text-placeholder focus:border-accent focus:outline-none focus:ring-1 focus:ring-edge-strong"
                     aria-autocomplete="list"
                     aria-controls="nav-search-results"
                     aria-expanded="false"
@@ -67,11 +67,11 @@
             ></div>
         </div>
 
-        <div class="order-4 hidden shrink-0 items-center gap-x-1 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9] lg:order-4 lg:flex">
+        <div class="order-4 hidden shrink-0 items-center gap-x-1 text-[11px] uppercase tracking-[0.22em] text-nav lg:order-4 lg:flex">
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"
-              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
               aria-label="Аккаунт, {{ user.get_username }}"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -81,7 +81,7 @@
             {% else %}
             <a
               href="{% url 'login' %}?next={{ request.path|urlencode }}"
-              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
               aria-label="Войти"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -91,7 +91,7 @@
             {% endif %}
             <a
               href="{% url 'products:cart' %}"
-              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-[#C9A96E] transition-colors hover:text-[#E4DFD5]"
+              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-accent transition-colors hover:text-foreground"
               aria-label="Корзина{% if cart_item_count %}, {{ cart_item_count }} шт.{% endif %}"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -101,7 +101,7 @@
             </a>
         </div>
 
-        <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[11px] uppercase tracking-[0.22em] text-[#D7D2C9] lg:hidden">
+        <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[11px] uppercase tracking-[0.22em] text-nav lg:hidden">
             <a href="{% url 'home' %}#featured" class="nav-link pb-1">Рекомендуемое</a>
             <a href="{% url 'home' %}#categories" class="nav-link pb-1">Категории</a>
             <a href="{% url 'home' %}#brands" class="nav-link pb-1">Бренды</a>
@@ -109,7 +109,7 @@
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"
-              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
               aria-label="Аккаунт, {{ user.get_username }}"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -119,7 +119,7 @@
             {% else %}
             <a
               href="{% url 'login' %}?next={{ request.path|urlencode }}"
-              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-white transition-colors hover:text-[#E4DFD5]"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
               aria-label="Войти"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -129,7 +129,7 @@
             {% endif %}
             <a
               href="{% url 'products:cart' %}"
-              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-[#C9A96E] transition-colors hover:text-[#E4DFD5]"
+              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-accent transition-colors hover:text-foreground"
               aria-label="Корзина{% if cart_item_count %}, {{ cart_item_count }} шт.{% endif %}"
             >
               <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -173,6 +173,6 @@
 </header>
 <div
     id="site-header-mobile-spacer"
-    class="site-header-mobile-spacer hidden max-lg:block max-lg:w-full max-lg:bg-[#0B0B0B]"
+    class="site-header-mobile-spacer hidden max-lg:block max-lg:w-full max-lg:bg-background"
     aria-hidden="true"
 ></div>

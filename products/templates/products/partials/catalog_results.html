@@ -5,9 +5,9 @@
   {% for product in product_list %}
     {% include "products/partials/catalog_product_card.html" with product=product %}
   {% empty %}
-    <div class="col-span-full border border-dashed border-[#C9A96E]/45 p-12 text-center">
-      <p class="font-serif text-2xl text-[#F5F1E8]">Ничего не найдено</p>
-      <p class="mt-2 text-sm text-[#BDB6AA]">Попробуйте изменить фильтры или сбросить их.</p>
+    <div class="col-span-full border border-dashed border-edge-strong p-12 text-center">
+      <p class="font-serif text-2xl text-heading">Ничего не найдено</p>
+      <p class="mt-2 text-sm text-muted">Попробуйте изменить фильтры или сбросить их.</p>
     </div>
   {% endfor %}
 </div>
