@@ -1,7 +1,9 @@
 import re
+from datetime import timedelta
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from django.utils.text import slugify
 
 User = get_user_model()
@@ -97,6 +99,11 @@ class Product(models.Model):
             if variant.stock > 0:
                 return variant
         return None
+
+    @property
+    def is_new(self) -> bool:
+        """Новинка: первые 60 дней после появления в каталоге."""
+        return self.created_at >= timezone.now() - timedelta(days=60)
 
 
 class ProductImage(models.Model):

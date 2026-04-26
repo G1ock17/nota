@@ -3,143 +3,249 @@
 
 {% block title %}Аккаунт — nota{% endblock %}
 
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block body %}
-<div class="min-h-screen bg-background text-foreground">
+<div class="min-h-screen account-cabinet-root section-deep text-foreground">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
-      <aside class="border border-edge bg-void p-6">
-        <p class="mb-5 border-b border-edge pb-4 text-[10px] uppercase tracking-[0.24em] text-muted">Меню кабинета</p>
-        <nav class="space-y-1">
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="profile-tab">профиль</button>
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="orders-tab">мои заказы</button>
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="favorites-tab">избранное</button>
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="gift-tab">подарочные карты</button>
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="notify-tab">настройки уведомлений</button>
-          <button type="button" class="lk-tab-btn w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas" data-tab="addresses-tab">мои адреса</button>
-          <button type="submit" form="logout-form" class="w-full border border-transparent border-l-2 px-3 py-2 text-left font-serif text-2xl leading-tight text-heading transition-all duration-200 hover:border-edge hover:bg-canvas hover:text-accent">выйти</button>
-        </nav>
-      </aside>
+  <div class="account-cabinet-layout">
+    <aside class="account-cabinet-sidebar">
+      <div class="account-cabinet-sidebar-user">
+        <div class="account-cabinet-avatar" aria-hidden="true">
+          {% if user.first_name or user.last_name %}
+            {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+          {% else %}
+            {{ user.get_username|slice:":2"|upper }}
+          {% endif %}
+        </div>
+        <div class="account-cabinet-sidebar-name">{{ user.get_full_name|default:user.get_username }}</div>
+        <div class="account-cabinet-sidebar-since">Клиент с {{ user.date_joined|date:"Y" }}</div>
+      </div>
 
-      <section>
-        <div id="profile-tab" class="lk-tab-pane">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <h1 class="font-serif text-4xl text-heading md:text-5xl">{{ user.first_name|default:user.get_username }} {{ user.last_name|default:'' }}</h1>
-            <button type="button" class="inline-flex items-center justify-center border border-edge-strong px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent/10" data-tab="profile-data-tab">Изменить профиль</button>
+      <div class="account-cabinet-nav-label">Личное</div>
+      <button type="button" class="lk-tab-btn" data-tab="profile-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"/><path d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>
+        Профиль
+      </button>
+      <button type="button" class="lk-tab-btn" data-tab="orders-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="11" height="11" rx="1"/><path d="M5.5 3V2a1 1 0 011 0v1M9.5 3V2a1 1 0 011 0v1"/><path d="M4.5 8h7M4.5 11h4.5"/></svg>
+        Мои заказы
+      </button>
+      <button type="button" class="lk-tab-btn" data-tab="favorites-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 13.5C8 13.5 2 9.2 2 5.5a3.5 3.5 0 016-2.4A3.5 3.5 0 0114 5.5c0 3.7-6 8-6 8z"/></svg>
+        Избранное
+      </button>
+      <button type="button" class="lk-tab-btn" data-tab="gift-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="1.5" y="7" width="13" height="8" rx="1"/><path d="M1.5 7h13M8 7v8M5.5 4A2.5 2.5 0 018 7M10.5 4A2.5 2.5 0 008 7"/></svg>
+        Подарочные карты
+      </button>
+
+      <div class="account-cabinet-nav-label">Настройки</div>
+      <button type="button" class="lk-tab-btn" data-tab="notify-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 2a5 5 0 00-5 5v3l-1.5 2h13L13 10V7a5 5 0 00-5-5zM6.5 13a1.5 1.5 0 003 0"/></svg>
+        Уведомления
+      </button>
+      <button type="button" class="lk-tab-btn" data-tab="addresses-tab">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 1.5A4.5 4.5 0 003.5 6c0 4 4.5 8.5 4.5 8.5S12.5 10 12.5 6A4.5 4.5 0 008 1.5z"/><circle cx="8" cy="6" r="1.5"/></svg>
+        Мои адреса
+      </button>
+
+      <div class="account-cabinet-sidebar-bottom">
+        <button type="submit" form="logout-form" class="account-cabinet-logout">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 8H3M6 5l-3 3 3 3"/><path d="M8 3h4a1 1 0 011 1v8a1 1 0 01-1 1H8"/></svg>
+          Выйти
+        </button>
+      </div>
+    </aside>
+
+    <div class="account-cabinet-main">
+      <div id="profile-tab" class="lk-tab-pane">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Профиль</h1>
+            <p class="account-cabinet-page-sub">Личные данные</p>
+          </div>
+          <button type="button" class="account-cabinet-btn" data-tab="profile-data-tab">Редактировать</button>
+        </header>
+        <div class="account-cabinet-page-body">
+          <div class="account-cabinet-profile-grid">
+            <div>
+              <div class="account-cabinet-card" style="margin-bottom:20px;">
+                <div class="account-cabinet-card-title">Личные данные</div>
+                <div class="account-cabinet-field">
+                  <div class="account-cabinet-field-label">Имя и фамилия</div>
+                  <div class="account-cabinet-field-value">{{ user.get_full_name|default:"—" }}</div>
+                </div>
+                <div class="account-cabinet-field">
+                  <div class="account-cabinet-field-label">Email</div>
+                  <div class="account-cabinet-field-value">{{ user.email|default:"—" }}</div>
+                </div>
+                <div class="account-cabinet-field">
+                  <div class="account-cabinet-field-label">Телефон</div>
+                  <div class="account-cabinet-field-value">{{ profile.phone|default:"—" }}</div>
+                </div>
+                <div class="account-cabinet-field">
+                  <div class="account-cabinet-field-label">Дата рождения</div>
+                  <div class="account-cabinet-field-value">{% if profile.birth_date %}{{ profile.birth_date|date:"d.m.Y" }}{% else %}—{% endif %}</div>
+                </div>
+              </div>
+              <div class="account-cabinet-card">
+                <div class="account-cabinet-card-title">Безопасность</div>
+                <div class="account-cabinet-field" style="margin-bottom:16px;">
+                  <div class="account-cabinet-field-label">Пароль</div>
+                  <div class="account-cabinet-field-value">••••••••</div>
+                </div>
+                <a href="{% url 'password_change' %}" class="account-cabinet-btn" style="font-size:9px;letter-spacing:0.18em;text-decoration:none;display:inline-flex;">Изменить пароль</a>
+              </div>
+            </div>
+            <div>
+              <div class="account-cabinet-card">
+                <div class="account-cabinet-card-title">Сводка</div>
+                <div class="account-cabinet-stat-grid">
+                  <div class="account-cabinet-stat-box">
+                    <div class="account-cabinet-stat-num">{{ total_orders }}</div>
+                    <div class="account-cabinet-stat-label">Заказов</div>
+                  </div>
+                  <div class="account-cabinet-stat-box">
+                    <div class="account-cabinet-stat-num">{{ favorite_entries|length }}</div>
+                    <div class="account-cabinet-stat-label">Избранных</div>
+                  </div>
+                  <div class="account-cabinet-stat-box">
+                    <div class="account-cabinet-stat-num account-cabinet-stat-num--gold">{{ total_spent|floatformat:0 }}</div>
+                    <div class="account-cabinet-stat-label">Сумма покупок ₽</div>
+                  </div>
+                  <div class="account-cabinet-stat-box">
+                    <div class="account-cabinet-stat-num">{{ cart_count }}</div>
+                    <div class="account-cabinet-stat-label">В корзине</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <article class="border border-edge p-5">
-              <p class="text-[10px] uppercase tracking-[0.2em] text-accent">Всего заказов</p>
-              <p class="mt-3 font-serif text-3xl text-heading">{{ total_orders }}</p>
-            </article>
-            <article class="border border-edge p-5">
-              <p class="text-[10px] uppercase tracking-[0.2em] text-accent">На сумму</p>
-              <p class="mt-3 font-serif text-3xl text-heading">{{ total_spent|floatformat:2 }} ₽</p>
-            </article>
-            <article class="border border-edge p-5">
-              <p class="text-[10px] uppercase tracking-[0.2em] text-accent">В корзине</p>
-              <p class="mt-3 font-serif text-3xl text-heading">{{ cart_count }}</p>
-            </article>
-          </div>
-
-          <div class="mt-10">
-            <h2 class="font-serif text-3xl text-heading">Последние заказы</h2>
+          <div style="margin-top:2rem;">
+            <div class="account-cabinet-card-title" style="margin-bottom:14px;">Последние заказы</div>
             {% if recent_orders %}
-              <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div class="account-cabinet-recent">
                 {% for order in recent_orders %}
-                  <a href="{% url 'order_detail' order.id %}" class="border border-edge p-4 transition-colors hover:border-accent">
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-accent">Заказ #{{ order.id }}</p>
-                    <p class="mt-2 text-sm text-muted">{{ order.created_at|date:"d.m.Y" }}</p>
-                    <p class="mt-3 font-serif text-2xl text-heading">{{ order.total_price|floatformat:2 }} ₽</p>
-                    <p class="mt-2 text-[10px] uppercase tracking-[0.2em] text-accent">{{ order.get_status_display }}</p>
+                  <a href="{% url 'order_detail' order.id %}">
+                    <div class="account-cabinet-recent-card">
+                      <p style="font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#8a6a3a;">Заказ #{{ order.id }}</p>
+                      <p style="margin-top:6px;font-size:12px;color:rgba(51,5,7,0.5);">{{ order.created_at|date:"d.m.Y" }}</p>
+                      <p style="margin-top:10px;font-family:'Cormorant Garamond','Constantine',serif;font-size:1.35rem;color:#330507;">{{ order.total_price|floatformat:0 }} ₽</p>
+                      <p style="margin-top:8px;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(51,5,7,0.45);">{{ order.get_status_display }}</p>
+                    </div>
                   </a>
                 {% endfor %}
               </div>
             {% else %}
-              <div class="mt-5 border border-dashed border-edge-strong p-8 text-center">
-                <p class="text-sm text-muted">Пока нет оформленных заказов.</p>
+              <div class="account-cabinet-empty">
+                <p style="font-size:14px;">Пока нет оформленных заказов.</p>
               </div>
             {% endif %}
           </div>
         </div>
+      </div>
 
-        <div id="orders-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-heading">Мои заказы</h2>
+      <div id="orders-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Мои заказы</h1>
+            <p class="account-cabinet-page-sub">История покупок</p>
+          </div>
+        </header>
+        <div class="account-cabinet-page-body">
           {% if orders %}
-            <div class="mt-6 space-y-5">
-              {% for order in orders %}
-                <article class="border border-edge p-6">
-                  <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <p class="text-[10px] uppercase tracking-[0.2em] text-accent">Заказ #{{ order.id }}</p>
-                      <p class="mt-2 text-sm text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="font-serif text-2xl text-heading">{{ order.total_price|floatformat:2 }} ₽</p>
-                      <p class="mt-2 text-[10px] uppercase tracking-[0.2em] text-accent">{{ order.get_status_display }}</p>
-                    </div>
-                  </div>
-                  <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-edge pt-5">
-                    <p class="text-sm text-muted">Товаров: {{ order.items_qty|default:0 }}</p>
-                    <a href="{% url 'order_detail' order.id %}" class="text-xs uppercase tracking-[0.16em] text-accent hover:text-accent-hover">Открыть детали заказа</a>
-                  </div>
-                </article>
-              {% endfor %}
+            <div class="account-cabinet-orders-wrap">
+              <table class="account-cabinet-orders-table">
+                <thead>
+                  <tr>
+                    <th style="width:90px;">Номер</th>
+                    <th>Товар</th>
+                    <th style="width:130px;">Дата</th>
+                    <th style="width:110px;">Сумма</th>
+                    <th style="width:120px;">Статус</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in orders %}
+                    {% with first_item=order.items.all|first %}
+                    <tr>
+                      <td><a href="{% url 'order_detail' order.id %}" class="account-cabinet-order-num" style="text-decoration:none;">#{{ order.id }}</a></td>
+                      <td>
+                        {% if first_item %}
+                          <div class="account-cabinet-order-name">{{ first_item.variant.product.name }}</div>
+                          <div class="account-cabinet-order-desc">
+                            {{ first_item.variant.get_volume_display }}
+                            {% with n=order.items.count %}
+                              {% if n > 1 %} · и ещё {{ n|add:"-1" }} тов.{% endif %}
+                            {% endwith %}
+                          </div>
+                        {% else %}
+                          <div class="account-cabinet-order-name">Заказ #{{ order.id }}</div>
+                          <div class="account-cabinet-order-desc">Товаров: {{ order.items_qty|default:0 }}</div>
+                        {% endif %}
+                      </td>
+                      <td><div class="account-cabinet-order-date">{{ order.created_at|date:"d.m.Y" }}</div></td>
+                      <td><div class="account-cabinet-order-price">{{ order.total_price|floatformat:0 }} ₽</div></td>
+                      <td>
+                        {% if order.status == 'delivered' %}
+                          <span class="account-cabinet-badge account-cabinet-badge--delivered">{{ order.get_status_display }}</span>
+                        {% elif order.status == 'shipped' %}
+                          <span class="account-cabinet-badge account-cabinet-badge--transit">{{ order.get_status_display }}</span>
+                        {% else %}
+                          <span class="account-cabinet-badge account-cabinet-badge--processing">{{ order.get_status_display }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endwith %}
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           {% else %}
-            <div class="mt-6 border border-dashed border-edge-strong p-8 text-center">
-              <p class="font-serif text-2xl text-heading">У вас пока нет заказов</p>
+            <div class="account-cabinet-empty">
+              <p style="font-family:'Cormorant Garamond','Constantine',serif;font-size:1.5rem;color:#330507;margin-bottom:8px;">У вас пока нет заказов</p>
+              <p style="font-size:14px;">Оформите первый заказ в каталоге.</p>
             </div>
           {% endif %}
         </div>
+      </div>
 
-        <div id="favorites-tab" class="lk-tab-pane hidden">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <h2 class="font-serif text-4xl text-heading">Избранное</h2>
-            {% if favorite_entries %}
-              <p class="text-[10px] uppercase tracking-[0.2em] text-accent">В списке: {{ favorite_entries|length }}</p>
-            {% endif %}
+      <div id="favorites-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Избранное</h1>
+            <p class="account-cabinet-page-sub">{% if favorite_entries %}{{ favorite_entries|length }} в списке{% else %}Список пуст{% endif %}</p>
           </div>
+        </header>
+        <div class="account-cabinet-page-body">
           {% if favorite_entries %}
-            <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
+            <div class="account-cabinet-wish-grid grid w-full justify-items-center grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
               {% for fav in favorite_entries %}
                 {% with p=fav.product %}
-                  <article class="group flex h-full flex-col border border-edge p-3 sm:p-4">
-                    <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-edge sm:mb-4">
-                      <a
-                        href="{% url 'products:product_detail' p.slug %}"
-                        class="absolute inset-0 z-0 block"
-                        aria-label="{{ p.name }} — открыть карточку"
-                        tabindex="-1"
-                      ></a>
+                  <article class="account-favorite-card product-card group flex h-full w-full max-w-[320px] flex-col">
+                    <div class="account-favorite-card__media product-card__media relative shrink-0 overflow-hidden">
+                      <a href="{% url 'products:product_detail' p.slug %}" class="absolute inset-0 z-0 block" aria-label="{{ p.name }} — открыть карточку" tabindex="-1"></a>
                       {% with imgs=p.images.all %}
                         {% if imgs %}
-                          <img
-                            src="{{ imgs.0.image.url }}"
-                            alt="{{ p.name }}"
-                            class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none"
-                            loading="lazy"
-                            width="320"
-                            height="400"
-                          >
+                          <img src="{{ imgs.0.image.url }}" alt="{{ p.name }}" class="relative z-0 transition duration-500 group-hover:scale-105 pointer-events-none" loading="lazy" width="320" height="400">
                         {% else %}
                           <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-muted pointer-events-none">Нет изображения</div>
                         {% endif %}
                       {% endwith %}
                       {% include "products/partials/favorite_btn_account.html" with product=p %}
                     </div>
-                    <a
-                      href="{% url 'products:product_detail' p.slug %}"
-                      class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong"
-                    >
+                    <a href="{% url 'products:product_detail' p.slug %}" class="flex min-h-0 flex-1 flex-col items-center px-4 pb-4 pt-3 text-center text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong">
                       <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-accent sm:text-[10px] sm:tracking-[0.22em]">{{ p.brand.name }}</p>
-                      <h3 class="line-clamp-3 min-h-0 flex-1 font-serif text-base leading-snug text-cream sm:text-lg">{{ p.name }}</h3>
-                      <div class="mt-3 border-t border-edge pt-3">
+                      <h3 class="line-clamp-3 min-h-0 flex-1 font-serif text-base leading-snug text-foreground sm:text-lg">{{ p.name }}</h3>
+                      <div class="mt-3 w-full border-t border-edge pt-3">
                         {% with v=p.first_in_stock_variant %}
                           {% if v %}
-                            <span class="font-serif text-sm text-cream sm:text-lg">от {{ v.price|floatformat:2 }} ₽</span>
+                            <span class="font-serif text-sm text-foreground sm:text-lg">от {{ v.price|floatformat:0 }} ₽</span>
                           {% else %}
                             <span class="text-xs uppercase tracking-[0.14em] text-muted">Нет в наличии</span>
                           {% endif %}
@@ -151,170 +257,207 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="mt-8 border border-dashed border-edge-strong p-10 text-center">
-              <p class="font-serif text-xl text-heading sm:text-2xl">Пока пусто</p>
-              <p class="mt-2 text-sm text-muted">Добавляйте товары в избранное на странице каталога или карточке аромата.</p>
-              <a href="{% url 'products:catalog' %}" class="btn-luxury mt-6 inline-flex">В каталог</a>
+            <div class="account-cabinet-empty">
+              <p style="font-family:'Cormorant Garamond','Constantine',serif;font-size:1.35rem;color:#330507;">Пока пусто</p>
+              <p style="margin-top:8px;font-size:14px;">Добавляйте товары в избранное в каталоге или на странице аромата.</p>
+              <a href="{% url 'products:catalog' %}" class="account-cabinet-btn account-cabinet-btn--fill" style="margin-top:1.25rem;text-decoration:none;display:inline-flex;">В каталог</a>
             </div>
           {% endif %}
         </div>
+      </div>
 
-        <div id="gift-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-heading">Подарочные карты</h2>
-          <div class="mt-6 border border-dashed border-edge-strong p-8 text-center">
-            <p class="text-sm text-muted">Раздел в разработке.</p>
+      <div id="gift-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Подарочные карты</h1>
+            <p class="account-cabinet-page-sub">Баланс и история</p>
+          </div>
+        </header>
+        <div class="account-cabinet-page-body">
+          <div class="account-cabinet-empty">
+            <p style="font-size:14px;">Раздел в разработке.</p>
           </div>
         </div>
+      </div>
 
-        <div id="notify-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-heading">Настройки уведомлений</h2>
-          <div class="mt-6 border border-dashed border-edge-strong p-8 text-center">
-            <p class="text-sm text-muted">Раздел в разработке.</p>
+      <div id="notify-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Уведомления</h1>
+            <p class="account-cabinet-page-sub">Настройки оповещений</p>
+          </div>
+        </header>
+        <div class="account-cabinet-page-body">
+          <div class="account-cabinet-empty">
+            <p style="font-size:14px;">Раздел в разработке.</p>
           </div>
         </div>
+      </div>
 
-        <div id="profile-data-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-heading">Профиль и данные</h2>
-          <form method="post" action="{% url 'account' %}" class="mt-6 space-y-4">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="update_profile">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Имя</label>
-                <input name="first_name" value="{{ user.first_name|default:'' }}" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
+      <div id="profile-data-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Профиль и данные</h1>
+            <p class="account-cabinet-page-sub">Редактирование</p>
+          </div>
+          <button type="button" class="account-cabinet-btn" data-tab="profile-tab">К обзору</button>
+        </header>
+        <div class="account-cabinet-page-body" style="max-width:720px;">
+          <div class="account-cabinet-card">
+            <form method="post" action="{% url 'account' %}" class="space-y-4">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="update_profile">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label class="account-cabinet-field-label" for="id_first_name">Имя</label>
+                  <input id="id_first_name" name="first_name" value="{{ user.first_name|default:'' }}" class="account-cabinet-input">
+                </div>
+                <div>
+                  <label class="account-cabinet-field-label" for="id_last_name">Фамилия</label>
+                  <input id="id_last_name" name="last_name" value="{{ user.last_name|default:'' }}" class="account-cabinet-input">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="account-cabinet-field-label" for="id_email">Email</label>
+                  <input id="id_email" value="{{ user.email }}" disabled class="account-cabinet-input">
+                </div>
+                <div>
+                  <label class="account-cabinet-field-label" for="id_phone">Телефон</label>
+                  <input id="id_phone" name="phone" value="{{ profile.phone|default:'' }}" class="account-cabinet-input">
+                </div>
+                <div>
+                  <label class="account-cabinet-field-label" for="id_birth_date">Дата рождения</label>
+                  <input id="id_birth_date" name="birth_date" type="date" value="{{ profile.birth_date|date:'Y-m-d' }}" class="account-cabinet-input">
+                </div>
               </div>
-              <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Фамилия</label>
-                <input name="last_name" value="{{ user.last_name|default:'' }}" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
+              <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(51,5,7,0.08);">
+                <button type="submit" class="btn-luxury w-full md:w-auto">Сохранить профиль</button>
               </div>
-              <div class="md:col-span-2">
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Email</label>
-                <input value="{{ user.email }}" disabled class="w-full cursor-not-allowed border border-edge bg-ink px-3 py-2 text-sm text-placeholder">
-              </div>
-              <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Телефон</label>
-                <input name="phone" value="{{ profile.phone|default:'' }}" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-              </div>
-              <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Дата рождения</label>
-                <input name="birth_date" type="date" value="{{ profile.birth_date|date:'Y-m-d' }}" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-              </div>
-            </div>
-            <button type="submit" class="btn-luxury w-full md:w-auto">Сохранить профиль</button>
-          </form>
-          <a href="{% url 'password_change' %}" class="mt-4 inline-flex text-xs uppercase tracking-[0.16em] text-accent hover:text-accent-hover">Сменить пароль</a>
+            </form>
+          </div>
         </div>
+      </div>
 
-        <div id="addresses-tab" class="lk-tab-pane hidden">
-          <h2 class="font-serif text-4xl text-heading">Мои адреса</h2>
-          {% if addresses %}
-            <div class="mt-6 space-y-3">
-              {% for address in addresses %}
-                <div class="border border-edge p-4">
-                  <div class="flex items-start justify-between gap-3">
-                    <p class="text-sm text-foreground">{{ address.country }}, {{ address.city }}, {{ address.address_line1 }}</p>
-                    {% if address.is_default %}
-                      <span class="text-[10px] uppercase tracking-[0.16em] text-accent">Основной</span>
-                    {% endif %}
-                  </div>
-                  <p class="mt-2 text-xs text-muted">{{ address.region }}, {{ address.postal_code }}{% if address.address_line2 %} · {{ address.address_line2 }}{% endif %}</p>
-                  <div class="mt-3 flex flex-wrap gap-4">
-                    {% if not address.is_default %}
-                      <form method="post" action="{% url 'account' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="set_default_address">
-                        <input type="hidden" name="address_id" value="{{ address.id }}">
-                        <button type="submit" class="text-xs uppercase tracking-[0.16em] text-accent hover:text-accent-hover">Сделать основным</button>
-                      </form>
-                    {% endif %}
-                    <button type="button" data-toggle-address-edit="edit-address-form-{{ address.id }}" class="text-xs uppercase tracking-[0.16em] text-accent hover:text-accent-hover">Редактировать</button>
-                    <form method="post" action="{% url 'account' %}">
+      <div id="addresses-tab" class="lk-tab-pane hidden">
+        <header class="account-cabinet-page-head">
+          <div>
+            <h1 class="account-cabinet-page-title">Мои адреса</h1>
+            <p class="account-cabinet-page-sub">Адреса доставки</p>
+          </div>
+          <button type="button" id="toggle-add-address-btn" class="account-cabinet-btn">+ Добавить адрес</button>
+        </header>
+        <div class="account-cabinet-page-body">
+          <div class="account-cabinet-addr-grid">
+            {% for address in addresses %}
+              <div class="account-cabinet-addr-card{% if address.is_default %} account-cabinet-addr-card--default{% endif %}">
+                {% if address.is_default %}
+                  <span class="account-cabinet-addr-tag">Основной</span>
+                {% endif %}
+                <div class="account-cabinet-field-value" style="margin-bottom:10px;font-weight:400;">{{ address.city }}</div>
+                <div class="account-cabinet-field-value" style="font-weight:300;line-height:1.75;color:rgba(51,5,7,0.55);">
+                  {{ address.country }}<br>
+                  {{ address.address_line1 }}{% if address.address_line2 %}<br>{{ address.address_line2 }}{% endif %}<br>
+                  {{ address.region }}, {{ address.postal_code }}
+                </div>
+                <div class="account-cabinet-addr-actions">
+                  {% if not address.is_default %}
+                    <form method="post" action="{% url 'account' %}" style="display:inline;">
                       {% csrf_token %}
-                      <input type="hidden" name="action" value="delete_address">
+                      <input type="hidden" name="action" value="set_default_address">
                       <input type="hidden" name="address_id" value="{{ address.id }}">
-                      <button type="submit" class="text-xs uppercase tracking-[0.16em] text-danger hover:text-danger-soft">Удалить</button>
+                      <button type="submit" class="account-cabinet-addr-link">Сделать основным</button>
                     </form>
-                  </div>
-
-                  <form id="edit-address-form-{{ address.id }}" method="post" action="{% url 'account' %}" class="mt-4 hidden space-y-3 border-t border-edge pt-4">
+                  {% endif %}
+                  <button type="button" data-toggle-address-edit="edit-address-form-{{ address.id }}" class="account-cabinet-addr-link">Изменить</button>
+                  <form method="post" action="{% url 'account' %}" style="display:inline;">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="update_address">
+                    <input type="hidden" name="action" value="delete_address">
                     <input type="hidden" name="address_id" value="{{ address.id }}">
-                    <div>
-                      <label class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Страна / регион</label>
-                      <input name="country" value="{{ address.country }}" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                    </div>
-                    <div>
-                      <label class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Адрес</label>
-                      <input name="address_line1" value="{{ address.address_line1 }}" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                    </div>
-                    <div>
-                      <label class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Подъезд, этаж и т.д.</label>
-                      <input name="address_line2" value="{{ address.address_line2 }}" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                    </div>
-                    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                      <input name="city" value="{{ address.city }}" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                      <input name="region" value="{{ address.region }}" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                      <input name="postal_code" value="{{ address.postal_code }}" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-                    </div>
-                    <label class="flex items-center gap-3 text-xs text-muted">
-                      <input type="checkbox" name="is_default" {% if address.is_default %}checked{% endif %} class="h-4 w-4 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
-                      Основной адрес
-                    </label>
-                    <button type="submit" class="btn-luxury w-full">Сохранить адрес</button>
+                    <button type="submit" class="account-cabinet-addr-link" style="color:rgba(51,5,7,0.45);">Удалить</button>
                   </form>
                 </div>
-              {% endfor %}
-            </div>
-          {% endif %}
 
-          <div class="mt-6">
-            <button type="button" id="toggle-add-address-btn" class="inline-flex items-center justify-center border border-edge-strong px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-accent transition-colors hover:bg-accent/10">Добавить адрес</button>
+                <form id="edit-address-form-{{ address.id }}" method="post" action="{% url 'account' %}" class="hidden space-y-3 border-t border-edge pt-4" style="margin-top:1rem;border-color:rgba(51,5,7,0.1);">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="update_address">
+                  <input type="hidden" name="address_id" value="{{ address.id }}">
+                  <div>
+                    <label class="account-cabinet-field-label" for="edit-country-{{ address.id }}">Страна / регион</label>
+                    <input id="edit-country-{{ address.id }}" name="country" value="{{ address.country }}" required class="account-cabinet-input">
+                  </div>
+                  <div>
+                    <label class="account-cabinet-field-label" for="edit-line1-{{ address.id }}">Адрес</label>
+                    <input id="edit-line1-{{ address.id }}" name="address_line1" value="{{ address.address_line1 }}" required class="account-cabinet-input">
+                  </div>
+                  <div>
+                    <label class="account-cabinet-field-label" for="edit-line2-{{ address.id }}">Подъезд, этаж и т.д.</label>
+                    <input id="edit-line2-{{ address.id }}" name="address_line2" value="{{ address.address_line2 }}" class="account-cabinet-input">
+                  </div>
+                  <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <input name="city" value="{{ address.city }}" required class="account-cabinet-input" aria-label="Город">
+                    <input name="region" value="{{ address.region }}" required class="account-cabinet-input" aria-label="Область">
+                    <input name="postal_code" value="{{ address.postal_code }}" required class="account-cabinet-input" aria-label="Индекс">
+                  </div>
+                  <label class="flex items-center gap-3 text-xs" style="color:rgba(51,5,7,0.5);">
+                    <input type="checkbox" name="is_default" {% if address.is_default %}checked{% endif %} class="h-4 w-4 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
+                    Основной адрес
+                  </label>
+                  <button type="submit" class="btn-luxury w-full">Сохранить адрес</button>
+                </form>
+              </div>
+            {% endfor %}
+
+            <button type="button" id="toggle-add-address-card" class="account-cabinet-addr-add" aria-controls="add-address-form">
+              <span style="font-size:22px;color:rgba(51,5,7,0.2);line-height:1;">+</span>
+              <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(51,5,7,0.35);">Новый адрес</span>
+            </button>
           </div>
 
           <form method="post" action="{% url 'account' %}" class="mt-6 hidden space-y-4" id="add-address-form">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_address">
-            <div>
-              <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Страна / регион</label>
-              <input name="country" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-            </div>
-            <div>
-              <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Адрес</label>
-              <input name="address_line1" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-            </div>
-            <div>
-              <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Подъезд, этаж и т.д.</label>
-              <input name="address_line2" class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
-            </div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="account-cabinet-card">
+              <div class="account-cabinet-card-title">Новый адрес</div>
               <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Населённый пункт</label>
-                <input name="city" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
+                <label class="account-cabinet-field-label" for="add-country">Страна / регион</label>
+                <input id="add-country" name="country" required class="account-cabinet-input">
               </div>
               <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Область / район</label>
-                <input name="region" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
+                <label class="account-cabinet-field-label" for="add-line1">Адрес</label>
+                <input id="add-line1" name="address_line1" required class="account-cabinet-input">
               </div>
               <div>
-                <label class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Почтовый индекс</label>
-                <input name="postal_code" required class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none">
+                <label class="account-cabinet-field-label" for="add-line2">Подъезд, этаж и т.д.</label>
+                <input id="add-line2" name="address_line2" class="account-cabinet-input">
               </div>
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <label class="account-cabinet-field-label" for="add-city">Населённый пункт</label>
+                  <input id="add-city" name="city" required class="account-cabinet-input">
+                </div>
+                <div>
+                  <label class="account-cabinet-field-label" for="add-region">Область / район</label>
+                  <input id="add-region" name="region" required class="account-cabinet-input">
+                </div>
+                <div>
+                  <label class="account-cabinet-field-label" for="add-postal">Почтовый индекс</label>
+                  <input id="add-postal" name="postal_code" required class="account-cabinet-input">
+                </div>
+              </div>
+              <label class="flex items-center gap-3 text-xs" style="color:rgba(51,5,7,0.5);">
+                <input type="checkbox" name="is_default" class="h-4 w-4 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
+                Сделать адрес основным
+              </label>
+              <button type="submit" class="btn-luxury w-full">Добавить адрес</button>
             </div>
-            <label class="flex items-center gap-3 text-xs text-muted">
-              <input type="checkbox" name="is_default" class="h-4 w-4 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
-              Сделать адрес основным
-            </label>
-            <button type="submit" class="btn-luxury w-full">Добавить адрес</button>
           </form>
         </div>
-      </section>
+      </div>
     </div>
+  </div>
 
-    <form id="logout-form" method="post" action="{% url 'logout' %}" class="hidden">
-      {% csrf_token %}
-    </form>
-  </main>
+  <form id="logout-form" method="post" action="{% url 'logout' %}" class="hidden">
+    {% csrf_token %}
+  </form>
 </div>
 {% endblock %}
 
@@ -364,26 +507,36 @@
     history.pushState({ accountTab: tabId }, "", path);
   }
 
+  function sidebarTabForPane(tabId) {
+    if (tabId === "profile-data-tab") return "profile-tab";
+    return tabId;
+  }
+
   function openTab(tabId, options) {
     options = options || {};
-    tabPanes.forEach((pane) => pane.classList.add("hidden"));
-    document.querySelectorAll(".lk-tab-btn[data-tab]").forEach((btn) => {
-      btn.classList.remove("border-l-edge-strong", "bg-elevated", "text-accent");
+    tabPanes.forEach(function (pane) {
+      pane.classList.add("hidden");
     });
-    const target = document.getElementById(tabId);
+    document.querySelectorAll(".account-cabinet-sidebar .lk-tab-btn[data-tab]").forEach(function (btn) {
+      btn.classList.remove("is-active");
+    });
+    var target = document.getElementById(tabId);
     if (target) {
       target.classList.remove("hidden");
     }
-    const activeButton = document.querySelector('.lk-tab-btn[data-tab="' + tabId + '"]');
-    if (activeButton) {
-      activeButton.classList.add("border-l-edge-strong", "bg-elevated", "text-accent");
+    var sidebarId = sidebarTabForPane(tabId);
+    var activeSidebarBtn = document.querySelector(
+      '.account-cabinet-sidebar .lk-tab-btn[data-tab="' + sidebarId + '"]'
+    );
+    if (activeSidebarBtn) {
+      activeSidebarBtn.classList.add("is-active");
     }
     syncUrlForTab(tabId, options.skipHistory);
   }
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const tabId = button.getAttribute("data-tab");
+  tabButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      var tabId = button.getAttribute("data-tab");
       if (tabId) {
         openTab(tabId, { skipHistory: false });
       }
@@ -402,18 +555,25 @@
     openTab(tabId, { skipHistory: true });
   })();
 
-  const addAddressBtn = document.getElementById("toggle-add-address-btn");
-  const addAddressForm = document.getElementById("add-address-form");
-  if (addAddressBtn && addAddressForm) {
-    addAddressBtn.addEventListener("click", () => {
+  var addAddressBtn = document.getElementById("toggle-add-address-btn");
+  var addAddressCard = document.getElementById("toggle-add-address-card");
+  var addAddressForm = document.getElementById("add-address-form");
+  function toggleAddAddressForm() {
+    if (addAddressForm) {
       addAddressForm.classList.toggle("hidden");
-    });
+    }
+  }
+  if (addAddressBtn && addAddressForm) {
+    addAddressBtn.addEventListener("click", toggleAddAddressForm);
+  }
+  if (addAddressCard && addAddressForm) {
+    addAddressCard.addEventListener("click", toggleAddAddressForm);
   }
 
-  document.querySelectorAll("[data-toggle-address-edit]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const targetId = button.getAttribute("data-toggle-address-edit");
-      const form = document.getElementById(targetId);
+  document.querySelectorAll("[data-toggle-address-edit]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var targetId = button.getAttribute("data-toggle-address-edit");
+      var form = document.getElementById(targetId);
       if (form) {
         form.classList.toggle("hidden");
       }

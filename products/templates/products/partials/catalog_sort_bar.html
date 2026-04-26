@@ -1,9 +1,14 @@
-<div class="catalog-sort-bar mb-6 space-y-3">
-  <div class="hidden lg:block">
-    {% include "products/partials/catalog_filter_modal_triggers.html" %}
-  </div>
-  <div class="catalog-sort-bar__sort-group hidden min-w-0 flex-wrap items-center gap-2 lg:flex md:justify-end md:gap-3">
-    <label for="id_sort" class="shrink-0 whitespace-nowrap text-[10px] uppercase text-accent">Сортировка</label>
-    {% include "products/partials/catalog_sort_select.html" with sort_select_id="id_sort" sort_select_extra_class="catalog-sort-bar-desktop-sort" %}
+<div class="catalog-sort-bar mb-6 max-lg:sticky max-lg:z-[85] max-lg:-mx-5 max-lg:border-b max-lg:border-edge max-lg:bg-background/95 max-lg:px-5 max-lg:py-3 max-lg:backdrop-blur-md max-lg:top-[var(--site-header-offset,0px)] max-lg:transition-[top] max-lg:duration-300 max-lg:ease-out">
+  <div class="catalog-sort-bar__sort-group flex min-w-0 items-center justify-between gap-3">
+    <button
+      type="button"
+      class="btn-luxury px-5 py-3 text-[10px] sm:text-[11px]"
+      data-catalog-mobile-filters-open
+    >
+      Фильтры
+    </button>
+    <div class="flex min-w-0 items-center gap-2 md:gap-3">
+      {% include "products/partials/catalog_sort_select.html" with sort_select_id="id_sort" sort_select_extra_class="catalog-sort-bar-desktop-sort" %}
+    </div>
   </div>
 </div>

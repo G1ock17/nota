@@ -110,6 +110,44 @@ def product_search_suggest(request):
     return JsonResponse({"results": results})
 
 
+class SearchListView(ListView):
+    model = Product
+    template_name = "products/search.html"
+    context_object_name = "product_list"
+    paginate_by = 24
+
+    def get_queryset(self):
+        query = (self.request.GET.get("q") or "").strip()
+        qs = (
+            Product.objects.select_related("brand")
+            .prefetch_related(
+                Prefetch(
+                    "images",
+                    queryset=ProductImage.objects.order_by("-is_main", "id"),
+                ),
+                Prefetch(
+                    "variants",
+                    queryset=Variant.objects.order_by("volume"),
+                ),
+            )
+            .annotate(
+                min_price=Min(
+                    "variants__price",
+                    filter=Q(variants__stock__gt=0),
+                ),
+            )
+            .filter(min_price__isnull=False)
+        )
+        if query:
+            qs = qs.filter(Q(name__icontains=query) | Q(brand__name__icontains=query))
+        return qs.distinct().order_by("name")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["current_query"] = (self.request.GET.get("q") or "").strip()
+        return ctx
+
+
 class CatalogListView(ListView):
     model = Product
     template_name = "products/catalog.html"
@@ -147,6 +185,10 @@ class CatalogListView(ListView):
         )
 
         params = self.request.GET
+
+        query = (params.get("q") or "").strip()
+        if query:
+            qs = qs.filter(Q(name__icontains=query) | Q(brand__name__icontains=query))
 
         category_slugs = params.getlist("category")
         if category_slugs:
@@ -239,6 +281,7 @@ class CatalogListView(ListView):
         ctx["notes_selected_group_values"] = list(selected_group_values)
         ctx["notes_filter_selected_count"] = len(selected_group_values)
         ctx["current_sort"] = self.request.GET.get("sort", "newest")
+        ctx["current_query"] = (self.request.GET.get("q") or "").strip()
         ctx["volume_choices"] = [
             (v, v)
             for v in Variant.objects.filter(stock__gt=0)
@@ -331,7 +374,12 @@ class ProductDetailView(DetailView):
                 Prefetch(
                     "images",
                     queryset=ProductImage.objects.order_by("-is_main", "id"),
-                )
+                ),
+                "notes",
+                Prefetch(
+                    "variants",
+                    queryset=Variant.objects.order_by("volume"),
+                ),
             )
             .annotate(
                 min_price=Min(

@@ -4,18 +4,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}nota — парфюмерия{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Constantine:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>{% block title %}nota — парфюмерия{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-                        serif: ["Playfair Display", "Georgia", "serif"]
+                        sans: ["Nota Numerals", "Constantine", "Times New Roman", "serif"],
+                        serif: ["Nota Numerals", "Constantine", "Times New Roman", "serif"]
                     },
                     colors: {
                         background: "rgb(var(--color-bg-rgb) / <alpha-value>)",
@@ -53,7 +53,7 @@
     <link rel="stylesheet" href="{% static 'core/css/site.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="font-sans antialiased">
     <form id="htmx-csrf" hidden>{% csrf_token %}</form>
     <div id="cart-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm empty:hidden" aria-live="polite"></div>
     {% include "products/partials/favorite_auth_modal.html" %}

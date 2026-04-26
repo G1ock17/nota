@@ -1,12 +1,14 @@
-<article class="reveal group border border-edge p-6 transition duration-500 ease-out hover:scale-[1.03]">
-    <div class="mb-6 aspect-[4/5] overflow-hidden border border-edge">
-        <img src="{{ image }}" alt="{{ name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+<article class="product-card reveal group flex h-full flex-col">
+    <div class="product-card__media">
+        <img src="{{ image }}" alt="{{ name }}" class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105">
     </div>
-    <p class="mb-3 text-[10px] uppercase tracking-[0.22em] text-accent">{{ family }}</p>
-    <h3 class="mb-3 font-serif text-2xl text-cream">{{ name }}</h3>
-    <p class="mb-6 text-sm leading-7 text-muted">{{ description }}</p>
-    <div class="flex items-center justify-between">
-        <span class="text-xs uppercase tracking-[0.2em] text-accent">{{ volume }}</span>
-        <span class="font-serif text-xl text-cream">{{ price }}</span>
+    <div class="product-info">
+        <p class="product-brand">{{ family }}</p>
+        <h3 class="product-title">{{ name }}</h3>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="price-row">
+            <span class="product-price">{{ price }}</span>
+            <span class="product-volume">{{ volume }}</span>
+        </div>
     </div>
 </article>

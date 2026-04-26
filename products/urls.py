@@ -10,12 +10,13 @@ from .cart_views import (
     checkout_success,
 )
 from .favorite_views import favorite_post_auth, favorite_toggle
-from .views import CatalogListView, ProductDetailView, product_search_suggest
+from .views import CatalogListView, ProductDetailView, SearchListView, product_search_suggest
 
 app_name = "products"
 
 urlpatterns = [
     path("search/suggest/", product_search_suggest, name="search_suggest"),
+    path("search/", SearchListView.as_view(), name="search"),
     path("", CatalogListView.as_view(), name="catalog"),
     path("cart/", cart_detail, name="cart"),
     path("checkout/save-address/", checkout_save_address, name="checkout_save_address"),

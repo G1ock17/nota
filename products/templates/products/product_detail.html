@@ -3,235 +3,562 @@
 
 {% block title %}{{ product.name }} — nota{% endblock %}
 
+{% block extra_css %}
+<style>
+  .product-detail-luxe {
+    min-height: calc(100vh - var(--site-header-offset, 0px));
+  }
+  .product-detail-luxe__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: calc(100vh - var(--site-header-offset, 0px));
+  }
+  .product-detail-luxe__visual {
+    background: #f7f5f1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4.5rem);
+  }
+  .product-detail-luxe__image-wrap {
+    width: min(100%, 30rem);
+    position: relative;
+  }
+  .product-detail-luxe__image-wrap::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 3%;
+    width: 72%;
+    height: 16%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(12, 8, 9, 0.3) 0%, rgba(12, 8, 9, 0) 72%);
+    filter: blur(5px);
+    pointer-events: none;
+  }
+  .product-detail-luxe__image {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-height: min(68vh, 42rem);
+    object-fit: contain;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .product-detail-luxe__image-wrap:hover .product-detail-luxe__image {
+    transform: translateY(-2px) scale(1.012);
+  }
+  .product-detail-luxe__thumbs {
+    margin-top: 1.2rem;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+  .product-detail-luxe__thumb {
+    border: 1px solid rgba(51, 5, 7, 0.2);
+    background: rgba(255, 255, 255, 0.78);
+    width: 3.25rem;
+    height: 3.25rem;
+    overflow: hidden;
+    padding: 0;
+    transition: border-color 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
+  }
+  .product-detail-luxe__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .product-detail-luxe__thumb:hover {
+    border-color: rgba(51, 5, 7, 0.5);
+    transform: translateY(-1px);
+  }
+  .product-detail-luxe__thumb.is-active {
+    border-color: #330507;
+    background: #ffffff;
+  }
+  .product-detail-luxe__empty {
+    color: rgba(18, 14, 14, 0.62);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.66rem;
+  }
+  .product-detail-luxe__content {
+    background: #330507;
+    color: #f7f5f1;
+    padding: clamp(2.5rem, 7vw, 5rem);
+    display: flex;
+    align-items: center;
+  }
+  .product-detail-luxe__content-inner {
+    width: min(100%, 34rem);
+  }
+  .product-detail-luxe__brand {
+    font-size: 0.64rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.78);
+    margin-bottom: 1.15rem;
+  }
+  .product-detail-luxe__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2.35rem, 6.3vw, 4rem);
+    line-height: 1.04;
+    letter-spacing: 0.01em;
+    color: #f7f5f1 !important;
+  }
+  /* Перебивает .section-deep h1 из site.css (там !important и выше специфичность у связки section + h1) */
+  .section-deep .product-detail-luxe__title,
+  .section-deep h1.product-detail-luxe__title {
+    color: #f7f5f1 !important;
+  }
+  .product-detail-luxe__year-country {
+    margin: 0.85rem 0 0;
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.72);
+  }
+  .section-deep .product-detail-luxe__content .product-detail-luxe__year-country {
+    color: rgba(247, 245, 241, 0.72) !important;
+  }
+  .product-detail-luxe__year-country-sep {
+    color: rgba(247, 245, 241, 0.45);
+    font-weight: 400;
+  }
+  .product-detail-luxe__desc {
+    margin-top: 1.75rem;
+    color: rgba(247, 245, 241, 0.8);
+    line-height: 1.76;
+    font-size: clamp(0.95rem, 1.05vw, 1.02rem);
+    max-width: 30rem;
+  }
+  .product-detail-luxe__desc[data-collapsible] {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    line-clamp: 6;
+    overflow: hidden;
+  }
+  .product-detail-luxe__desc.is-expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+  .product-detail-luxe__desc-toggle {
+    margin-top: 0.75rem;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: rgba(247, 245, 241, 0.92);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(247, 245, 241, 0.55);
+    transition: border-color 0.25s ease, color 0.25s ease;
+  }
+  .product-detail-luxe__desc-toggle:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+  .product-detail-luxe__meta {
+    margin-top: 2.5rem;
+    border-top: 1px solid rgba(247, 245, 241, 0.2);
+    padding-top: 1.6rem;
+  }
+  .product-detail-luxe__meta-label {
+    font-size: 0.64rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.72);
+    margin-bottom: 0.95rem;
+  }
+  .product-detail-luxe__size-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+  .product-detail-luxe__size-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .product-detail-luxe__size-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .product-detail-luxe__size-option-text {
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.56);
+    border-bottom: 1px solid transparent;
+    transition: color 0.25s ease, border-color 0.25s ease;
+    padding-bottom: 0.15rem;
+    cursor: pointer;
+  }
+  .product-detail-luxe__size-option:hover .product-detail-luxe__size-option-text {
+    color: rgba(247, 245, 241, 0.9);
+  }
+  .product-detail-luxe__size-option input:checked + .product-detail-luxe__size-option-text {
+    color: #f7f5f1;
+    border-color: #f7f5f1;
+  }
+  .product-detail-luxe__price {
+    margin-top: 2.2rem;
+    border-top: 1px solid rgba(247, 245, 241, 0.2);
+    padding-top: 1.5rem;
+  }
+  .product-detail-luxe__price-value {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4.2vw, 2.6rem);
+    color: #f7f5f1;
+  }
+  .product-detail-luxe__actions {
+    margin-top: 2.2rem;
+    display: flex;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .product-detail-luxe__buy-btn {
+    width: min(100%, 24rem);
+    min-height: 3.3rem;
+    border: 1px solid #f7f5f1;
+    border-radius: 2px;
+    background: #f7f5f1;
+    color: #120d0e;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+  }
+  .product-detail-luxe__buy-btn:hover {
+    background: transparent;
+    color: #f7f5f1;
+  }
+  .product-detail-luxe__actions .product-detail-luxe__buy-btn {
+    flex: 1 1 auto;
+  }
+  .product-detail-luxe__actions .favorite-btn--detail {
+    width: 3.3rem;
+    min-height: 3.3rem;
+    border: 1px solid #f7f5f1;
+    color: #f7f5f1;
+    background: transparent;
+  }
+  .product-detail-luxe__actions .favorite-btn--detail:hover,
+  .product-detail-luxe__actions .favorite-btn--detail.is-active {
+    background: #f7f5f1;
+    color: #120d0e;
+  }
+  @media (min-width: 1024px) {
+    .product-detail-luxe__layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+  .product-detail-luxe__related {
+    background-color: var(--background-color);
+    color: var(--color-text);
+    border-top: 1px solid rgba(51, 5, 7, 0.08);
+  }
+  .product-detail-luxe__notes {
+    background: #f7f5f1;
+    padding: 0;
+    border-top: 1px solid rgba(51, 5, 7, 0.1);
+    color: #330507;
+    font-family: var(--font-serif);
+  }
+  .product-detail-luxe__notes h2,
+  .product-detail-luxe__notes p {
+    font-family: inherit;
+  }
+  .product-detail-luxe__notes-layout {
+    --notes-col-gap: clamp(2rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--notes-col-gap);
+    align-items: stretch;
+  }
+  @media (min-width: 900px) {
+    .product-detail-luxe__notes-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: var(--notes-col-gap);
+      row-gap: 0;
+    }
+  }
+  @media (min-width: 900px) {
+    .product-detail-luxe__notes-main {
+      position: relative;
+    }
+  }
+  .product-detail-luxe__notes-eyebrow {
+    margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
+    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1.35;
+    color: #330507 !important;
+  }
+  .section-deep .product-detail-luxe__notes h2.product-detail-luxe__notes-eyebrow {
+    color: #330507 !important;
+  }
+  .product-detail-luxe__notes-row {
+    position: relative;
+    padding-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+    margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+    border-bottom: none;
+  }
+  .product-detail-luxe__notes-row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    background: rgba(51, 5, 7, 0.2);
+    width: 100%;
+  }
+  @media (min-width: 900px) {
+    .product-detail-luxe__notes-row::after {
+      /* до середины всей сетки: ширина левой колонки + половина промежутка */
+      width: calc(100% + var(--notes-col-gap) / 2);
+    }
+  }
+  .product-detail-luxe__notes-row:last-child {
+    margin-bottom: 0;
+  }
+  .product-detail-luxe__notes-label {
+    margin: 0 0 0.55rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(51, 5, 7, 0.55) !important;
+  }
+  .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-label {
+    color: rgba(51, 5, 7, 0.55) !important;
+  }
+  .product-detail-luxe__notes-value {
+    margin: 0;
+    font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+    color: #330507 !important;
+  }
+  .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-value {
+    color: #330507 !important;
+  }
+  .product-detail-luxe__notes-empty-msg {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: rgba(51, 5, 7, 0.65) !important;
+  }
+  .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-empty-msg {
+    color: rgba(51, 5, 7, 0.65) !important;
+  }
+  .product-detail-luxe__notes-aside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .product-detail-luxe__notes-brand-box {
+    width: 100%;
+    max-width: 31.25rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .product-detail-luxe__notes-brand-img {
+    display: block;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+  }
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="min-h-screen bg-background text-foreground">
+<div class="section-deep text-foreground product-detail-luxe">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-7xl px-6 py-14 lg:px-12">
-    <nav class="mb-8 text-xs uppercase tracking-[0.16em] text-muted" aria-label="Навигация по каталогу">
-      <a href="{% url 'products:catalog' %}" class="nav-link">Каталог</a>
-      <span class="mx-2 text-dim" aria-hidden="true">/</span>
-      <a href="{% url 'products:catalog' %}?category={{ product.category.slug }}" class="nav-link">{{ product.category.name }}</a>
-      <span class="mx-2 text-dim" aria-hidden="true">/</span>
-      <a href="{% url 'products:catalog' %}?category={{ product.category.slug }}&amp;brand={{ product.brand.slug }}" class="nav-link">{{ product.brand.name }}</a>
-    </nav>
-
-    <section class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,34%)] lg:items-start">
-      <div class="min-w-0 w-full">
-        <div data-product-gallery class="w-full max-w-[min(100%,34rem)] mx-auto">
-          {% with imgs=product.images.all %}
+  <main class="w-full">
+    <section class="product-detail-luxe__layout">
+      <div class="product-detail-luxe__visual">
+        {% with imgs=product.images.all %}
           {% if imgs %}
-            <button
-              type="button"
-              class="group mb-5 mx-auto block w-fit max-w-full overflow-hidden border border-edge p-0 text-left align-top cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              data-gallery-lightbox-trigger
-              aria-label="Открыть фото в полном размере"
-            >
+            <div class="product-detail-luxe__image-wrap">
               <img
                 src="{{ imgs.0.image.url }}"
                 alt="{{ product.name }}"
-                class="gallery-main-image block h-auto w-auto max-h-[min(29rem,53vh)] max-w-[min(100%,34rem)] object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                class="product-detail-luxe__image"
                 loading="eager"
-                data-gallery-main
+                data-product-main-image
               >
-            </button>
+            </div>
             {% if imgs|length > 1 %}
-              <div class="flex flex-wrap justify-center gap-2.5">
-                {% for img in imgs|slice:":5" %}
+              <div class="product-detail-luxe__thumbs" data-product-thumbs>
+                {% for img in imgs %}
                   <button
                     type="button"
-                    class="gallery-thumb aspect-square h-14 w-14 max-h-14 max-w-14 shrink-0 overflow-hidden border border-edge sm:h-16 sm:w-16 sm:max-h-16 sm:max-w-16 {% if forloop.first %}is-active{% endif %}"
-                    data-gallery-thumb
+                    class="product-detail-luxe__thumb {% if forloop.first %}is-active{% endif %}"
+                    data-product-thumb
                     data-image-url="{{ img.image.url }}"
                     data-image-alt="{{ product.name }} {{ forloop.counter }}"
                     aria-label="Показать изображение {{ forloop.counter }}"
                   >
-                    <img src="{{ img.image.url }}" alt="{{ product.name }} {{ forloop.counter }}" class="h-full w-full object-cover" loading="lazy">
+                    <img src="{{ img.image.url }}" alt="{{ product.name }} {{ forloop.counter }}" loading="lazy">
                   </button>
                 {% endfor %}
               </div>
             {% endif %}
-            <div
-              class="product-image-lightbox"
-              data-product-image-lightbox
-              role="dialog"
-              aria-modal="true"
-              aria-label="Просмотр фото"
-            >
-              <div class="product-image-lightbox__backdrop" data-product-image-lightbox-close tabindex="-1" aria-hidden="true"></div>
-              <button type="button" class="product-image-lightbox__close" data-product-image-lightbox-close aria-label="Закрыть">
-                <span aria-hidden="true">&times;</span>
-              </button>
-              <div class="product-image-lightbox__frame">
-                <p class="product-image-lightbox__title">{{ product.name }}</p>
-                <div class="product-image-lightbox__stage">
-                  {% if imgs|length > 1 %}
-                  <button type="button" class="product-image-lightbox__nav product-image-lightbox__nav--prev" data-lightbox-prev aria-label="Предыдущее фото">
-                    <span aria-hidden="true">‹</span>
-                  </button>
-                  {% endif %}
-                  <div class="product-image-lightbox__photo-box">
-                    <div class="product-image-lightbox__zoom-wrap" aria-hidden="true">
-                      <img src="" alt="" class="product-image-lightbox__img" data-product-image-lightbox-img width="1200" height="1600" decoding="async">
-                    </div>
-                  </div>
-                  {% if imgs|length > 1 %}
-                  <button type="button" class="product-image-lightbox__nav product-image-lightbox__nav--next" data-lightbox-next aria-label="Следующее фото">
-                    <span aria-hidden="true">›</span>
-                  </button>
-                  {% endif %}
-                </div>
-                {% if imgs|length > 1 %}
-                <div class="product-image-lightbox__thumbs" role="tablist" aria-label="Галерея фото">
-                  {% for img in imgs|slice:":5" %}
-                  <button
-                    type="button"
-                    role="tab"
-                    class="product-image-lightbox__thumb {% if forloop.first %}is-active{% endif %}"
-                    data-lightbox-slide-thumb
-                    data-slide-index="{{ forloop.counter0 }}"
-                    data-image-url="{{ img.image.url }}"
-                    data-image-alt="{{ product.name }} {{ forloop.counter }}"
-                    aria-label="Фото {{ forloop.counter }}"
-                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                  >
-                    <img src="{{ img.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy">
-                  </button>
-                  {% endfor %}
-                </div>
-                {% endif %}
+          {% else %}
+            <p class="product-detail-luxe__empty">Нет изображения</p>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <div class="product-detail-luxe__content">
+        <div class="product-detail-luxe__content-inner">
+          <p class="product-detail-luxe__brand">{{ product.brand.name }}</p>
+          <h1 class="product-detail-luxe__title">{{ product.name }}</h1>
+          <p class="product-detail-luxe__year-country">
+            {% if product.year %}{{ product.year }}{% else %}—{% endif %}<span class="product-detail-luxe__year-country-sep" aria-hidden="true"> / </span>{% if product.country %}{{ product.country }}{% else %}—{% endif %}
+          </p>
+          <p class="product-detail-luxe__desc" data-collapsible data-expanded="false">
+            {{ product.description|default:"A profound exploration of sensory silence. A composed and intimate fragrance crafted for a discerning presence." }}
+          </p>
+          <button type="button" class="product-detail-luxe__desc-toggle" data-desc-toggle hidden>Показать полностью</button>
+
+          {% if in_stock_variants %}
+            <div id="product-volume-picker" class="product-detail-luxe__meta">
+              <p class="product-detail-luxe__meta-label">Объем</p>
+              <div class="product-detail-luxe__size-list">
+                {% for v in in_stock_variants %}
+                  <label class="product-detail-luxe__size-option">
+                    <input
+                      type="radio"
+                      name="variant_id"
+                      value="{{ v.id }}"
+                      data-price-display="{{ v.price|floatformat:2 }} ₽"
+                      {% if forloop.first %}checked{% endif %}
+                    >
+                    <span class="product-detail-luxe__size-option-text">{{ v.get_volume_display }}</span>
+                  </label>
+                {% endfor %}
               </div>
+            </div>
+
+            <div class="product-detail-luxe__price">
+              <p class="product-detail-luxe__meta-label">Цена</p>
+              <p id="detail-product-price" class="product-detail-luxe__price-value">{{ in_stock_variants.0.price|floatformat:2 }} ₽</p>
+            </div>
+
+            <div class="product-detail-luxe__actions">
+              <button
+                type="button"
+                class="product-detail-luxe__buy-btn"
+                hx-post="{% url 'products:cart_add' %}"
+                hx-include="#htmx-csrf, #product-volume-picker"
+                hx-target="#cart-toast"
+                hx-swap="innerHTML"
+              >
+                Добавить в корзину
+              </button>
+              {% include "products/partials/favorite_btn_detail.html" with product=product %}
             </div>
           {% else %}
-            <div class="mx-auto flex min-h-[min(29rem,53vh)] w-full max-w-[min(100%,34rem)] items-center justify-center border border-edge py-16">
-              <div class="text-sm text-muted">Нет изображения</div>
+            <div class="product-detail-luxe__price">
+              <p class="product-detail-luxe__meta-label">Цена</p>
+              <p class="product-detail-luxe__price-value">Out of stock</p>
+            </div>
+            <div class="product-detail-luxe__actions">
+              {% include "products/partials/favorite_btn_detail.html" with product=product %}
             </div>
           {% endif %}
-          {% endwith %}
         </div>
-
-        <p class="mt-7 w-full border-t border-edge pt-7 text-sm leading-7 text-muted">
-          {{ product.description|default:"Нишевая композиция из отборных материалов с благородным шлейфом и устойчивой стойкостью." }}
-        </p>
-      </div>
-
-      <div class="min-w-0 border border-edge p-8 lg:p-10">
-        <p class="mb-3 text-[10px] uppercase tracking-[0.22em] text-accent">{{ product.brand.name }}</p>
-        <h1 class="font-serif text-4xl leading-tight text-heading md:text-5xl">{{ product.name }}</h1>
-        <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">
-          {% if product.year %}{{ product.year }}{% else %}—{% endif %} / {% if product.country %}{{ product.country }}{% else %}—{% endif %}
-        </p>
-
-        {% if in_stock_variants %}
-          <p id="detail-product-price" class="mt-6 font-serif text-3xl text-heading">
-            {{ in_stock_variants.0.price|floatformat:2 }} ₽
-          </p>
-          <div id="product-volume-picker" class="mt-6 space-y-3 border-t border-edge pt-6">
-            <p class="text-[10px] uppercase tracking-[0.22em] text-accent">Объём</p>
-            {% for v in in_stock_variants %}
-              <label class="flex cursor-pointer items-center justify-between gap-4 border border-edge px-4 py-3 has-[:checked]:border-accent">
-                <span class="flex items-center gap-3 text-sm text-foreground">
-                  <input
-                    type="radio"
-                    name="variant_id"
-                    value="{{ v.id }}"
-                    data-price-display="{{ v.price|floatformat:2 }} ₽"
-                    class="h-4 w-4 border border-edge-strong bg-transparent text-accent accent-accent focus:ring-0"
-                    {% if forloop.first %}checked{% endif %}
-                  >
-                  <span>{{ v.get_volume_display }}</span>
-                </span>
-                <span class="font-serif text-lg text-heading">{{ v.price|floatformat:2 }} ₽</span>
-              </label>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="mt-6 font-serif text-3xl text-muted">Нет в наличии</p>
-        {% endif %}
-
-        <div class="mt-8 space-y-6 border-t border-edge pt-8">
-          <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Верхние ноты</h2>
-            <p class="text-sm text-note">
-              {% for note in top_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
-            </p>
-          </div>
-          <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Средние ноты</h2>
-            <p class="text-sm text-note">
-              {% for note in middle_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
-            </p>
-          </div>
-          <div>
-            <h2 class="mb-2 text-[10px] uppercase tracking-[0.22em] text-accent">Базовые ноты</h2>
-            <p class="text-sm text-note">
-              {% for note in base_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
-            </p>
-          </div>
-        </div>
-
-        <div class="product-detail-actions mt-10 flex w-full flex-wrap gap-1 {% if not in_stock_variants %}product-detail-actions--solo{% endif %}">
-          {% if in_stock_variants %}
-            <button
-              type="button"
-              class="btn-luxury min-h-[3.25rem] min-w-0 flex-1"
-              hx-post="{% url 'products:cart_add' %}"
-              hx-include="#htmx-csrf, #product-volume-picker"
-              hx-target="#cart-toast"
-              hx-swap="innerHTML"
-            >
-              Добавить в корзину
-            </button>
-          {% endif %}
-          {% include "products/partials/favorite_btn_detail.html" with product=product %}
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-20">
-      <h2 class="mb-8 w-full font-serif text-3xl text-heading">Похожие ароматы</h2>
-      <div class="grid grid-cols-2 gap-3 sm:gap-6 md:gap-7 xl:grid-cols-4">
-        {% for item in related_products %}
-          <article class="group flex h-full flex-col border border-edge p-3 sm:p-4">
-            <div class="relative mb-3 aspect-[4/5] shrink-0 overflow-hidden border border-edge sm:mb-6">
-              <a
-                href="{% url 'products:product_detail' item.slug %}"
-                class="absolute inset-0 z-0 block"
-                aria-label="{{ item.name }} — открыть карточку"
-                tabindex="-1"
-              ></a>
-              {% with rel_imgs=item.images.all %}
-                {% if rel_imgs %}
-                  <img src="{{ rel_imgs.0.image.url }}" alt="{{ item.name }}" class="relative z-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" loading="lazy">
-                {% else %}
-                  <div class="relative z-0 flex h-full w-full items-center justify-center text-xs text-muted pointer-events-none">Нет изображения</div>
-                {% endif %}
-              {% endwith %}
-              {% include "products/partials/favorite_btn_catalog.html" with product=item %}
-            </div>
-            <a
-              href="{% url 'products:product_detail' item.slug %}"
-              class="flex min-h-0 flex-1 flex-col text-inherit no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-edge-strong"
-            >
-              <p class="mb-1.5 text-[8px] uppercase tracking-[0.18em] text-accent sm:mb-3 sm:text-[10px] sm:tracking-[0.22em]">{{ item.brand.name }}</p>
-              <h3 class="line-clamp-3 min-h-0 font-serif text-base leading-snug text-cream sm:min-h-[4.5rem] sm:text-lg lg:min-h-[6rem] lg:text-2xl">{{ item.name }}</h3>
-              <div class="mt-auto pt-3 sm:pt-6">
-                <span class="font-serif text-sm text-cream sm:text-lg lg:text-xl">
-                  {% if item.min_price != None %}
-                    от {{ item.min_price|floatformat:2 }} ₽
-                  {% else %}
-                    нет в наличии
-                  {% endif %}
-                </span>
-              </div>
-            </a>
-          </article>
-        {% empty %}
-          <p class="col-span-full text-sm text-muted">Похожих ароматов пока нет.</p>
-        {% endfor %}
       </div>
     </section>
   </main>
+
+  <section class="product-detail-luxe__notes" aria-labelledby="product-notes-heading">
+    <div class="mx-auto w-full max-w-[min(100%,1680px)] px-5 pb-14 pt-10 sm:px-6 sm:pt-11 lg:px-8 lg:pb-16 lg:pt-14 xl:px-10">
+      <div class="relative mx-auto w-full max-w-[1360px]">
+        <div class="product-detail-luxe__notes-layout">
+        <div class="product-detail-luxe__notes-main">
+          <h2 id="product-notes-heading" class="product-detail-luxe__notes-eyebrow">Анатомия аккорда</h2>
+          {% if top_notes or middle_notes or base_notes %}
+            <div>
+              <div class="product-detail-luxe__notes-row">
+                <p class="product-detail-luxe__notes-label">Верхние ноты</p>
+                <p class="product-detail-luxe__notes-value">
+                  {% for note in top_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+                </p>
+              </div>
+              <div class="product-detail-luxe__notes-row">
+                <p class="product-detail-luxe__notes-label">Сердечные ноты</p>
+                <p class="product-detail-luxe__notes-value">
+                  {% for note in middle_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+                </p>
+              </div>
+              <div class="product-detail-luxe__notes-row">
+                <p class="product-detail-luxe__notes-label">Базовые ноты</p>
+                <p class="product-detail-luxe__notes-value">
+                  {% for note in base_notes %}{{ note.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+                </p>
+              </div>
+            </div>
+          {% else %}
+            <p class="product-detail-luxe__notes-empty-msg">Информация о нотах не указана.</p>
+          {% endif %}
+        </div>
+        <aside class="product-detail-luxe__notes-aside" aria-label="Логотип магазина">
+          <div class="product-detail-luxe__notes-brand-box">
+            <img
+              src="{% static 'core/img/store-logo-red.png' %}"
+              alt="nota"
+              class="product-detail-luxe__notes-brand-img"
+              width="500"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+        </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="product-detail-luxe__related">
+    <div class="mx-auto w-full max-w-[min(100%,1680px)] px-5 pb-14 pt-10 sm:px-6 sm:pt-11 lg:px-8 lg:pb-16 lg:pt-14 xl:px-10">
+      <div class="relative mx-auto w-full max-w-[1360px]">
+        <h2 class="mb-8 font-serif text-2xl text-heading sm:mb-10 sm:text-3xl">Похожие ароматы</h2>
+        <div
+          id="catalog-product-grid"
+          class="grid justify-items-center grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4"
+        >
+          {% for related in related_products %}
+            {% include "products/partials/catalog_product_card.html" with product=related %}
+          {% empty %}
+            <p class="col-span-full border border-dashed border-edge-strong bg-surface p-12 text-center font-serif text-2xl text-heading">
+              Похожих ароматов пока нет.
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
 
   {% include "core/partials/footer.html" %}
 </div>
@@ -252,6 +579,46 @@
   }
   picker.addEventListener("change", syncPrice);
   syncPrice();
+})();
+
+(function () {
+  var desc = document.querySelector("[data-collapsible]");
+  var toggleBtn = document.querySelector("[data-desc-toggle]");
+  if (!desc || !toggleBtn) return;
+
+  var canExpand = desc.scrollHeight > desc.clientHeight + 1;
+  if (!canExpand) return;
+
+  toggleBtn.hidden = false;
+  toggleBtn.addEventListener("click", function () {
+    var expanded = desc.classList.toggle("is-expanded");
+    desc.setAttribute("data-expanded", expanded ? "true" : "false");
+    toggleBtn.textContent = expanded ? "Свернуть" : "Показать полностью";
+  });
+})();
+
+(function () {
+  var mainImage = document.querySelector("[data-product-main-image]");
+  var thumbs = document.querySelectorAll("[data-product-thumb]");
+  if (!mainImage || !thumbs.length) return;
+
+  thumbs.forEach(function (thumb) {
+    thumb.addEventListener("click", function () {
+      var nextSrc = thumb.getAttribute("data-image-url");
+      var nextAlt = thumb.getAttribute("data-image-alt") || mainImage.alt;
+      if (!nextSrc) return;
+
+      thumbs.forEach(function (item) {
+        item.classList.remove("is-active");
+      });
+      thumb.classList.add("is-active");
+
+      if (mainImage.getAttribute("src") !== nextSrc) {
+        mainImage.setAttribute("src", nextSrc);
+      }
+      mainImage.setAttribute("alt", nextAlt);
+    });
+  });
 })();
 </script>
 {% endblock %}

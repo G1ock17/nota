@@ -1,5 +1,6 @@
 /**
  * Mirror of the Tailwind CDN `theme.extend` block in `core/templates/core/base.html`.
+ * NOTA: `surface` = rgb(--color-surface-1-rgb) плотная плитка; стекло — CSS `var(--color-surface)` + .product-card.
  * The live site uses the CDN config in the browser; this file exists for editors,
  * documentation, and a future PostCSS / CLI build if you add one.
  */
@@ -12,8 +13,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["Playfair Display", "Georgia", "serif"],
+        sans: ["Nota Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", "serif"],
+        serif: ["Nota Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", "serif"],
       },
       colors: {
         background: "rgb(var(--color-bg-rgb) / <alpha-value>)",

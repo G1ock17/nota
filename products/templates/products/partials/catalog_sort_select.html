@@ -1,12 +1,32 @@
-<select
-  name="sort"
-  id="{{ sort_select_id }}"
-  class="catalog-sort-bar__select {{ sort_select_extra_class }} shrink-0 border border-edge-strong bg-background text-foreground focus:border-accent focus:outline-none"
-  onchange="this.form.requestSubmit()"
->
-  <option value="newest" {% if current_sort == "newest" %}selected{% endif %}>Сначала новые</option>
-  <option value="popularity" {% if current_sort == "popularity" %}selected{% endif %}>По популярности</option>
-  <option value="price_asc" {% if current_sort == "price_asc" %}selected{% endif %}>Цена: по возрастанию</option>
-  <option value="price_desc" {% if current_sort == "price_desc" %}selected{% endif %}>Цена: по убыванию</option>
-  <option value="name" {% if current_sort == "name" %}selected{% endif %}>По названию</option>
-</select>
+<details class="catalog-sort-dropdown {{ sort_select_extra_class }}">
+  <summary id="{{ sort_select_id }}" class="catalog-sort-dropdown__summary">
+    {% if current_sort == "popularity" %}
+      По популярности
+    {% elif current_sort == "price_asc" %}
+      Цена: по возрастанию
+    {% elif current_sort == "price_desc" %}
+      Цена: по убыванию
+    {% elif current_sort == "name" %}
+      По названию
+    {% else %}
+      Сначала новые
+    {% endif %}
+  </summary>
+  <div class="catalog-sort-dropdown__menu" role="listbox" aria-labelledby="{{ sort_select_id }}">
+    <button type="submit" name="sort" value="newest" class="catalog-sort-dropdown__option {% if current_sort == 'newest' %}is-active{% endif %}">
+      Сначала новые
+    </button>
+    <button type="submit" name="sort" value="popularity" class="catalog-sort-dropdown__option {% if current_sort == 'popularity' %}is-active{% endif %}">
+      По популярности
+    </button>
+    <button type="submit" name="sort" value="price_asc" class="catalog-sort-dropdown__option {% if current_sort == 'price_asc' %}is-active{% endif %}">
+      Цена: по возрастанию
+    </button>
+    <button type="submit" name="sort" value="price_desc" class="catalog-sort-dropdown__option {% if current_sort == 'price_desc' %}is-active{% endif %}">
+      Цена: по убыванию
+    </button>
+    <button type="submit" name="sort" value="name" class="catalog-sort-dropdown__option {% if current_sort == 'name' %}is-active{% endif %}">
+      По названию
+    </button>
+  </div>
+</details>

@@ -1,63 +1,98 @@
-<header class="site-header relative z-50 bg-background max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:top-0 max-lg:z-[100] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out overflow-visible border-b border-edge-strong">
-    <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3 overflow-visible px-6 py-6 lg:flex-nowrap lg:gap-x-4 lg:gap-y-0 lg:px-12">
-        <a href="{% url 'home' %}" class="order-1 shrink-0 font-serif text-3xl uppercase tracking-[0.22em] text-accent nav-link">nota</a>
-        <div class="order-2 ml-auto flex shrink-0 items-center gap-2 lg:hidden">
-            <button
-                type="button"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-accent text-accent transition-colors hover:border-foreground hover:text-foreground"
-                data-nav-search-mobile-trigger
-                aria-label="Открыть поиск"
-                aria-expanded="false"
-                aria-controls="nav-search-input"
-            >
-                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-            </button>
-            <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 items-center justify-center border border-accent text-accent" aria-label="Открыть меню" aria-expanded="false">
-                <span class="sr-only">Открыть меню</span>
-                <span class="block h-px w-5 bg-current"></span>
-            </button>
-        </div>
-
-        <div
-            class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:flex-1 lg:items-center lg:justify-center lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[11px] uppercase tracking-[0.22em] text-nav"
-        >
-            <a href="{% url 'home' %}#featured" class="nav-link shrink-0 pb-1">Рекомендуемое</a>
-            <a href="{% url 'home' %}#categories" class="nav-link shrink-0 pb-1">Категории</a>
-            <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
-                <a href="{% url 'home' %}#brands" class="nav-link shrink-0 pb-1">Бренды</a>
+{% load static %}
+<header class="site-header relative z-50 max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:top-0 max-lg:z-[100] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out overflow-visible border-b border-edge-strong">
+    <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-3 overflow-visible px-6 py-7 max-lg:relative max-lg:py-5 lg:relative lg:flex-nowrap lg:gap-x-4 lg:gap-y-0 lg:px-12">
+        <a href="{% url 'home' %}" class="order-1 shrink-0 text-heading no-underline max-lg:hidden lg:absolute lg:left-1/2 lg:top-1/2 lg:flex lg:-translate-x-1/2 lg:-translate-y-1/2 lg:flex-col lg:items-center lg:text-center">
+            <img src="{% static 'core/img/brand-logo.png' %}" alt="" class="h-[100px] w-[100px] object-contain" width="100" height="100" loading="eager" decoding="async">
+        </a>
+        <div class="order-1 flex w-full items-center justify-between lg:hidden">
+            <div class="flex shrink-0 items-center gap-1">
+                <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-[5px] text-accent" aria-label="Открыть меню" aria-expanded="false">
+                    <span class="sr-only">Открыть меню</span>
+                    <span class="block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
+                    <span class="block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center text-accent transition-colors hover:text-foreground"
+                    data-nav-search-mobile-trigger
+                    data-search-page-url="{% url 'products:search' %}"
+                    aria-label="Открыть поиск"
+                    aria-expanded="false"
+                    aria-controls="nav-search-input"
+                >
+                    <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </button>
             </div>
-            <a href="{% url 'products:catalog' %}" class="nav-link shrink-0 pb-1">Каталог</a>
+
+            <a href="{% url 'home' %}" class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center text-heading no-underline">
+                <img src="{% static 'core/img/brand-logo.png' %}" alt="" class="site-header-mobile-logo h-14 w-auto object-contain sm:h-16" width="96" height="56" loading="eager" decoding="async">
+            </a>
+
+            <div class="flex shrink-0 items-center gap-1">
+                {% if user.is_authenticated %}
+                <a href="{% url 'account' %}?section=favorites" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Избранное">
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'account' %}%3Fsection%3Dfavorites" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Избранное">
+                {% endif %}
+                    <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+                    </svg>
+                </a>
+                <a
+                  href="{% url 'products:cart' %}"
+                  class="nav-cart relative inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground"
+                  aria-label="Корзина{% if cart_item_count %}, {{ cart_item_count }} шт.{% endif %}"
+                >
+                  <svg class="h-5 w-5 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                  {% include "core/partials/nav_cart_badge.html" with count=cart_item_count only %}
+                </a>
+            </div>
         </div>
 
         <div
-            class="nav-search relative order-3 min-w-0 w-full basis-full max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:z-[95] max-lg:hidden max-lg:border-b max-lg:border-edge-strong max-lg:bg-background max-lg:px-4 max-lg:py-3 max-lg:shadow-[0_8px_24px_rgba(0,0,0,0.35)] max-lg:[&.nav-search--drawer-open]:block lg:order-3 lg:block lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto lg:border-b-0 lg:px-0 lg:py-0 lg:shadow-none"
+            class="hidden min-w-0 overflow-visible lg:order-2 lg:z-[100] lg:relative lg:flex lg:shrink-0 lg:items-center lg:justify-start lg:gap-x-5 lg:px-2 xl:gap-x-7 text-[12px] uppercase tracking-[0.2em] text-nav"
+        >
+            <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
+                <a href="{% url 'home' %}#brands" class="nav-link shrink-0 pb-1 font-semibold">Бренды</a>
+            </div>
+            <a href="{% url 'products:catalog' %}" class="nav-link shrink-0 pb-1 font-semibold">Каталог</a>
+        </div>
+
+        <div
+            class="nav-search relative order-3 min-w-0 w-full basis-full max-lg:fixed max-lg:left-0 max-lg:right-0 max-lg:z-[95] max-lg:hidden max-lg:border-b max-lg:border-edge-strong max-lg:px-4 max-lg:py-3 max-lg:shadow-[0_8px_24px_rgba(0,0,0,0.35)] max-lg:[&.nav-search--drawer-open]:block lg:order-3 lg:ml-auto lg:block lg:w-[16rem] lg:max-w-[16rem] lg:shrink-0 lg:basis-auto lg:border-b-0 lg:px-0 lg:py-0 lg:shadow-none"
             data-nav-search
             data-search-url="{% url 'products:search_suggest' %}"
             data-product-detail-template="{% url 'products:product_detail' slug='__slug__' %}"
+            data-catalog-url="{% url 'products:search' %}"
         >
-            <label class="sr-only" for="nav-search-input">Поиск по каталогу</label>
-            <div class="relative">
-                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-accent/70" aria-hidden="true">
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                    </svg>
-                </span>
-                <input
-                    id="nav-search-input"
-                    type="search"
-                    name="nav_q"
-                    class="nav-search__input w-full border border-edge bg-background py-2.5 pl-10 pr-3 text-sm text-heading placeholder:text-placeholder focus:border-accent focus:outline-none focus:ring-1 focus:ring-edge-strong"
-                    aria-autocomplete="list"
-                    aria-controls="nav-search-results"
-                    aria-expanded="false"
-                    placeholder="Поиск…"
-                    autocomplete="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                >
-            </div>
+            <form method="get" action="{% url 'products:search' %}" class="nav-search__form">
+                <label class="sr-only" for="nav-search-input">Поиск по каталогу</label>
+                <div class="relative">
+                    <input
+                        id="nav-search-input"
+                        type="search"
+                        name="q"
+                        value="{{ request.GET.q|default:'' }}"
+                        class="nav-search__input w-full bg-transparent py-2 pr-8 text-[12px] uppercase tracking-[0.16em] text-heading placeholder:text-placeholder focus:outline-none"
+                        aria-autocomplete="list"
+                        aria-controls="nav-search-results"
+                        aria-expanded="false"
+                        placeholder="ПОИСК"
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                    >
+                    <span class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-accent" aria-hidden="true">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </span>
+                </div>
+            </form>
             <div
                 id="nav-search-results"
                 class="nav-search__panel"
@@ -67,7 +102,7 @@
             ></div>
         </div>
 
-        <div class="order-4 hidden shrink-0 items-center gap-x-1 text-[11px] uppercase tracking-[0.22em] text-nav lg:order-4 lg:flex">
+        <div class="order-4 hidden shrink-0 items-center gap-x-1 text-[12px] uppercase tracking-[0.2em] text-nav lg:order-4 lg:flex">
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"
@@ -101,11 +136,9 @@
             </a>
         </div>
 
-        <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[11px] uppercase tracking-[0.22em] text-nav lg:hidden">
-            <a href="{% url 'home' %}#featured" class="nav-link pb-1">Рекомендуемое</a>
-            <a href="{% url 'home' %}#categories" class="nav-link pb-1">Категории</a>
-            <a href="{% url 'home' %}#brands" class="nav-link pb-1">Бренды</a>
-            <a href="{% url 'products:catalog' %}" class="nav-link pb-1">Каталог</a>
+        <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[12px] uppercase tracking-[0.2em] text-nav lg:hidden">
+            <a href="{% url 'home' %}#brands" class="nav-link pb-1 font-semibold">Бренды</a>
+            <a href="{% url 'products:catalog' %}" class="nav-link pb-1 font-semibold">Каталог</a>
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"
@@ -173,6 +206,6 @@
 </header>
 <div
     id="site-header-mobile-spacer"
-    class="site-header-mobile-spacer hidden max-lg:block max-lg:w-full max-lg:bg-background"
+    class="site-header-mobile-spacer hidden max-lg:block max-lg:w-full"
     aria-hidden="true"
 ></div>

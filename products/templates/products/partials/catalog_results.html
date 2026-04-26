@@ -1,11 +1,18 @@
 {% load static %}
 {% include "products/partials/catalog_sort_bar.html" %}
 
-<div id="catalog-product-grid" class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+{% if current_query %}
+<div class="mb-8 flex items-end justify-between gap-4">
+  <h1 class="font-serif text-2xl text-heading sm:text-3xl">Products</h1>
+  <p class="text-[10px] uppercase tracking-[0.2em] text-muted">Search: {{ current_query }}</p>
+</div>
+{% endif %}
+
+<div id="catalog-product-grid" class="grid justify-items-center grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
   {% for product in product_list %}
     {% include "products/partials/catalog_product_card.html" with product=product %}
   {% empty %}
-    <div class="col-span-full border border-dashed border-edge-strong p-12 text-center">
+    <div class="col-span-full border border-dashed border-edge-strong bg-surface p-12 text-center">
       <p class="font-serif text-2xl text-heading">Ничего не найдено</p>
       <p class="mt-2 text-sm text-muted">Попробуйте изменить фильтры или сбросить их.</p>
     </div>

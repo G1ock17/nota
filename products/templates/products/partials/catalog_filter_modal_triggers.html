@@ -1,15 +1,15 @@
 {# Кнопки открытия модалок брендов / нот / года / страны — общий фрагмент для сайдбара (моб.) и полосы над сеткой (десктоп) #}
-<div class="catalog-sort-bar__filters grid w-full min-w-0 grid-cols-2 gap-3 md:flex md:flex-nowrap md:items-center md:gap-4 md:overflow-x-auto md:pb-0.5">
-  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px] md:w-auto" data-filter-modal-open="brands">
+<div class="catalog-sort-bar__filters grid w-full min-w-0 grid-cols-2 gap-3 lg:grid-cols-4">
+  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px]" data-filter-modal-open="brands">
     Бренды{% if selected_brands %} ({{ selected_brands|length }}){% endif %}
   </button>
-  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px] md:w-auto" data-filter-modal-open="notes">
+  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px]" data-filter-modal-open="notes">
     Ноты{% if notes_filter_selected_count %} ({{ notes_filter_selected_count }}){% endif %}
   </button>
-  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px] md:w-auto" data-filter-modal-open="years">
+  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px]" data-filter-modal-open="years">
     Год{% if selected_years %} ({{ selected_years|length }}){% endif %}
   </button>
-  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px] md:w-auto" data-filter-modal-open="countries">
+  <button type="button" class="btn-luxury w-full min-w-0 justify-center text-[10px]" data-filter-modal-open="countries">
     Страна{% if selected_countries %} ({{ selected_countries|length }}){% endif %}
   </button>
 </div>

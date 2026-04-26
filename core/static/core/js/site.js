@@ -15,6 +15,11 @@
             return String(template).split("__slug__").join(encodeURIComponent(slug));
         }
 
+        function catalogHref(urlBase, q) {
+            var sep = String(urlBase).indexOf("?") === -1 ? "?" : "&";
+            return String(urlBase) + sep + "q=" + encodeURIComponent(q || "");
+        }
+
         function getNavSearchPanel(root) {
             return root._navSearchPanel || null;
         }
@@ -24,22 +29,15 @@
             var panel = getNavSearchPanel(root);
             if (!input || !panel || !panel.classList.contains("is-open")) return;
             var r = input.getBoundingClientRect();
-            var gap = 4;
-            var margin = 10;
-            var minPanel = 420;
-            var maxPanel = Math.min(520, window.innerWidth - 2 * margin);
-            var w = Math.min(Math.max(r.width, minPanel), maxPanel);
-            var left = r.left;
-            if (left + w > window.innerWidth - margin) {
-                left = Math.max(margin, window.innerWidth - margin - w);
-            }
-            left = Math.max(margin, left);
-            panel.style.left = left + "px";
-            panel.style.top = r.bottom + gap + "px";
-            panel.style.width = w + "px";
-            var avail = window.innerHeight - r.bottom - gap - margin;
-            var cap = 360;
-            panel.style.maxHeight = Math.max(120, Math.min(cap, avail)) + "px";
+            var margin = 8;
+            var header = document.querySelector(".site-header");
+            var headerRect = header ? header.getBoundingClientRect() : null;
+            panel.style.left = "0px";
+            panel.style.width = "100vw";
+            panel.style.top = Math.round(Math.max(0, headerRect ? headerRect.bottom : r.bottom)) + "px";
+            var topPx = parseFloat(panel.style.top || "0") || 0;
+            var avail = window.innerHeight - topPx - margin;
+            panel.style.maxHeight = Math.max(180, avail) + "px";
         }
 
         function detachNavSearchPanelViewport(root) {
@@ -82,7 +80,7 @@
             }
         }
 
-        function renderResults(root, items, detailTpl) {
+        function renderResults(root, items, detailTpl, query, catalogUrl) {
             if (!items.length) {
                 openSearchPanel(
                     root,
@@ -95,7 +93,7 @@
                 var href = productHref(detailTpl, item.slug);
                 var a = document.createElement("a");
                 a.href = href;
-                a.className = "nav-search__row";
+                a.className = "nav-search__card";
 
                 if (item.image_url) {
                     var img = document.createElement("img");
@@ -117,11 +115,6 @@
                 var meta = document.createElement("div");
                 meta.className = "nav-search__meta";
 
-                var brand = document.createElement("div");
-                brand.className = "nav-search__brand";
-                brand.textContent = item.brand || "";
-                meta.appendChild(brand);
-
                 var name = document.createElement("p");
                 name.className = "nav-search__name";
                 name.textContent = item.name || "";
@@ -129,16 +122,25 @@
 
                 a.appendChild(meta);
 
-                var price = document.createElement("div");
-                price.className = "nav-search__price";
-                price.textContent = formatSuggestPrice(item.min_price);
-                a.appendChild(price);
-
                 frag.appendChild(a);
             });
 
             var wrap = document.createElement("div");
-            wrap.appendChild(frag);
+            wrap.className = "nav-search__content";
+            var list = document.createElement("div");
+            list.className = "nav-search__cards";
+            list.appendChild(frag);
+            wrap.appendChild(list);
+            if (catalogUrl && query) {
+                var footer = document.createElement("div");
+                footer.className = "nav-search__footer";
+                var more = document.createElement("a");
+                more.className = "btn-luxury nav-search__more";
+                more.href = catalogHref(catalogUrl, query);
+                more.textContent = "Показать больше";
+                footer.appendChild(more);
+                wrap.appendChild(footer);
+            }
             openSearchPanel(root, wrap.innerHTML);
         }
 
@@ -147,6 +149,7 @@
             var input = root.querySelector(".nav-search__input");
             var urlBase = root.getAttribute("data-search-url") || "";
             var detailTpl = root.getAttribute("data-product-detail-template") || "";
+            var catalogUrl = root.getAttribute("data-catalog-url") || "";
             if (!input || !urlBase || !detailTpl || !panelEl) return;
             if (panelEl.parentElement !== document.body) {
                 document.body.appendChild(panelEl);
@@ -183,7 +186,7 @@
                     })
                     .then(function (data) {
                         var items = (data && data.results) || [];
-                        renderResults(root, items, detailTpl);
+                        renderResults(root, items, detailTpl, q, catalogUrl);
                     })
                     .catch(function (err) {
                         if (err && err.name === "AbortError") return;
@@ -233,6 +236,13 @@
             btn.addEventListener("click", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+                if (window.matchMedia("(max-width: 1023px)").matches) {
+                    var targetUrl = btn.getAttribute("data-search-page-url") || "";
+                    if (targetUrl) {
+                        window.location.href = targetUrl;
+                        return;
+                    }
+                }
                 var root = document.querySelector("[data-nav-search]");
                 var input = root && root.querySelector(".nav-search__input");
                 if (!root || !input) return;
@@ -961,7 +971,7 @@
     function catalogMobileFiltersOpen() {
         var aside = document.getElementById("catalog-sidebar-filters");
         var backdrop = getCatalogMobileFiltersBackdrop();
-        if (!aside || !window.matchMedia("(max-width: 1023px)").matches) return;
+        if (!aside) return;
         aside.classList.add("is-open");
         aside.setAttribute("aria-hidden", "false");
         if (backdrop) {
@@ -986,11 +996,7 @@
             backdrop.setAttribute("aria-hidden", "true");
         }
         document.body.classList.remove("catalog-mobile-filters-open");
-        if (window.matchMedia("(min-width: 1024px)").matches) {
-            aside.removeAttribute("aria-hidden");
-        } else {
-            aside.setAttribute("aria-hidden", "true");
-        }
+        aside.setAttribute("aria-hidden", "true");
         restoreCatalogPageScroll();
     }
 
@@ -999,8 +1005,14 @@
         var desk = document.querySelector(".catalog-sort-bar-desktop-sort");
         var mob = document.querySelector(".catalog-sort-bar-mobile-sort");
         if (!desk && !mob) return;
-        if (desk) desk.disabled = !!mq;
-        if (mob) mob.disabled = !mq;
+        if (desk && mob) {
+            desk.disabled = !!mq;
+            mob.disabled = !mq;
+        } else if (desk) {
+            desk.disabled = false;
+        } else if (mob) {
+            mob.disabled = false;
+        }
         if (mq && desk && mob) {
             mob.value = desk.value;
         } else if (!mq && desk && mob) {
@@ -1188,12 +1200,12 @@
         );
     })();
 
-    (function initMobileHeaderScrollHide() {
+    (function initHeaderScrollHide() {
         var header = document.querySelector(".site-header");
         var spacer = document.getElementById("site-header-mobile-spacer");
         if (!header || !spacer) return;
 
-        var mq = window.matchMedia("(max-width: 1023px)");
+        var mobileMq = window.matchMedia("(max-width: 1023px)");
         var lastScrollY = window.scrollY || 0;
         var headerVisible = true;
         var HEADER_HIDE_CLASS = "site-header--scroll-hidden";
@@ -1209,20 +1221,24 @@
 
         function applyLayout() {
             ticking = false;
-            if (!mq.matches) {
-                spacer.style.height = "";
-                document.documentElement.style.removeProperty("--site-header-offset");
-                header.classList.remove(HEADER_HIDE_CLASS);
-                return;
-            }
-            var h = header.offsetHeight;
-            spacer.style.height = h + "px";
-            if (headerVisible) {
-                header.classList.remove(HEADER_HIDE_CLASS);
-                document.documentElement.style.setProperty("--site-header-offset", h + "px");
+            if (mobileMq.matches) {
+                var h = header.offsetHeight;
+                spacer.style.height = h + "px";
+                if (headerVisible) {
+                    header.classList.remove(HEADER_HIDE_CLASS);
+                    document.documentElement.style.setProperty("--site-header-offset", h + "px");
+                } else {
+                    header.classList.add(HEADER_HIDE_CLASS);
+                    document.documentElement.style.setProperty("--site-header-offset", "0px");
+                }
             } else {
-                header.classList.add(HEADER_HIDE_CLASS);
+                spacer.style.height = "";
                 document.documentElement.style.setProperty("--site-header-offset", "0px");
+                if (headerVisible) {
+                    header.classList.remove(HEADER_HIDE_CLASS);
+                } else {
+                    header.classList.add(HEADER_HIDE_CLASS);
+                }
             }
         }
 
@@ -1234,7 +1250,6 @@
         }
 
         function onScroll() {
-            if (!mq.matches) return;
             var y = window.scrollY || document.documentElement.scrollTop || 0;
             var delta = y - lastScrollY;
             lastScrollY = y;
@@ -1274,20 +1289,135 @@
             lastScrollY = window.scrollY || 0;
             accumDown = 0;
             accumUp = 0;
-            if (!mq.matches) {
-                headerVisible = true;
-            }
             applyLayout();
         }
 
         window.addEventListener("scroll", onScroll, { passive: true });
         window.addEventListener("resize", onResizeOrMq, { passive: true });
-        if (mq.addEventListener) {
-            mq.addEventListener("change", onResizeOrMq);
-        } else if (mq.addListener) {
-            mq.addListener(onResizeOrMq);
+        if (mobileMq.addEventListener) {
+            mobileMq.addEventListener("change", onResizeOrMq);
+        } else if (mobileMq.addListener) {
+            mobileMq.addListener(onResizeOrMq);
         }
         onResizeOrMq();
+    })();
+
+    (function initAnimatedSearchPlaceholders() {
+        var inputs = document.querySelectorAll("#nav-search-input, #search-page-input");
+        if (!inputs.length) return;
+
+        var brands = [
+            "Byredo",
+            "Amouage",
+            "Clive Christian",
+            "Creed",
+            "Tom Ford",
+            "Bvlgari",
+            "Carolina Herrera"
+        ];
+        var TYPE_MS = 95;
+        var ERASE_MS = 55;
+        var HOLD_MS = 1200;
+        var LOOP_PAUSE_MS = 420;
+
+        inputs.forEach(function (input) {
+            var state = {
+                active: true,
+                brandIndex: 0,
+                charIndex: 0,
+                deleting: false,
+                timer: null
+            };
+
+            function clearStepTimer() {
+                if (state.timer) {
+                    window.clearTimeout(state.timer);
+                    state.timer = null;
+                }
+            }
+
+            function setStaticPlaceholder() {
+                input.setAttribute("placeholder", "ПОИСК");
+            }
+
+            function scheduleNext(ms) {
+                clearStepTimer();
+                state.timer = window.setTimeout(step, ms);
+            }
+
+            function step() {
+                if (!state.active) return;
+                if (document.activeElement === input || (input.value || "").trim() !== "") {
+                    setStaticPlaceholder();
+                    scheduleNext(260);
+                    return;
+                }
+                var word = brands[state.brandIndex % brands.length];
+                if (!state.deleting) {
+                    state.charIndex += 1;
+                    input.setAttribute("placeholder", word.slice(0, state.charIndex));
+                    if (state.charIndex >= word.length) {
+                        state.deleting = true;
+                        scheduleNext(HOLD_MS);
+                        return;
+                    }
+                    scheduleNext(TYPE_MS);
+                    return;
+                }
+                state.charIndex = Math.max(0, state.charIndex - 1);
+                input.setAttribute("placeholder", word.slice(0, state.charIndex));
+                if (state.charIndex === 0) {
+                    state.deleting = false;
+                    state.brandIndex += 1;
+                    scheduleNext(LOOP_PAUSE_MS);
+                    return;
+                }
+                scheduleNext(ERASE_MS);
+            }
+
+            input.addEventListener("focus", function () {
+                setStaticPlaceholder();
+            });
+            input.addEventListener("input", function () {
+                if ((input.value || "").trim() !== "") {
+                    setStaticPlaceholder();
+                }
+            });
+            input.addEventListener("blur", function () {
+                if ((input.value || "").trim() === "") {
+                    scheduleNext(200);
+                }
+            });
+
+            setStaticPlaceholder();
+            scheduleNext(420);
+        });
+    })();
+
+    (function initCatalogSortDropdownDismiss() {
+        function closeAllSortDropdowns(exceptEl) {
+            document.querySelectorAll(".catalog-sort-dropdown[open]").forEach(function (el) {
+                if (exceptEl && el === exceptEl) return;
+                el.removeAttribute("open");
+            });
+        }
+
+        document.addEventListener("click", function (e) {
+            var inside = e.target && e.target.closest
+                ? e.target.closest(".catalog-sort-dropdown")
+                : null;
+            if (!inside) {
+                closeAllSortDropdowns();
+            } else {
+                closeAllSortDropdowns(inside);
+            }
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                closeAllSortDropdowns();
+            }
+        });
     })();
 
     (function () {

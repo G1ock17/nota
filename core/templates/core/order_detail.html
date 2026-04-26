@@ -4,7 +4,7 @@
 {% block title %}Заказ #{{ order.id }} — nota{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-background text-foreground">
+<div class="min-h-screen section-deep text-foreground">
   {% include "core/partials/navbar.html" %}
 
   <main class="mx-auto w-full max-w-6xl px-6 py-16 lg:px-12">
@@ -22,7 +22,7 @@
     <div class="mt-8 grid grid-cols-1 gap-8 xl:grid-cols-[1fr_320px]">
       <section class="space-y-4">
         {% for item in order.items.all %}
-          <article class="grid grid-cols-1 gap-4 border border-edge p-5 md:grid-cols-[110px_1fr_auto]">
+          <article class="account-panel grid grid-cols-1 gap-4 border border-edge p-5 md:grid-cols-[110px_1fr_auto]">
             <div class="aspect-[4/5] overflow-hidden border border-edge">
               {% with imgs=item.variant.product.images.all %}
                 {% if imgs %}
@@ -42,7 +42,7 @@
         {% endfor %}
       </section>
 
-      <aside class="h-fit border border-edge p-6">
+      <aside class="account-panel h-fit border border-edge p-6">
         <h2 class="font-serif text-3xl text-heading">Детали доставки</h2>
         <p class="mt-5 text-sm text-muted">Способ: {{ order.get_delivery_method_display }}</p>
         <p class="mt-2 text-sm text-muted">Адрес: {{ order.country }}, {{ order.city }}, {{ order.region }}, {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.postal_code }}</p>

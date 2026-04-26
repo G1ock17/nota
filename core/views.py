@@ -3,13 +3,13 @@ from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
-from django.db.models import Prefetch, Sum
+from django.db.models import Min, Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic.edit import FormView
 
-from products.models import Favorite, Order, ProductImage, Variant
+from products.models import Favorite, Order, Product, ProductImage, Variant
 from products.cart_utils import cart_total_items, get_cart
 
 from .models import DeliveryAddress, UserProfile
@@ -17,7 +17,35 @@ from .brand_constants import FEATURED_HOME_BRANDS
 
 
 def home(request):
-    return render(request, "core/home.html", {"featured_brands": FEATURED_HOME_BRANDS})
+    featured_products = (
+        Product.objects.select_related("brand")
+        .prefetch_related(
+            Prefetch(
+                "images",
+                queryset=ProductImage.objects.order_by("-is_main", "id"),
+            ),
+            Prefetch(
+                "variants",
+                queryset=Variant.objects.order_by("volume"),
+            ),
+        )
+        .annotate(
+            min_price=Min(
+                "variants__price",
+                filter=Q(variants__stock__gt=0),
+            ),
+        )
+        .filter(min_price__isnull=False)
+        .order_by("-created_at")[:3]
+    )
+    return render(
+        request,
+        "core/home.html",
+        {
+            "featured_brands": FEATURED_HOME_BRANDS,
+            "featured_products": featured_products,
+        },
+    )
 
 
 class SiteLoginView(LoginView):

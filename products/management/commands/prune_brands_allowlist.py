@@ -1,4 +1,4 @@
-"""
+﻿"""
 Delete all products and brands whose slug is not on the allowlist.
 
 Removes OrderItems that reference variants of deleted products first (Variant is PROTECTed).
@@ -21,7 +21,7 @@ ALLOWED_BRAND_NAMES = [
     "Bvlgari",
     "Chanel",
     "Creed",
-    "Christian Dior",
+    "Dior",
     "Carolina Herrera",
     "Ex Nihilo",
     "Escentric Molecules",
@@ -144,3 +144,4 @@ class Command(BaseCommand):
                 f"products: {Product.objects.count()}."
             )
         )
+

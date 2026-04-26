@@ -1,9 +1,9 @@
 <aside
   id="catalog-sidebar-filters"
-  class="catalog-mobile-filters-aside order-3 w-full shrink-0 max-lg:pointer-events-none max-lg:fixed max-lg:inset-0 max-lg:z-[150] max-lg:flex max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:flex-col max-lg:translate-y-full max-lg:overflow-hidden max-lg:bg-background max-lg:pt-[env(safe-area-inset-top,0px)] max-lg:transition-transform max-lg:duration-300 max-lg:ease-out max-lg:[&.is-open]:translate-y-0 max-lg:[&.is-open]:pointer-events-auto lg:order-none lg:static lg:h-auto lg:max-h-none lg:translate-y-0 lg:pt-0 lg:pointer-events-auto lg:overflow-visible lg:shadow-none"
+  class="catalog-mobile-filters-aside pointer-events-none fixed inset-0 z-[150] flex h-[100dvh] max-h-[100dvh] flex-col translate-y-full overflow-hidden bg-background pt-[env(safe-area-inset-top,0px)] transition-transform duration-300 ease-out [&.is-open]:translate-y-0 [&.is-open]:pointer-events-auto lg:items-center lg:justify-center lg:bg-black/60 lg:pt-0 lg:opacity-0 lg:transition-opacity lg:duration-200 lg:[&.is-open]:opacity-100"
 >
   <div
-    class="min-h-0 flex-1 space-y-8 overflow-y-auto border border-edge bg-background p-6 max-lg:rounded-none max-lg:border-0 lg:sticky lg:top-6"
+    class="filter-sidebar min-h-0 flex-1 space-y-8 overflow-y-auto border border-edge p-6 max-lg:rounded-none max-lg:border-0 lg:max-h-[80vh] lg:w-full lg:max-w-[720px] lg:flex-none lg:rounded-sm lg:border lg:shadow-[0_20px_70px_rgba(0,0,0,0.45)]"
     style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));"
   >
     <div class="flex items-center justify-between gap-2 lg:justify-between">
@@ -15,17 +15,12 @@
         >Очистить</a>
         <button
           type="button"
-          class="text-[10px] uppercase tracking-[0.2em] text-accent lg:hidden"
+          class="text-[10px] uppercase tracking-[0.2em] text-accent"
           data-catalog-mobile-filters-close
         >
           Готово
         </button>
       </div>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-2 lg:hidden">
-      <label for="id_sort_mobile" class="shrink-0 whitespace-nowrap text-[10px] uppercase text-accent">Сортировка</label>
-      {% include "products/partials/catalog_sort_select.html" with sort_select_id="id_sort_mobile" sort_select_extra_class="catalog-sort-bar-mobile-sort" %}
     </div>
 
     <div class="max-lg:border-t max-lg:border-edge max-lg:pt-6">
@@ -104,7 +99,7 @@
       </div>
     </div>
 
-    <div class="border-t border-edge pt-6 lg:hidden">
+    <div class="border-t border-edge pt-6">
       <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">По параметрам</span>
       {% include "products/partials/catalog_filter_modal_triggers.html" %}
     </div>

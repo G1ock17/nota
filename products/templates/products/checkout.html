@@ -6,114 +6,463 @@
 {% block extra_css %}
 <style>
   .checkout-root {
-    --checkout-bg: var(--color-bg);
-    --checkout-bg-soft: rgb(var(--color-surface-1-rgb));
-    --checkout-text: var(--color-text);
-    --checkout-text-muted: var(--color-text-muted);
-    --checkout-heading: rgb(var(--color-heading-rgb));
-    --checkout-accent: var(--color-accent);
-    --checkout-accent-hover: var(--color-accent-hover);
-    --checkout-line: var(--color-border);
-    --checkout-line-focus: var(--color-border-strong);
+    --checkout-burgundy: #330507;
+    --checkout-cream: #f7f5f1;
+    --checkout-line-light: rgba(51, 5, 7, 0.28);
+    --checkout-line-light-focus: rgba(51, 5, 7, 0.55);
+    --checkout-muted-on-cream: rgba(51, 5, 7, 0.55);
     --checkout-error: var(--color-danger);
   }
 
-  .checkout-input,
-  .checkout-textarea {
+  .checkout-split__inner {
+    display: grid;
+    grid-template-columns: 1fr;
     width: 100%;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid var(--checkout-line);
-    background: transparent;
-    padding: 0.55rem 0;
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: var(--checkout-text);
-    transition: border-color 0.15s ease;
   }
 
-  .checkout-input:focus,
-  .checkout-textarea:focus {
-    outline: none;
-    border-bottom-color: var(--checkout-line-focus);
+  @media (min-width: 1024px) {
+    .checkout-split__inner {
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      min-height: calc(100vh - var(--site-header-offset, 5.5rem));
+      align-items: stretch;
+    }
   }
 
-  .checkout-input::placeholder,
-  .checkout-textarea::placeholder {
-    color: rgb(var(--color-text-muted-rgb) / 0.55);
+  /* ——— Левая колонка (крем, тёмный текст) ——— */
+  .checkout-form-col {
+    background: var(--checkout-cream);
+    color: var(--checkout-burgundy);
+    padding: clamp(1.75rem, 5vw, 3.75rem) clamp(1.35rem, 4vw, 3.25rem) clamp(2.5rem, 6vw, 4.5rem);
   }
 
-  .checkout-ghost-btn {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--checkout-line-focus);
-    background: transparent;
-    padding: 1rem 1.25rem;
+  .checkout-hero-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    color: var(--checkout-burgundy) !important;
+    text-transform: uppercase;
+  }
+
+  .checkout-hero-kicker {
+    margin: 0.85rem 0 0;
     font-size: 10px;
     font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--checkout-muted-on-cream);
+  }
+
+  .checkout-sec {
+    margin-top: clamp(2rem, 4vw, 2.75rem);
+  }
+
+  .checkout-sec-label {
+    margin: 0 0 1.25rem;
+    font-size: 10px;
+    font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--checkout-heading);
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    color: var(--checkout-burgundy);
   }
 
-  .checkout-ghost-btn:hover:not(:disabled) {
-    background: rgb(var(--color-accent-rgb) / 0.08);
-    border-color: var(--checkout-accent);
-    color: var(--checkout-accent-hover);
-  }
-
-  .checkout-ghost-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
-  }
-
-  .checkout-address-card {
-    border: 1px solid var(--checkout-line-focus);
-    background: transparent;
+  .checkout-form-col .checkout-address-card {
+    border: 1px solid rgba(51, 5, 7, 0.12);
+    background: rgba(51, 5, 7, 0.04);
     padding: 1.25rem 1.35rem;
   }
 
-  .checkout-address-edit-btn {
+  .checkout-form-col #checkout-address-summary {
+    color: var(--checkout-burgundy) !important;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .checkout-form-col .checkout-address-edit-btn {
     display: flex;
     width: 100%;
     align-items: center;
     justify-content: center;
     margin-top: 1.1rem;
-    border: 1px solid var(--checkout-line-focus);
+    border: 1px solid var(--checkout-line-light);
     background: transparent;
     padding: 0.85rem 1rem;
     font-size: 10px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--checkout-accent);
+    color: var(--checkout-burgundy);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .checkout-form-col .checkout-address-edit-btn:hover {
+    background: rgba(51, 5, 7, 0.06);
+    border-color: var(--checkout-burgundy);
+  }
+
+  .checkout-form-col .checkout-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-burgundy);
+  }
+
+  .checkout-form-col .checkout-input,
+  .checkout-form-col .checkout-textarea {
+    width: 100%;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--checkout-line-light);
+    background: transparent;
+    padding: 0.55rem 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--checkout-burgundy);
+    transition: border-color 0.15s ease;
+  }
+
+  .checkout-form-col .checkout-input:focus,
+  .checkout-form-col .checkout-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--checkout-line-light-focus);
+  }
+
+  .checkout-form-col .checkout-input::placeholder,
+  .checkout-form-col .checkout-textarea::placeholder {
+    color: rgba(51, 5, 7, 0.38);
+  }
+
+  .checkout-form-col .checkout-terms {
+    color: var(--checkout-muted-on-cream);
+  }
+
+  .checkout-form-col .checkout-terms a {
+    color: var(--checkout-burgundy);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .checkout-form-col .checkout-terms a:hover {
+    opacity: 0.85;
+  }
+
+  .checkout-form-col .checkout-ghost-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--checkout-burgundy);
+    background: transparent;
+    padding: 1rem 1.25rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-burgundy);
+    cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   }
 
-  .checkout-address-edit-btn:hover {
-    background: rgb(var(--color-accent-rgb) / 0.08);
-    border-color: var(--checkout-accent);
-    color: var(--checkout-accent-hover);
+  .checkout-form-col .checkout-ghost-btn:hover:not(:disabled) {
+    background: var(--checkout-burgundy);
+    color: var(--checkout-cream);
+    border-color: var(--checkout-burgundy);
   }
 
+  .checkout-form-col .checkout-ghost-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+
+  .checkout-form-col .accent-accent {
+    accent-color: var(--checkout-burgundy);
+  }
+
+  /* ——— Правая колонка (бордо, светлый текст) ——— */
+  .checkout-summary {
+    background: var(--checkout-burgundy) !important;
+    border: none !important;
+    color: #f7f5f1;
+    padding: clamp(2rem, 5vw, 3.75rem) clamp(1.35rem, 4vw, 2.75rem) clamp(2.5rem, 5vw, 4rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .checkout-summary-body {
+    flex: 1 1 auto;
+  }
+
+  @media (min-width: 1024px) {
+    .checkout-summary {
+      position: sticky;
+      top: var(--site-header-offset, 0px);
+      align-self: start;
+      min-height: calc(100vh - var(--site-header-offset, 5.5rem));
+    }
+  }
+
+  .checkout-summary .text-heading,
+  .checkout-summary h1,
+  .checkout-summary h2,
+  .checkout-summary h3,
+  .checkout-summary .text-foreground {
+    color: #f7f5f1 !important;
+  }
+
+  .checkout-summary .text-muted {
+    color: rgba(247, 245, 241, 0.72) !important;
+  }
+
+  .checkout-summary-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.85rem, 3.5vw, 2.65rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f7f5f1 !important;
+  }
+
+  .checkout-line-item {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem 1.15rem;
+    align-items: start;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(247, 245, 241, 0.18);
+  }
+
+  .checkout-line-item:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .checkout-line-item__thumb {
+    width: 4.5rem;
+    height: 4.5rem;
+    overflow: hidden;
+    background: rgba(247, 245, 241, 0.12);
+  }
+
+  .checkout-line-item__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .checkout-line-item__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .checkout-line-item__name {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #f7f5f1 !important;
+  }
+
+  .checkout-line-item__price {
+    margin: 0;
+    flex-shrink: 0;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #f7f5f1 !important;
+  }
+
+  .checkout-line-item__brand {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.85) !important;
+  }
+
+  .checkout-line-item__meta {
+    margin: 0.35rem 0 0;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.65) !important;
+  }
+
+  .checkout-line-item__qty {
+    margin: 0.5rem 0 0;
+    font-size: 11px;
+    color: rgba(247, 245, 241, 0.7) !important;
+  }
+
+  .checkout-totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.75);
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(247, 245, 241, 0.14);
+  }
+
+  .checkout-totals-row .checkout-num {
+    color: #f7f5f1;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .checkout-total-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(247, 245, 241, 0.22);
+  }
+
+  .checkout-total-final span:first-child {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #f7f5f1;
+  }
+
+  .checkout-total-final .checkout-total-sum {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #f7f5f1 !important;
+  }
+
+  .checkout-summary-foot {
+    margin-top: auto;
+    padding-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .checkout-summary-foot-inner {
+    background: rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(247, 245, 241, 0.12);
+    padding: 1.25rem 1.35rem;
+  }
+
+  .checkout-summary-foot-title {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.92);
+  }
+
+  .checkout-summary-foot-text {
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    font-style: italic;
+    color: rgba(247, 245, 241, 0.78);
+  }
+
+  .checkout-summary .checkout-back {
+    display: inline-block;
+    margin-top: 1.75rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.65) !important;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .checkout-summary .checkout-back:hover {
+    color: #f7f5f1 !important;
+  }
+
+  /* ——— Модалка адреса: светлый фон, бордовый текст (как форма слева) ——— */
   #checkout-address-modal {
     max-width: 26rem;
     width: calc(100vw - 2rem);
-    border: 1px solid var(--checkout-line-focus);
-    background: var(--checkout-bg);
-    color: var(--checkout-text);
+    border: 1px solid rgba(51, 5, 7, 0.14);
+    background: #ffffff;
+    color: var(--checkout-burgundy);
     padding: 0;
+    box-shadow: 0 24px 48px rgba(51, 5, 7, 0.12);
   }
 
   #checkout-address-modal::backdrop {
-    background: rgba(0, 0, 0, 0.72);
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  #checkout-address-modal .checkout-input,
+  #checkout-address-modal .checkout-textarea {
+    width: 100%;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--checkout-line-light);
+    background: transparent;
+    padding: 0.55rem 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--checkout-burgundy);
+    transition: border-color 0.15s ease;
+  }
+
+  #checkout-address-modal .checkout-input:focus,
+  #checkout-address-modal .checkout-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--checkout-line-light-focus);
+  }
+
+  #checkout-address-modal .checkout-input::placeholder,
+  #checkout-address-modal .checkout-textarea::placeholder {
+    color: rgba(51, 5, 7, 0.38);
+  }
+
+  #checkout-address-modal .checkout-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-burgundy);
   }
 
   .checkout-modal-inner {
     padding: 1.35rem 1.5rem 1.5rem;
+  }
+
+  .checkout-modal-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--checkout-burgundy);
   }
 
   .checkout-modal-head {
@@ -121,7 +470,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    border-bottom: 1px solid var(--checkout-line);
+    border-bottom: 1px solid rgba(51, 5, 7, 0.12);
     padding-bottom: 0.85rem;
     margin-bottom: 1.25rem;
   }
@@ -129,15 +478,58 @@
   .checkout-modal-close {
     border: none;
     background: transparent;
-    color: var(--checkout-text-muted);
+    color: rgba(51, 5, 7, 0.55);
     font-size: 1.35rem;
     line-height: 1;
     cursor: pointer;
     padding: 0.15rem;
+    transition: color 0.15s ease;
   }
 
   .checkout-modal-close:hover {
-    color: var(--checkout-accent);
+    color: var(--checkout-burgundy);
+  }
+
+  #checkout-address-modal .checkout-ghost-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--checkout-burgundy);
+    background: transparent;
+    padding: 1rem 1.25rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-burgundy);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  #checkout-address-modal .checkout-ghost-btn:hover {
+    background: var(--checkout-burgundy);
+    color: var(--checkout-cream);
+    border-color: var(--checkout-burgundy);
+  }
+
+  .checkout-modal-cancel {
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-muted-on-cream);
+    cursor: pointer;
+    padding: 0.35rem;
+    transition: color 0.15s ease;
+  }
+
+  .checkout-modal-cancel:hover {
+    color: var(--checkout-burgundy);
   }
 
   #checkout-modal-error:empty {
@@ -150,186 +542,219 @@
     font-size: 0.8rem;
     color: var(--checkout-error);
   }
+
+  .checkout-split {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .checkout-error-banner {
+    width: 100%;
+    padding: 0.85rem clamp(1.25rem, 4vw, 2.5rem);
+    border-bottom: 1px solid rgba(185, 28, 28, 0.35);
+    background: rgba(185, 28, 28, 0.08);
+    color: var(--checkout-error);
+    font-size: 0.875rem;
+    text-align: center;
+  }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="checkout-root min-h-screen bg-background text-foreground">
+<div class="checkout-root min-h-screen section-deep text-foreground">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-6xl px-6 py-12 md:py-16 lg:px-10">
-    {% if cart_items %}
-      <header class="mb-12 text-center md:mb-16">
-        <h1 class="font-serif text-3xl tracking-tight text-heading md:text-4xl lg:text-[2.75rem]">Оформление заказа</h1>
-        <p class="mt-3 text-[10px] uppercase tracking-[0.28em] text-muted">Завершите оформление</p>
-      </header>
-
+  {% if cart_items %}
+    <div class="checkout-split w-full">
       {% if checkout_error %}
-        <div class="mx-auto mb-8 max-w-2xl border border-edge-strong bg-surface px-4 py-3 text-center text-sm text-danger" role="alert">
-          {{ checkout_error }}
-        </div>
+        <div class="checkout-error-banner" role="alert">{{ checkout_error }}</div>
       {% endif %}
 
-      <form method="post" action="{% url 'products:checkout' %}" class="grid grid-cols-1 gap-14 lg:grid-cols-[2fr_3fr] lg:gap-16 lg:items-start" id="checkout-main-form">
+      <form method="post" action="{% url 'products:checkout' %}" class="checkout-split__inner" id="checkout-main-form">
         {% csrf_token %}
         <input type="hidden" name="checkout_address_id" id="checkout-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
 
-        <aside>
-          <h2 class="border-b border-edge pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Сводка заказа</h2>
+        <div class="checkout-form-col">
+          <h1 class="checkout-hero-title">Информация</h1>
+          <p class="checkout-hero-kicker">Завершите оформление заказа</p>
 
-          <ul class="mt-8 space-y-8">
-            {% for item in cart_items %}
-              <li class="flex gap-4">
-                <div class="h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden border border-edge bg-surface">
-                  {% with imgs=item.variant.product.images.all %}
-                    {% if imgs %}
-                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy" width="72" height="72">
-                    {% else %}
-                      <div class="flex h-full items-center justify-center px-1 text-center text-[9px] uppercase tracking-wider text-muted">Нет фото</div>
-                    {% endif %}
-                  {% endwith %}
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-[9px] uppercase tracking-[0.18em] text-accent">{{ item.variant.product.brand.name }}</p>
-                  <p class="mt-1 font-serif text-base leading-snug text-heading">{{ item.variant.product.name }}</p>
-                  {% if item.variant.get_volume_display %}
-                    <p class="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted">{{ item.variant.get_volume_display }}</p>
-                  {% endif %}
-                  <p class="mt-2 text-xs text-muted">Кол-во: {{ item.quantity }}</p>
-                  <p class="mt-1 text-xs text-muted">Цена: {{ item.variant.price|floatformat:2 }}&nbsp;₽</p>
-                </div>
-                <p class="shrink-0 self-start font-serif text-base tabular-nums text-heading">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
-              </li>
-            {% endfor %}
-          </ul>
-
-          <div class="mt-10 space-y-3 border-t border-edge pt-6">
-            <div class="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-muted">
-              <span>Промежуточный итог</span>
-              <span class="tabular-nums text-foreground">{{ total_price|floatformat:2 }}&nbsp;₽</span>
+          <section class="checkout-sec" aria-labelledby="checkout-sec-address">
+            <h2 id="checkout-sec-address" class="checkout-sec-label">АДРЕС ДОСТАВКИ</h2>
+            <div class="checkout-address-card">
+              <p id="checkout-address-summary" class="text-sm leading-relaxed">
+                {% if checkout_address_summary %}
+                  {{ checkout_address_summary }}
+                {% else %}
+                  Адрес не указан. Нажмите «Изменить», чтобы добавить адрес доставки.
+                {% endif %}
+              </p>
+              <button type="button" id="checkout-open-address-modal" class="checkout-address-edit-btn" aria-haspopup="dialog" aria-controls="checkout-address-modal">
+                Изменить
+              </button>
             </div>
-            <div class="flex items-end justify-between gap-4 border-t border-edge pt-4">
-              <span class="text-sm font-medium uppercase tracking-[0.2em] text-heading">Итого</span>
-              <span class="font-serif text-2xl tabular-nums text-heading md:text-3xl">{{ total_price|floatformat:2 }}&nbsp;₽</span>
-            </div>
-          </div>
+          </section>
 
-          <a href="{% url 'products:cart' %}" class="mt-10 inline-block text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-accent">← В корзину</a>
-        </aside>
-
-        <section>
-          <h2 class="border-b border-edge pb-3 text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Доставка и контакты</h2>
-
-          <div class="checkout-address-card mt-10">
-            <p id="checkout-address-summary" class="text-sm leading-relaxed text-accent">
-              {% if checkout_address_summary %}
-                {{ checkout_address_summary }}
-              {% else %}
-                Адрес не указан. Нажмите «Изменить», чтобы добавить адрес доставки.
-              {% endif %}
-            </p>
-            <button type="button" id="checkout-open-address-modal" class="checkout-address-edit-btn" aria-haspopup="dialog" aria-controls="checkout-address-modal">
-              Изменить
-            </button>
-          </div>
-
-          <div class="mt-10 space-y-8">
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-8">
-              <div>
-                <label for="checkout-first-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Имя</label>
-                <input id="checkout-first-name" name="first_name" type="text" value="{{ checkout_form.first_name }}" required class="checkout-input" autocomplete="given-name">
+          <section class="checkout-sec">
+            <div class="space-y-8">
+              <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-8">
+                <div>
+                  <label for="checkout-first-name" class="checkout-label">Имя</label>
+                  <input id="checkout-first-name" name="first_name" type="text" value="{{ checkout_form.first_name }}" required class="checkout-input" autocomplete="given-name">
+                </div>
+                <div>
+                  <label for="checkout-last-name" class="checkout-label">Фамилия</label>
+                  <input id="checkout-last-name" name="last_name" type="text" value="{{ checkout_form.last_name }}" required class="checkout-input" autocomplete="family-name">
+                </div>
               </div>
+
               <div>
-                <label for="checkout-last-name" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Фамилия</label>
-                <input id="checkout-last-name" name="last_name" type="text" value="{{ checkout_form.last_name }}" required class="checkout-input" autocomplete="family-name">
+                <label for="checkout-email" class="checkout-label">Email</label>
+                <input id="checkout-email" name="email" type="email" value="{{ checkout_form.email }}" required class="checkout-input" autocomplete="email">
+              </div>
+
+              <div>
+                <label for="checkout-phone" class="checkout-label">Телефон</label>
+                <input id="checkout-phone" name="phone" type="tel" value="{{ checkout_form.phone }}" placeholder="+7…" required class="checkout-input" autocomplete="tel">
+              </div>
+
+              <div>
+                <label for="checkout-note" class="checkout-label">Комментарий к заказу</label>
+                <textarea id="checkout-note" name="order_note" rows="3" placeholder="Пожелания по доставке" class="checkout-textarea resize-y">{{ checkout_form.order_note }}</textarea>
               </div>
             </div>
+          </section>
 
-            <div>
-              <label for="checkout-email" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Email</label>
-              <input id="checkout-email" name="email" type="email" value="{{ checkout_form.email }}" required class="checkout-input" autocomplete="email">
-            </div>
-
-            <div>
-              <label for="checkout-phone" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Телефон</label>
-              <input id="checkout-phone" name="phone" type="tel" value="{{ checkout_form.phone }}" placeholder="+7…" required class="checkout-input" autocomplete="tel">
-            </div>
-
-            <div>
-              <label for="checkout-note" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Комментарий к заказу</label>
-              <textarea id="checkout-note" name="order_note" rows="3" placeholder="Пожелания по доставке" class="checkout-textarea resize-y">{{ checkout_form.order_note }}</textarea>
-            </div>
-          </div>
-
-          <label class="mt-10 flex items-start gap-3 text-xs leading-relaxed text-muted">
-            <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border border-edge-strong bg-background accent-accent focus:ring-0 focus:ring-offset-0">
+          <label class="checkout-terms mt-10 flex items-start gap-3 text-xs leading-relaxed">
+            <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border border-edge-strong bg-transparent accent-accent focus:ring-0 focus:ring-offset-0">
             <span>
               Соглашаюсь с
-              <a href="#" class="text-accent underline-offset-2 transition-colors hover:text-accent-hover">правилами</a>
+              <a href="#">правилами</a>
               и
-              <a href="#" class="text-accent underline-offset-2 transition-colors hover:text-accent-hover">политикой конфиденциальности</a>.
+              <a href="#">политикой конфиденциальности</a>.
             </span>
           </label>
 
           <div class="mt-8">
             <button type="submit" id="checkout-submit-btn" class="checkout-ghost-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
-            <p class="mt-3 text-center text-[10px] uppercase tracking-[0.16em] text-muted">Оплату подключим на следующем шаге</p>
+            <p class="mt-3 text-center text-[10px] uppercase tracking-[0.16em]" style="color: var(--checkout-muted-on-cream)">Оплату подключим на следующем шаге</p>
           </div>
-        </section>
-      </form>
-
-      <dialog id="checkout-address-modal" aria-labelledby="checkout-address-modal-title">
-        <div class="checkout-modal-inner">
-          <div class="checkout-modal-head">
-            <h3 id="checkout-address-modal-title" class="text-[11px] font-medium uppercase tracking-[0.22em] text-accent">Адрес доставки</h3>
-            <button type="button" class="checkout-modal-close" id="checkout-address-modal-close" aria-label="Закрыть">&times;</button>
-          </div>
-          <p id="checkout-modal-error" role="alert"></p>
-          <form id="checkout-address-modal-form">
-            {% csrf_token %}
-            <input type="hidden" name="address_id" id="modal-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
-            <div class="space-y-6">
-              <div>
-                <label for="modal-country" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Страна / регион</label>
-                <input id="modal-country" name="country" type="text" value="{{ address_prefill.country }}" required class="checkout-input" autocomplete="country-name">
-              </div>
-              <div>
-                <label for="modal-address-line1" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Адрес</label>
-                <input id="modal-address-line1" name="address_line1" type="text" value="{{ address_prefill.address_line1 }}" required class="checkout-input" autocomplete="street-address">
-              </div>
-              <div>
-                <label for="modal-address-line2" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Подъезд, этаж и т.д.</label>
-                <input id="modal-address-line2" name="address_line2" type="text" value="{{ address_prefill.address_line2 }}" class="checkout-input" autocomplete="address-line2" placeholder="Необязательно">
-              </div>
-              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-6">
-                <div>
-                  <label for="modal-city" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Город</label>
-                  <input id="modal-city" name="city" type="text" value="{{ address_prefill.city }}" required class="checkout-input" autocomplete="address-level2">
-                </div>
-                <div>
-                  <label for="modal-postal" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Индекс</label>
-                  <input id="modal-postal" name="postal_code" type="text" value="{{ address_prefill.postal_code }}" required class="checkout-input" autocomplete="postal-code">
-                </div>
-              </div>
-              <div>
-                <label for="modal-region" class="mb-1 block text-[10px] uppercase tracking-[0.2em] text-accent">Область / район</label>
-                <input id="modal-region" name="region" type="text" value="{{ address_prefill.region }}" required class="checkout-input" autocomplete="address-level1">
-              </div>
-            </div>
-            <div class="mt-8 flex flex-col gap-3">
-              <button type="submit" class="checkout-ghost-btn">Сохранить адрес</button>
-              <button type="button" class="text-center text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-accent" id="checkout-address-modal-cancel">Отмена</button>
-            </div>
-          </form>
         </div>
-      </dialog>
-    {% else %}
-      <div class="border border-dashed border-edge-strong px-8 py-16 text-center md:py-20">
+
+        <aside class="checkout-summary">
+          <h2 class="checkout-summary-title">Сводка</h2>
+
+          <div class="checkout-summary-body">
+          <ul class="mt-10 list-none p-0 m-0">
+            {% for item in cart_items %}
+              <li class="checkout-line-item">
+                <div class="checkout-line-item__thumb">
+                  {% with imgs=item.variant.product.images.all %}
+                    {% if imgs %}
+                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" loading="lazy" width="72" height="72">
+                    {% else %}
+                      <div class="flex h-full items-center justify-center px-1 text-center text-[8px] uppercase tracking-wider text-muted">Нет фото</div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                <div class="min-w-0">
+                  <div class="checkout-line-item__top">
+                    <div class="min-w-0">
+                      <p class="checkout-line-item__brand">{{ item.variant.product.brand.name }}</p>
+                      <p class="checkout-line-item__name">{{ item.variant.product.name }}</p>
+                      {% if item.variant.get_volume_display %}
+                        <p class="checkout-line-item__meta">{{ item.variant.get_volume_display }}</p>
+                      {% endif %}
+                      <p class="checkout-line-item__qty">Кол-во: {{ item.quantity }} · {{ item.variant.price|floatformat:2 }}&nbsp;₽ за ед.</p>
+                    </div>
+                    <p class="checkout-line-item__price">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="mt-6">
+            <div class="checkout-totals-row">
+              <span>Промежуточный итог</span>
+              <span class="checkout-num">{{ total_price|floatformat:2 }}&nbsp;₽</span>
+            </div>
+            <div class="checkout-totals-row">
+              <span>Доставка</span>
+              <span class="checkout-num" style="letter-spacing: 0.04em">По согласованию</span>
+            </div>
+          </div>
+
+          <div class="checkout-total-final">
+            <span>Итого</span>
+            <p class="checkout-total-sum">{{ total_price|floatformat:2 }}&nbsp;₽</p>
+          </div>
+          </div>
+
+          <div class="checkout-summary-foot">
+            <div class="checkout-summary-foot-inner">
+              <p class="checkout-summary-foot-title">Архитектура аромата</p>
+              <p class="checkout-summary-foot-text">Каждый заказ собирается вручную: проверка партии, упаковка и сопровождение до вручения — как в ателье парфюмерии.</p>
+            </div>
+            <a href="{% url 'products:cart' %}" class="checkout-back">← В корзину</a>
+          </div>
+        </aside>
+      </form>
+    </div>
+
+    <dialog id="checkout-address-modal" aria-labelledby="checkout-address-modal-title">
+      <div class="checkout-modal-inner">
+        <div class="checkout-modal-head">
+          <h3 id="checkout-address-modal-title" class="checkout-modal-title">Адрес доставки</h3>
+          <button type="button" class="checkout-modal-close" id="checkout-address-modal-close" aria-label="Закрыть">&times;</button>
+        </div>
+        <p id="checkout-modal-error" role="alert"></p>
+        <form id="checkout-address-modal-form">
+          {% csrf_token %}
+          <input type="hidden" name="address_id" id="modal-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
+          <div class="space-y-6">
+            <div>
+              <label for="modal-country" class="checkout-label">Страна / регион</label>
+              <input id="modal-country" name="country" type="text" value="{{ address_prefill.country }}" required class="checkout-input" autocomplete="country-name">
+            </div>
+            <div>
+              <label for="modal-address-line1" class="checkout-label">Адрес</label>
+              <input id="modal-address-line1" name="address_line1" type="text" value="{{ address_prefill.address_line1 }}" required class="checkout-input" autocomplete="street-address">
+            </div>
+            <div>
+              <label for="modal-address-line2" class="checkout-label">Подъезд, этаж и т.д.</label>
+              <input id="modal-address-line2" name="address_line2" type="text" value="{{ address_prefill.address_line2 }}" class="checkout-input" autocomplete="address-line2" placeholder="Необязательно">
+            </div>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-6">
+              <div>
+                <label for="modal-city" class="checkout-label">Город</label>
+                <input id="modal-city" name="city" type="text" value="{{ address_prefill.city }}" required class="checkout-input" autocomplete="address-level2">
+              </div>
+              <div>
+                <label for="modal-postal" class="checkout-label">Индекс</label>
+                <input id="modal-postal" name="postal_code" type="text" value="{{ address_prefill.postal_code }}" required class="checkout-input" autocomplete="postal-code">
+              </div>
+            </div>
+            <div>
+              <label for="modal-region" class="checkout-label">Область / район</label>
+              <input id="modal-region" name="region" type="text" value="{{ address_prefill.region }}" required class="checkout-input" autocomplete="address-level1">
+            </div>
+          </div>
+          <div class="mt-8 flex flex-col gap-3">
+            <button type="submit" class="checkout-ghost-btn">Сохранить адрес</button>
+            <button type="button" class="checkout-modal-cancel" id="checkout-address-modal-cancel">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+  {% else %}
+    <main class="mx-auto w-full max-w-6xl px-6 py-12 md:py-16 lg:px-10">
+      <div class="border border-dashed border-edge-strong bg-surface px-8 py-16 text-center md:py-20">
         <p class="font-serif text-2xl text-heading md:text-3xl">Корзина пуста</p>
         <a href="{% url 'products:catalog' %}" class="btn-luxury mt-8 inline-flex">Перейти в каталог</a>
       </div>
-    {% endif %}
-  </main>
+    </main>
+  {% endif %}
 
   {% include "core/partials/footer.html" %}
 </div>

@@ -4,10 +4,10 @@
 {% block title %}Вход — nota{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-background text-foreground">
+<div class="min-h-screen section-deep text-foreground">
   {% include "core/partials/navbar.html" %}
 
-  <main class="mx-auto w-full max-w-md px-6 py-16 lg:px-12">
+  <main class="auth-panel mx-auto my-12 w-full max-w-md border border-edge px-8 py-12 lg:my-16 lg:px-12 lg:py-14">
     <h1 class="font-serif text-4xl text-heading">Вход</h1>
     <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">Войдите в аккаунт</p>
 
@@ -59,7 +59,10 @@
 
     <p class="mt-6 text-sm text-muted">
       Нет аккаунта?
-      <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="text-accent hover:text-accent-hover transition-colors">Зарегистрироваться</a>
+      <a
+        href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}"
+        class="text-accent transition-colors hover:text-accent-hover"
+      >Зарегистрироваться</a>
     </p>
   </main>
 </div>
