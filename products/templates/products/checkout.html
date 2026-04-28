@@ -232,9 +232,9 @@
 
   .checkout-line-item {
     display: grid;
-    grid-template-columns: 4.5rem 1fr;
+    grid-template-columns: 3.25rem 1fr;
     gap: 1rem 1.15rem;
-    align-items: start;
+    align-items: center;
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid rgba(247, 245, 241, 0.18);
@@ -247,17 +247,33 @@
   }
 
   .checkout-line-item__thumb {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 3.25rem;
+    height: 5.25rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    background: rgba(247, 245, 241, 0.12);
+    background: transparent;
   }
 
   .checkout-line-item__thumb img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center bottom;
     display: block;
+  }
+
+  @media (max-width: 1023.98px) {
+    .checkout-line-item {
+      grid-template-columns: min(11.5rem, 52vw) 1fr;
+    }
+
+    .checkout-line-item__thumb {
+      width: 100%;
+      height: calc(min(11.5rem, 52vw) * 84 / 52);
+    }
   }
 
   .checkout-line-item__top {
@@ -268,7 +284,7 @@
   }
 
   .checkout-line-item__name {
-    margin: 0.2rem 0 0;
+    margin: 0;
     font-family: var(--font-serif);
     font-size: clamp(1rem, 1.8vw, 1.2rem);
     font-weight: 600;
@@ -288,15 +304,6 @@
     color: #f7f5f1 !important;
   }
 
-  .checkout-line-item__brand {
-    margin: 0;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.85) !important;
-  }
-
   .checkout-line-item__meta {
     margin: 0.35rem 0 0;
     font-size: 10px;
@@ -311,32 +318,12 @@
     color: rgba(247, 245, 241, 0.7) !important;
   }
 
-  .checkout-totals-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.75);
-    padding: 0.65rem 0;
-    border-bottom: 1px solid rgba(247, 245, 241, 0.14);
-  }
-
-  .checkout-totals-row .checkout-num {
-    color: #f7f5f1;
-    letter-spacing: 0.06em;
-    font-variant-numeric: tabular-nums;
-  }
-
   .checkout-total-final {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
-    margin-top: 1.25rem;
+    margin-top: 1.75rem;
     padding-top: 1.25rem;
     border-top: 1px solid rgba(247, 245, 241, 0.22);
   }
@@ -361,34 +348,54 @@
   .checkout-summary-foot {
     margin-top: auto;
     padding-top: clamp(1.75rem, 4vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
   }
 
-  .checkout-summary-foot-inner {
-    background: rgba(0, 0, 0, 0.12);
-    border: 1px solid rgba(247, 245, 241, 0.12);
-    padding: 1.25rem 1.35rem;
-  }
-
-  .checkout-summary-foot-title {
-    margin: 0;
+  .checkout-summary .checkout-submit-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(247, 245, 241, 0.88);
+    background: transparent;
+    padding: 1rem 1.25rem;
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.28em;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.92);
+    color: #f7f5f1;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   }
 
-  .checkout-summary-foot-text {
-    margin: 0.75rem 0 0;
-    font-size: 0.8rem;
-    line-height: 1.55;
-    font-style: italic;
-    color: rgba(247, 245, 241, 0.78);
+  .checkout-summary .checkout-submit-btn:hover:not(:disabled) {
+    background: #f7f5f1;
+    color: var(--checkout-burgundy);
+    border-color: #f7f5f1;
+  }
+
+  .checkout-summary .checkout-submit-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+
+  .checkout-summary-submit-note {
+    margin: 0;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.62);
+    line-height: 1.45;
   }
 
   .checkout-summary .checkout-back {
     display: inline-block;
-    margin-top: 1.75rem;
+    margin-top: 0;
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.2em;
@@ -400,6 +407,33 @@
 
   .checkout-summary .checkout-back:hover {
     color: #f7f5f1 !important;
+  }
+
+  /* «В корзину» в сводке: на телефоне показываем копию над «Информация» в левой колонке */
+  .checkout-form-col .checkout-back--form {
+    display: none;
+    margin: 0 0 0.85rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--checkout-muted-on-cream) !important;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .checkout-form-col .checkout-back--form:hover {
+    color: var(--checkout-burgundy) !important;
+  }
+
+  @media (max-width: 1023.98px) {
+    .checkout-form-col .checkout-back--form {
+      display: inline-block;
+    }
+
+    .checkout-summary-foot .checkout-back--summary {
+      display: none;
+    }
   }
 
   /* ——— Модалка адреса: светлый фон, бордовый текст (как форма слева) ——— */
@@ -576,6 +610,7 @@
         <input type="hidden" name="checkout_address_id" id="checkout-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
 
         <div class="checkout-form-col">
+          <a href="{% url 'products:cart' %}" class="checkout-back checkout-back--form">← В корзину</a>
           <h1 class="checkout-hero-title">Информация</h1>
           <p class="checkout-hero-kicker">Завершите оформление заказа</p>
 
@@ -634,11 +669,6 @@
               <a href="#">политикой конфиденциальности</a>.
             </span>
           </label>
-
-          <div class="mt-8">
-            <button type="submit" id="checkout-submit-btn" class="checkout-ghost-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
-            <p class="mt-3 text-center text-[10px] uppercase tracking-[0.16em]" style="color: var(--checkout-muted-on-cream)">Оплату подключим на следующем шаге</p>
-          </div>
         </div>
 
         <aside class="checkout-summary">
@@ -651,7 +681,7 @@
                 <div class="checkout-line-item__thumb">
                   {% with imgs=item.variant.product.images.all %}
                     {% if imgs %}
-                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" loading="lazy" width="72" height="72">
+                      <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" loading="lazy" width="52" height="84">
                     {% else %}
                       <div class="flex h-full items-center justify-center px-1 text-center text-[8px] uppercase tracking-wider text-muted">Нет фото</div>
                     {% endif %}
@@ -660,12 +690,11 @@
                 <div class="min-w-0">
                   <div class="checkout-line-item__top">
                     <div class="min-w-0">
-                      <p class="checkout-line-item__brand">{{ item.variant.product.brand.name }}</p>
                       <p class="checkout-line-item__name">{{ item.variant.product.name }}</p>
                       {% if item.variant.get_volume_display %}
                         <p class="checkout-line-item__meta">{{ item.variant.get_volume_display }}</p>
                       {% endif %}
-                      <p class="checkout-line-item__qty">Кол-во: {{ item.quantity }} · {{ item.variant.price|floatformat:2 }}&nbsp;₽ за ед.</p>
+                      <p class="checkout-line-item__qty">Кол-во: {{ item.quantity }}</p>
                     </div>
                     <p class="checkout-line-item__price">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
                   </div>
@@ -674,17 +703,6 @@
             {% endfor %}
           </ul>
 
-          <div class="mt-6">
-            <div class="checkout-totals-row">
-              <span>Промежуточный итог</span>
-              <span class="checkout-num">{{ total_price|floatformat:2 }}&nbsp;₽</span>
-            </div>
-            <div class="checkout-totals-row">
-              <span>Доставка</span>
-              <span class="checkout-num" style="letter-spacing: 0.04em">По согласованию</span>
-            </div>
-          </div>
-
           <div class="checkout-total-final">
             <span>Итого</span>
             <p class="checkout-total-sum">{{ total_price|floatformat:2 }}&nbsp;₽</p>
@@ -692,11 +710,9 @@
           </div>
 
           <div class="checkout-summary-foot">
-            <div class="checkout-summary-foot-inner">
-              <p class="checkout-summary-foot-title">Архитектура аромата</p>
-              <p class="checkout-summary-foot-text">Каждый заказ собирается вручную: проверка партии, упаковка и сопровождение до вручения — как в ателье парфюмерии.</p>
-            </div>
-            <a href="{% url 'products:cart' %}" class="checkout-back">← В корзину</a>
+            <button type="submit" id="checkout-submit-btn" class="checkout-submit-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
+            <p class="checkout-summary-submit-note">Оплату подключим на следующем шаге</p>
+            <a href="{% url 'products:cart' %}" class="checkout-back checkout-back--summary">← В корзину</a>
           </div>
         </aside>
       </form>
