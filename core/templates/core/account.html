@@ -16,7 +16,7 @@
       </button>
       <button type="button" class="lk-tab-btn" data-tab="orders-tab">
         <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="3" width="11" height="11" rx="1"/><path d="M5.5 3V2a1 1 0 011 0v1M9.5 3V2a1 1 0 011 0v1"/><path d="M4.5 8h7M4.5 11h4.5"/></svg>
-        <span class="account-cabinet-mobile-tabs__label">Мои заказы</span>
+        <span class="account-cabinet-mobile-tabs__label">Заказы</span>
       </button>
       <button type="button" class="lk-tab-btn" data-tab="favorites-tab">
         <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 13.5C8 13.5 2 9.2 2 5.5a3.5 3.5 0 016-2.4A3.5 3.5 0 0114 5.5c0 3.7-6 8-6 8z"/></svg>
@@ -24,15 +24,15 @@
       </button>
       <button type="button" class="lk-tab-btn" data-tab="gift-tab">
         <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="1.5" y="7" width="13" height="8" rx="1"/><path d="M1.5 7h13M8 7v8M5.5 4A2.5 2.5 0 018 7M10.5 4A2.5 2.5 0 008 7"/></svg>
-        <span class="account-cabinet-mobile-tabs__label">Подарочные карты</span>
-      </button>
-      <button type="button" class="lk-tab-btn" data-tab="notify-tab">
-        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 2a5 5 0 00-5 5v3l-1.5 2h13L13 10V7a5 5 0 00-5-5zM6.5 13a1.5 1.5 0 003 0"/></svg>
-        <span class="account-cabinet-mobile-tabs__label">Уведомления</span>
+        <span class="account-cabinet-mobile-tabs__label">Карты</span>
       </button>
       <button type="button" class="lk-tab-btn" data-tab="addresses-tab">
         <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 1.5A4.5 4.5 0 003.5 6c0 4 4.5 8.5 4.5 8.5S12.5 10 12.5 6A4.5 4.5 0 008 1.5z"/><circle cx="8" cy="6" r="1.5"/></svg>
-        <span class="account-cabinet-mobile-tabs__label">Мои адреса</span>
+        <span class="account-cabinet-mobile-tabs__label">Адреса</span>
+      </button>
+      <button type="submit" form="logout-form" class="lk-tab-btn" aria-label="Выйти из аккаунта">
+        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M10 8H3M6 5l-3 3 3 3"/><path d="M8 3h4a1 1 0 011 1v8a1 1 0 01-1 1H8"/></svg>
+        <span class="account-cabinet-mobile-tabs__label">Выйти</span>
       </button>
     </nav>
     <aside class="account-cabinet-sidebar">
@@ -55,10 +55,6 @@
       </button>
 
       <div class="account-cabinet-nav-label">Настройки</div>
-      <button type="button" class="lk-tab-btn" data-tab="notify-tab">
-        <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 2a5 5 0 00-5 5v3l-1.5 2h13L13 10V7a5 5 0 00-5-5zM6.5 13a1.5 1.5 0 003 0"/></svg>
-        Уведомления
-      </button>
       <button type="button" class="lk-tab-btn" data-tab="addresses-tab">
         <svg class="account-cabinet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M8 1.5A4.5 4.5 0 003.5 6c0 4 4.5 8.5 4.5 8.5S12.5 10 12.5 6A4.5 4.5 0 008 1.5z"/><circle cx="8" cy="6" r="1.5"/></svg>
         Мои адреса
@@ -203,15 +199,17 @@
                             {% endif %}
                           </span>
                           <span class="account-cabinet-order-date">{{ order.created_at|date:"d.m.Y" }}</span>
-                          <span class="account-cabinet-order-price">{{ order.total_price|floatformat:0 }} ₽</span>
-                          <span class="account-cabinet-order-line__status">
-                            {% if order.status == 'delivered' %}
-                              <span class="account-cabinet-badge account-cabinet-badge--delivered">{{ order.get_status_display }}</span>
-                            {% elif order.status == 'shipped' %}
-                              <span class="account-cabinet-badge account-cabinet-badge--transit">{{ order.get_status_display }}</span>
-                            {% else %}
-                              <span class="account-cabinet-badge account-cabinet-badge--processing">{{ order.get_status_display }}</span>
-                            {% endif %}
+                          <span class="account-cabinet-order-meta">
+                            <span class="account-cabinet-order-price">{{ order.total_price|floatformat:0 }} ₽</span>
+                            <span class="account-cabinet-order-line__status">
+                              {% if order.status == 'delivered' %}
+                                <span class="account-cabinet-badge account-cabinet-badge--delivered">{{ order.get_status_display }}</span>
+                              {% elif order.status == 'shipped' %}
+                                <span class="account-cabinet-badge account-cabinet-badge--transit">{{ order.get_status_display }}</span>
+                              {% else %}
+                                <span class="account-cabinet-badge account-cabinet-badge--processing">{{ order.get_status_display }}</span>
+                              {% endif %}
+                            </span>
                           </span>
                         </a>
                       </td>
@@ -285,26 +283,52 @@
         <header class="account-cabinet-page-head">
           <div>
             <h1 class="account-cabinet-page-title font-serif text-heading">Подарочные карты</h1>
-            <p class="account-cabinet-page-sub">Баланс и история</p>
+            <p class="account-cabinet-page-sub">Доступно {{ gift_total_balance|floatformat:2 }} ₽</p>
           </div>
         </header>
         <div class="account-cabinet-page-body">
-          <div class="account-cabinet-empty">
-            <p style="font-size:1.05rem;">Раздел в разработке.</p>
+          <div class="account-cabinet-card" style="margin-bottom: 1rem;">
+            <div class="account-cabinet-card-title">Активация карты</div>
+            {% if gift_ok %}
+              <p style="color:#166534; font-size:.95rem; margin-bottom:.75rem;">Карта успешно активирована.</p>
+            {% endif %}
+            {% if gift_error %}
+              <p style="color:#b91c1c; font-size:.95rem; margin-bottom:.75rem;">
+                {% if gift_error == 'not_found' %}Карта не найдена.
+                {% elif gift_error == 'expired' %}Срок действия карты истек.
+                {% elif gift_error == 'used_by_other' %}Карта уже активирована другим пользователем.
+                {% elif gift_error == 'already_mine' %}Эта карта уже привязана к вашему аккаунту.
+                {% else %}Введите код карты.{% endif %}
+              </p>
+            {% endif %}
+            <form method="post" action="{% url 'account' %}?section=gift" class="space-y-3">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="activate_gift_card">
+              <label class="account-cabinet-field-label" for="gift_code">Код карты</label>
+              <input id="gift_code" name="gift_code" required placeholder="GIFT-XXXX-XXXX" class="account-cabinet-input" style="text-transform:uppercase;">
+              <button type="submit" class="btn-luxury">Активировать</button>
+            </form>
           </div>
-        </div>
-      </div>
-
-      <div id="notify-tab" class="lk-tab-pane hidden">
-        <header class="account-cabinet-page-head">
-          <div>
-            <h1 class="account-cabinet-page-title font-serif text-heading">Уведомления</h1>
-            <p class="account-cabinet-page-sub">Настройки оповещений</p>
-          </div>
-        </header>
-        <div class="account-cabinet-page-body">
-          <div class="account-cabinet-empty">
-            <p style="font-size:1.05rem;">Раздел в разработке.</p>
+          <div class="account-cabinet-card">
+            <div class="account-cabinet-card-title">Мои активированные карты</div>
+            {% if gift_cards %}
+              <div class="space-y-3">
+                {% for card in gift_cards %}
+                  <div style="padding:.9rem 1rem;border:1px solid rgba(51,5,7,.1);">
+                    <div style="display:flex;justify-content:space-between;gap:.75rem;flex-wrap:wrap;">
+                      <strong>{{ card.code }}</strong>
+                      <span>Баланс: {{ card.balance|floatformat:2 }} ₽</span>
+                    </div>
+                    <div style="margin-top:.35rem;font-size:.85rem;color:rgba(51,5,7,.55);">
+                      Номинал: {{ card.nominal|floatformat:2 }} ₽
+                      {% if card.expires_at %} · Действует до: {{ card.expires_at|date:"d.m.Y" }}{% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p style="font-size:1.05rem;">У вас пока нет активированных карт.</p>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -488,7 +512,6 @@
     "orders-tab": "orders",
     "favorites-tab": "favorites",
     "gift-tab": "gift",
-    "notify-tab": "notify",
     "addresses-tab": "addresses",
     "profile-data-tab": "profile-data",
   };
@@ -497,7 +520,6 @@
     orders: "orders-tab",
     favorites: "favorites-tab",
     gift: "gift-tab",
-    notify: "notify-tab",
     addresses: "addresses-tab",
     "profile-data": "profile-data-tab",
   };

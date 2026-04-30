@@ -1,4 +1,5 @@
 from urllib.parse import urlencode
+from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -7,9 +8,12 @@ from django.db.models import Min, Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils import timezone
 from django.views.generic.edit import FormView
 
 from products.models import Favorite, Order, Product, ProductImage, Variant
+from products.gift_cards import total_active_balance
+from products.models import GiftCard, GiftCardTransaction
 from products.cart_utils import cart_total_items, get_cart
 
 from .models import DeliveryAddress, UserProfile
@@ -192,6 +196,30 @@ def account(request):
                         new_default.save(update_fields=["is_default"])
             return redirect("account")
 
+        if action == "activate_gift_card":
+            code = (request.POST.get("gift_code") or "").strip().upper()
+            if code:
+                card = GiftCard.objects.filter(code=code).first()
+                if not card:
+                    return redirect(f"{reverse('account')}?section=gift&gift_error=not_found")
+                if card.is_expired:
+                    return redirect(f"{reverse('account')}?section=gift&gift_error=expired")
+                if card.is_activated and card.user_id and card.user_id != request.user.id:
+                    return redirect(f"{reverse('account')}?section=gift&gift_error=used_by_other")
+                if card.is_activated and card.user_id == request.user.id:
+                    return redirect(f"{reverse('account')}?section=gift&gift_error=already_mine")
+                card.is_activated = True
+                card.user = request.user
+                card.activated_at = timezone.now()
+                card.save(update_fields=["is_activated", "user", "activated_at", "updated_at"])
+                GiftCardTransaction.objects.create(
+                    gift_card=card,
+                    amount=Decimal("0.00"),
+                    type=GiftCardTransaction.TxType.ACTIVATION,
+                )
+                return redirect(f"{reverse('account')}?section=gift&gift_ok=1")
+            return redirect(f"{reverse('account')}?section=gift&gift_error=empty")
+
     orders = (
         Order.objects.filter(user=request.user)
         .annotate(items_qty=Sum("items__quantity"))
@@ -226,6 +254,8 @@ def account(request):
         )
         .order_by("-created_at")
     )
+    gift_cards = GiftCard.objects.filter(user=request.user, is_activated=True).order_by("-activated_at")
+    gift_total_balance = total_active_balance(request.user)
 
     return render(
         request,
@@ -240,6 +270,10 @@ def account(request):
             "order_items_count": order_items_count,
             "addresses": addresses,
             "favorite_entries": favorite_entries,
+            "gift_cards": gift_cards,
+            "gift_total_balance": gift_total_balance,
+            "gift_error": request.GET.get("gift_error", ""),
+            "gift_ok": request.GET.get("gift_ok") == "1",
         },
     )
 
@@ -252,3 +286,52 @@ def order_detail(request, order_id: int):
         user=request.user,
     )
     return render(request, "core/order_detail.html", {"order": order})
+
+
+def gift_cards_catalog(request):
+    if request.method == "POST":
+        nominal_raw = (request.POST.get("nominal") or "").strip()
+        custom_raw = (request.POST.get("custom_nominal") or "").strip()
+        email = (request.POST.get("email") or "").strip()
+        raw_value = custom_raw or nominal_raw
+        try:
+            nominal = Decimal(raw_value)
+        except (InvalidOperation, TypeError):
+            return render(
+                request,
+                "core/gift_cards.html",
+                {"purchase_error": "Укажите корректный номинал.", "presets": [1000, 2000, 5000]},
+            )
+        if nominal <= 0:
+            return render(
+                request,
+                "core/gift_cards.html",
+                {"purchase_error": "Номинал должен быть больше 0.", "presets": [1000, 2000, 5000]},
+            )
+        card = GiftCard.objects.create(
+            code=GiftCard.generate_code(),
+            nominal=nominal,
+            balance=nominal,
+            buyer_email=email,
+        )
+        GiftCardTransaction.objects.create(
+            gift_card=card,
+            amount=nominal,
+            type=GiftCardTransaction.TxType.PURCHASE,
+        )
+        return render(
+            request,
+            "core/gift_cards.html",
+            {
+                "purchase_ok": True,
+                "created_code": card.code,
+                "presets": [1000, 2000, 5000],
+            },
+        )
+
+    return render(request, "core/gift_cards.html", {"presets": [1000, 2000, 5000]})
+
+
+@login_required
+def account_gift_cards(request):
+    return redirect(f"{reverse('account')}?section=gift")

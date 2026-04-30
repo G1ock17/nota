@@ -1,0 +1,46 @@
+{% extends "core/base.html" %}
+
+{% block title %}Подарочные карты — nota{% endblock %}
+
+{% block body %}
+<div class="min-h-screen section-deep text-foreground">
+  {% include "core/partials/navbar.html" %}
+  <main class="mx-auto w-full max-w-4xl px-6 py-12 lg:px-10">
+    <h1 class="font-serif text-4xl text-heading">Подарочные карты</h1>
+    <p class="mt-3 text-muted">Выберите номинал или укажите свою сумму. После покупки вы получите код формата GIFT-XXXX-XXXX.</p>
+
+    <div class="mt-8 border border-edge bg-surface p-6">
+      {% if purchase_ok %}
+        <p style="color:#166534; margin-bottom:1rem;">Карта создана. Код: <strong>{{ created_code }}</strong></p>
+      {% endif %}
+      {% if purchase_error %}
+        <p style="color:#b91c1c; margin-bottom:1rem;">{{ purchase_error }}</p>
+      {% endif %}
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block text-xs uppercase tracking-[0.2em] mb-2">Номинал</label>
+          <div class="grid grid-cols-3 gap-3">
+            {% for amount in presets %}
+            <label class="border border-edge px-3 py-2 text-center cursor-pointer">
+              <input type="radio" name="nominal" value="{{ amount }}" class="mr-2">
+              {{ amount }} ₽
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-[0.2em] mb-2" for="custom_nominal">Своя сумма</label>
+          <input id="custom_nominal" name="custom_nominal" type="number" min="100" step="1" class="w-full border border-edge px-3 py-2" placeholder="Например: 3500">
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-[0.2em] mb-2" for="email">Email получателя (опционально)</label>
+          <input id="email" name="email" type="email" class="w-full border border-edge px-3 py-2" placeholder="name@example.com">
+        </div>
+        <button class="btn-luxury" type="submit">Купить карту</button>
+      </form>
+    </div>
+  </main>
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}

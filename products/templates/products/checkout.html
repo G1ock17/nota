@@ -607,6 +607,7 @@
 
       <form method="post" action="{% url 'products:checkout' %}" class="checkout-split__inner" id="checkout-main-form">
         {% csrf_token %}
+        <input type="hidden" id="checkout-order-total-raw" value="{{ checkout_total_amount_str }}" autocomplete="off">
         <input type="hidden" name="checkout_address_id" id="checkout-address-id" value="{% if checkout_address %}{{ checkout_address.id }}{% endif %}">
 
         <div class="checkout-form-col">
@@ -660,6 +661,29 @@
             </div>
           </section>
 
+          {% if user.is_authenticated %}
+          <section class="checkout-sec" aria-labelledby="checkout-sec-gift-card">
+            <h2 id="checkout-sec-gift-card" class="checkout-sec-label">Подарочная карта</h2>
+            <div class="checkout-address-card">
+              <p class="text-sm leading-relaxed">
+                Доступный баланс: <strong id="gift-available-balance">{{ gift_available_balance|floatformat:2 }}</strong> ₽
+              </p>
+              <div class="mt-4 space-y-4">
+                <label class="checkout-terms flex items-center gap-3 text-xs">
+                  <input type="checkbox" id="gift-use-toggle" class="mt-0 h-4 w-4 shrink-0 cursor-pointer border border-edge-strong bg-transparent accent-accent focus:ring-0 focus:ring-offset-0" {% if gift_applied_amount > 0 %}checked{% endif %}>
+                  <span>Использовать баланс подарочной карты</span>
+                </label>
+                <div>
+                  <label for="gift-amount-input" class="checkout-label">Сумма списания</label>
+                  <input id="gift-amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" value="{{ gift_applied_amount_str }}" class="checkout-input">
+                  <p id="gift-apply-error" class="mt-2 text-xs" style="color: var(--checkout-error);"></p>
+                </div>
+                <button type="button" id="gift-apply-btn" class="checkout-ghost-btn">Применить</button>
+              </div>
+            </div>
+          </section>
+          {% endif %}
+
           <label class="checkout-terms mt-10 flex items-start gap-3 text-xs leading-relaxed">
             <input type="checkbox" name="terms_accepted" required class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border border-edge-strong bg-transparent accent-accent focus:ring-0 focus:ring-offset-0">
             <span>
@@ -707,6 +731,16 @@
             <span>Итого</span>
             <p class="checkout-total-sum">{{ total_price|floatformat:2 }}&nbsp;₽</p>
           </div>
+          {% if user.is_authenticated %}
+          <div class="checkout-total-final">
+            <span>Списание с подарочной карты</span>
+            <p class="checkout-total-sum" style="font-size:1.1rem;" id="gift-applied-summary">- {{ gift_applied_amount|floatformat:2 }} ₽</p>
+          </div>
+          <div class="checkout-total-final">
+            <span>К оплате</span>
+            <p class="checkout-total-sum" id="gift-payable-summary">{{ gift_payable_amount|floatformat:2 }} ₽</p>
+          </div>
+          {% endif %}
           </div>
 
           <div class="checkout-summary-foot">
@@ -790,12 +824,37 @@
     const hiddenId = document.getElementById("checkout-address-id");
     const modalAddressId = document.getElementById("modal-address-id");
     const submitBtn = document.getElementById("checkout-submit-btn");
+    const giftUseToggle = document.getElementById("gift-use-toggle");
+    const giftAmountInput = document.getElementById("gift-amount-input");
+    const giftApplyBtn = document.getElementById("gift-apply-btn");
+    const giftApplyError = document.getElementById("gift-apply-error");
+    const giftAppliedSummary = document.getElementById("gift-applied-summary");
+    const giftPayableSummary = document.getElementById("gift-payable-summary");
+    const orderTotalRawInput = document.getElementById("checkout-order-total-raw");
+
+    function parseMoneyInput(value) {
+      if (value === undefined || value === null) return NaN;
+      var s = String(value).trim();
+      s = s.replace(/\u00a0|\u202f/g, "");
+      s = s.replace(/\s/g, "");
+      if (!s) return NaN;
+      if (s.indexOf(",") !== -1 && s.indexOf(".") !== -1) {
+        s = s.replace(/\./g, "").replace(",", ".");
+      } else if (s.indexOf(",") !== -1) {
+        s = s.replace(",", ".");
+      }
+      var n = Number(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
 
     function getCsrfToken() {
       const fromMain = document.querySelector("#checkout-main-form [name=csrfmiddlewaretoken]");
       if (fromMain) return fromMain.value;
-      const fromModal = modalForm.querySelector("[name=csrfmiddlewaretoken]");
-      return fromModal ? fromModal.value : "";
+      if (modalForm) {
+        const fromModal = modalForm.querySelector("[name=csrfmiddlewaretoken]");
+        return fromModal ? fromModal.value : "";
+      }
+      return "";
     }
 
     function openModal() {
@@ -841,6 +900,60 @@
         } catch (err) {
           errEl.textContent = "Ошибка сети. Попробуйте ещё раз.";
         }
+      });
+    }
+
+    async function applyGiftCard() {
+      if (!giftApplyBtn || !giftAmountInput) return;
+      if (giftApplyError) giftApplyError.textContent = "";
+      const orderTotal = orderTotalRawInput
+        ? parseMoneyInput(orderTotalRawInput.value)
+        : parseMoneyInput("{{ checkout_total_amount_str }}");
+      let amount = 0;
+      if (giftUseToggle && giftUseToggle.checked) {
+        amount = parseMoneyInput(giftAmountInput.value || "0");
+      }
+      if (!Number.isFinite(orderTotal) || orderTotal <= 0) {
+        if (giftApplyError) giftApplyError.textContent = "Не удалось определить сумму заказа. Обновите страницу.";
+        return;
+      }
+      if (!Number.isFinite(amount) || amount < 0) {
+        if (giftApplyError) giftApplyError.textContent = "Введите корректную сумму.";
+        return;
+      }
+      const fd = new FormData();
+      fd.set("order_total", String(orderTotal));
+      fd.set("amount", String(amount));
+      try {
+        const res = await fetch("{% url 'api_cart_apply_gift_card' %}", {
+          method: "POST",
+          headers: { "X-CSRFToken": getCsrfToken() },
+          body: fd,
+          credentials: "same-origin",
+        });
+        const ct = (res.headers.get("content-type") || "").toLowerCase();
+        const isJson = ct.indexOf("application/json") !== -1;
+        const data = isJson ? await res.json().catch(function () { return {}; }) : {};
+        if (!res.ok || !isJson || data.ok !== true) {
+          if (giftApplyError) {
+            var msg = data.error;
+            if (!msg && res.status === 403) msg = "Нет доступа (CSRF). Обновите страницу и попробуйте снова.";
+            if (!msg && res.redirected) msg = "Сессия истекла. Войдите в аккаунт снова.";
+            if (!msg && !isJson) msg = "Сервер вернул неожиданный ответ. Обновите страницу.";
+            giftApplyError.textContent = msg || "Не удалось применить карту.";
+          }
+          return;
+        }
+        if (giftAppliedSummary) giftAppliedSummary.textContent = "- " + Number(data.amount).toFixed(2) + " ₽";
+        if (giftPayableSummary) giftPayableSummary.textContent = Number(data.payable_amount).toFixed(2) + " ₽";
+      } catch (e) {
+        if (giftApplyError) giftApplyError.textContent = "Ошибка сети. Попробуйте еще раз.";
+      }
+    }
+
+    if (giftApplyBtn) {
+      giftApplyBtn.addEventListener("click", function () {
+        applyGiftCard();
       });
     }
   })();

@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -7,6 +7,11 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .cart_utils import CART_SESSION_KEY, add_variant, cart_total_items, get_cart, set_variant_quantity
+from .gift_cards import (
+    GIFT_CARD_APPLY_SESSION_KEY,
+    apply_gift_cards_to_order,
+    total_active_balance,
+)
 from .models import Order, OrderItem, Variant
 from core.models import DeliveryAddress, UserProfile
 
@@ -366,9 +371,39 @@ def checkout_detail(request):
             checkout_has_address = _guest_address_complete(guest_data)
             address_prefill = _address_prefill_from_session_dict(guest_data)
 
+        gift_applied = Decimal("0.00")
+        gift_available = Decimal("0.00")
+        gift_payable = total_price
+        if request.user.is_authenticated:
+            gift_available = total_active_balance(request.user)
+            session_apply = request.session.get(GIFT_CARD_APPLY_SESSION_KEY) or {}
+            try:
+                gift_applied = Decimal(session_apply.get("amount", "0"))
+            except (InvalidOperation, TypeError, ValueError):
+                gift_applied = Decimal("0.00")
+            max_applicable = min(total_price, gift_available)
+            if gift_applied > max_applicable:
+                gift_applied = max_applicable
+            if gift_applied < 0:
+                gift_applied = Decimal("0.00")
+            gift_payable = total_price - gift_applied
+
+        # Для JS/API: без локализации (ru даёт «5 000,00» → Number() = NaN).
+        checkout_total_amount_str = format(total_price, "f")
+        gift_available_balance_str = format(gift_available, "f")
+        gift_applied_amount_str = format(gift_applied, "f")
+        gift_payable_amount_str = format(gift_payable, "f")
+
         return {
             "cart_items": items,
             "total_price": total_price,
+            "checkout_total_amount_str": checkout_total_amount_str,
+            "gift_available_balance": gift_available,
+            "gift_available_balance_str": gift_available_balance_str,
+            "gift_applied_amount": gift_applied,
+            "gift_applied_amount_str": gift_applied_amount_str,
+            "gift_payable_amount": gift_payable,
+            "gift_payable_amount_str": gift_payable_amount_str,
             "item_count": cart_total_items(raw_cart),
             "checkout_form": form_data,
             "checkout_address": checkout_address,
@@ -466,6 +501,8 @@ def checkout_detail(request):
             delivery_method=Order.DeliveryMethod.COURIER,
             order_note=checkout_form["order_note"],
             total_price=total_price,
+            gift_card_debit=Decimal("0.00"),
+            payable_amount=total_price,
         )
         OrderItem.objects.bulk_create(
             [
@@ -479,7 +516,16 @@ def checkout_detail(request):
                 for item in items
             ]
         )
+        if request.user.is_authenticated:
+            session_apply = request.session.get(GIFT_CARD_APPLY_SESSION_KEY) or {}
+            try:
+                requested = Decimal(session_apply.get("amount", "0"))
+            except (InvalidOperation, TypeError, ValueError):
+                requested = Decimal("0.00")
+            if requested > 0:
+                apply_gift_cards_to_order(order=order, user=request.user, requested_amount=requested)
         request.session[CART_SESSION_KEY] = {}
+        request.session.pop(GIFT_CARD_APPLY_SESSION_KEY, None)
         if not request.user.is_authenticated:
             request.session.pop(GUEST_CHECKOUT_ADDRESS_KEY, None)
             request.session["checkout_last_order_id"] = order.pk

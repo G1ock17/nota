@@ -1209,8 +1209,8 @@ main section {
         flex-direction: row;
         flex-wrap: nowrap;
         align-items: stretch;
-        justify-content: flex-start;
-        gap: 6px;
+        justify-content: space-between;
+        gap: 0;
         box-sizing: border-box;
         position: sticky;
         top: var(--site-header-offset, 0px);
@@ -1218,29 +1218,24 @@ main section {
         margin-left: -1.5rem;
         margin-right: -1.5rem;
         margin-bottom: 0.5rem;
-        padding: 10px 1.25rem 12px;
+        padding: 8px 1rem 10px;
         border-bottom: 1px solid var(--color-border);
         background: rgb(var(--background-color-rgb) / 0.94);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         transition: top 0.3s ease;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .account-cabinet-mobile-tabs::-webkit-scrollbar {
-        display: none;
+        overflow: hidden;
     }
 
     .account-cabinet-mobile-tabs .lk-tab-btn {
-        flex: 0 0 auto;
+        flex: 1 1 0;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        gap: 6px;
-        padding: 6px 10px 6px;
+        gap: 4px;
+        padding: 6px 2px 5px;
         margin: 0;
         border: none;
         border-top: 2px solid transparent;
@@ -1266,8 +1261,8 @@ main section {
     }
 
     .account-cabinet-mobile-tabs .account-cabinet-nav-icon {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
         flex-shrink: 0;
         opacity: 0.55;
     }
@@ -1278,14 +1273,15 @@ main section {
 
     .account-cabinet-mobile-tabs__label {
         display: block;
-        width: max-content;
-        max-width: none;
-        font-size: 9px;
+        width: 100%;
+        font-size: 8px;
         text-transform: uppercase;
         text-align: center;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-family: var(--font-serif);
-        letter-spacing: 0.05em;
+        letter-spacing: 0.035em;
     }
 
     .account-cabinet-sidebar .account-cabinet-nav-label,
@@ -1312,14 +1308,7 @@ main section {
 
 @media (max-width: 1023.98px) {
     .account-cabinet-sidebar {
-        border-right: none;
-        border-bottom: 1px solid var(--color-border);
-        padding: 1rem 0 1.25rem;
-    }
-
-    .account-cabinet-sidebar-bottom {
-        padding: 0 1.25rem 0;
-        border-top: none;
+        display: none;
     }
 }
 
@@ -1442,7 +1431,7 @@ main section {
 
 @media (max-width: 639.98px) {
     .account-cabinet-page-body {
-        padding: 1.35rem;
+        padding: 1rem;
     }
 }
 
@@ -1486,6 +1475,12 @@ main section {
     padding: 1.75rem 2rem;
 }
 
+@media (max-width: 639.98px) {
+    .account-cabinet-card {
+        padding: 1.1rem 1rem;
+    }
+}
+
 .account-cabinet-card-title {
     font-size: 10px;
     letter-spacing: 0.2em;
@@ -1522,6 +1517,10 @@ main section {
     gap: 24px;
 }
 
+.account-cabinet-profile-grid > * {
+    min-width: 0;
+}
+
 @media (max-width: 899.98px) {
     .account-cabinet-profile-grid {
         grid-template-columns: 1fr;
@@ -1530,14 +1529,26 @@ main section {
 
 .account-cabinet-stat-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
+}
+
+@media (max-width: 639.98px) {
+    .account-cabinet-stat-grid {
+        gap: 10px;
+    }
 }
 
 .account-cabinet-stat-box {
     background: rgb(var(--color-elevated-rgb));
     border: 1px solid var(--color-border);
     padding: 18px;
+}
+
+@media (max-width: 639.98px) {
+    .account-cabinet-stat-box {
+        padding: 12px;
+    }
 }
 
 .account-cabinet-stat-num {
@@ -1547,6 +1558,12 @@ main section {
     color: rgb(var(--color-heading-rgb));
     line-height: 1;
     margin-bottom: 6px;
+}
+
+@media (max-width: 639.98px) {
+    .account-cabinet-stat-num {
+        font-size: 1.95rem;
+    }
 }
 
 .account-cabinet-stat-num--gold {
@@ -1661,6 +1678,10 @@ main section {
     color: rgb(var(--color-text-rgb));
 }
 
+.account-cabinet-order-meta {
+    display: contents;
+}
+
 .account-cabinet-badge {
     display: inline-block;
     font-size: 10px;
@@ -1685,6 +1706,113 @@ main section {
     background: rgba(51, 5, 7, 0.05);
     color: rgba(51, 5, 7, 0.55);
     border: 1px solid rgba(51, 5, 7, 0.12);
+}
+
+@media (max-width: 899.98px) {
+    .account-cabinet-orders-wrap {
+        overflow: visible;
+    }
+
+    .account-cabinet-orders-table {
+        min-width: 0;
+    }
+
+    .account-cabinet-orders-table thead {
+        display: none;
+    }
+
+    .account-cabinet-order-line {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "num"
+            "main"
+            "date"
+            "meta";
+        column-gap: 12px;
+        row-gap: 6px;
+        padding: 0;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--background-color);
+        margin-bottom: 14px;
+    }
+
+    .account-cabinet-order-num,
+    .account-cabinet-order-line__main,
+    .account-cabinet-order-date {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .account-cabinet-order-num {
+        grid-area: num;
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin-top: 12px;
+        color: var(--color-accent);
+    }
+
+    .account-cabinet-order-line__main {
+        grid-area: main;
+    }
+
+    .account-cabinet-order-name {
+        font-family: var(--font-serif);
+        font-size: 1.9rem;
+        line-height: 1.06;
+    }
+
+    .account-cabinet-order-desc {
+        margin-top: 7px;
+        font-size: 14px;
+    }
+
+    .account-cabinet-order-date {
+        grid-area: date;
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    .account-cabinet-order-meta {
+        grid-area: meta;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--color-border);
+        padding: 12px 14px 12px 12px;
+        gap: 10px;
+    }
+
+    .account-cabinet-order-price {
+        font-family: var(--font-serif);
+        font-size: 1.95rem;
+        color: rgb(var(--color-heading-rgb));
+    }
+
+    .account-cabinet-order-line__status {
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 639.98px) {
+    .account-cabinet-order-name {
+        font-size: 1.75rem;
+    }
+
+    .account-cabinet-order-desc {
+        font-size: 13px;
+    }
+
+    .account-cabinet-order-date {
+        font-size: 12px;
+    }
+
+    .account-cabinet-order-price {
+        font-size: 1.7rem;
+    }
 }
 
 .account-cabinet-empty {

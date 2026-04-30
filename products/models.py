@@ -1,5 +1,7 @@
 import re
 from datetime import timedelta
+from decimal import Decimal
+import secrets
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -197,6 +199,8 @@ class Order(models.Model):
     )
     tracking_number = models.CharField(max_length=120, blank=True)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
+    gift_card_debit = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    payable_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -242,3 +246,78 @@ class Favorite(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_id} ♥ {self.product_id}"
+
+
+class GiftCard(models.Model):
+    code = models.CharField(max_length=32, unique=True, db_index=True, blank=True)
+    nominal = models.DecimalField(max_digits=12, decimal_places=2)
+    balance = models.DecimalField(max_digits=12, decimal_places=2)
+    is_activated = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="gift_cards",
+        null=True,
+        blank=True,
+    )
+    buyer_email = models.EmailField(blank=True)
+    activated_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.code} ({self.balance})"
+
+    @staticmethod
+    def generate_code() -> str:
+        while True:
+            part1 = secrets.token_hex(2).upper()
+            part2 = secrets.token_hex(2).upper()
+            code = f"GIFT-{part1}-{part2}"
+            if not GiftCard.objects.filter(code=code).exists():
+                return code
+
+    @property
+    def is_expired(self) -> bool:
+        return bool(self.expires_at and timezone.now() > self.expires_at)
+
+
+class GiftCardTransaction(models.Model):
+    class TxType(models.TextChoices):
+        DEBIT = "debit", "Списание"
+        CREDIT = "credit", "Пополнение"
+        PURCHASE = "purchase", "Покупка"
+        ACTIVATION = "activation", "Активация"
+
+    gift_card = models.ForeignKey(
+        GiftCard,
+        on_delete=models.CASCADE,
+        related_name="transactions",
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    type = models.CharField(max_length=16, choices=TxType.choices)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        related_name="gift_card_transactions",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["gift_card", "order", "type"],
+                condition=models.Q(type="debit", order__isnull=False),
+                name="unique_gift_card_debit_per_order",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.gift_card.code}: {self.type} {self.amount}"
