@@ -54,6 +54,13 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="font-sans antialiased">
+    {% if messages %}
+    <div class="fixed left-1/2 top-[calc(var(--site-header-offset,5.5rem)+0.5rem)] z-[200] w-[min(100%-2rem,36rem)] -translate-x-1/2 space-y-2" role="alert">
+      {% for message in messages %}
+        <p class="border border-edge-strong bg-surface px-4 py-3 text-sm text-foreground shadow-lg">{{ message }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
     <form id="htmx-csrf" hidden>{% csrf_token %}</form>
     <div id="cart-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm empty:hidden" aria-live="polite"></div>
     {% include "products/partials/favorite_auth_modal.html" %}

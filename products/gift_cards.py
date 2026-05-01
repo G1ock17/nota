@@ -116,3 +116,17 @@ def apply_gift_cards_to_order(order: Order, user, requested_amount: Decimal) -> 
     else:
         order.save(update_fields=["gift_card_debit", "payable_amount"])
     return debited
+
+
+@transaction.atomic
+def cancel_checkout_order_after_payment_failure(order: Order) -> None:
+    """Откатывает списания подарочных карт и удаляет заказ, если оплату начать не удалось."""
+    for tx in GiftCardTransaction.objects.select_for_update().filter(
+        order=order,
+        type=GiftCardTransaction.TxType.DEBIT,
+    ).select_related("gift_card"):
+        card = tx.gift_card
+        card.balance = card.balance + tx.amount
+        card.save(update_fields=["balance", "updated_at"])
+    GiftCardTransaction.objects.filter(order=order).delete()
+    order.delete()

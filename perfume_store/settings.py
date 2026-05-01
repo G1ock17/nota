@@ -10,10 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Корневой `.env` (не коммитится) — подхватывается до чтения os.environ ниже.
+load_dotenv(BASE_DIR / ".env")
+
+# ЮKassa (тестовые ключи из личного кабинета: Настройки → API-ключи, режим «Тест»).
+YOOKASSA_SHOP_ID = os.environ.get("YOOKASSA_SHOP_ID", "").strip()
+YOOKASSA_SECRET_KEY = os.environ.get("YOOKASSA_SECRET_KEY", "").strip()
 
 
 # Quick-start development settings - unsuitable for production

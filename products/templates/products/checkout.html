@@ -745,7 +745,13 @@
 
           <div class="checkout-summary-foot">
             <button type="submit" id="checkout-submit-btn" class="checkout-submit-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
-            <p class="checkout-summary-submit-note">Оплату подключим на следующем шаге</p>
+            <p class="checkout-summary-submit-note">
+              {% if yookassa_enabled %}
+                Далее — тестовая оплата в ЮKassa (карта из кабинета разработчика).
+              {% else %}
+                Оплата онлайн появится после настройки ЮKassa (переменные YOOKASSA_*).
+              {% endif %}
+            </p>
             <a href="{% url 'products:cart' %}" class="checkout-back checkout-back--summary">← В корзину</a>
           </div>
         </aside>
