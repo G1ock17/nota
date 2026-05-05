@@ -11,42 +11,81 @@
     min-height: min(88vh, 860px);
     display: flex;
     flex-direction: column;
-    background: #330507;
+    /*
+      У catalog-bg.png внутри квадрата фон #000. При contain поля слева/справа
+      должны быть тем же #000 — иначе видна «рамка» (бордовый #330507).
+      Бордовый даём только мягким виньетом у краёв экрана в ::after.
+    */
+    background-color: #000000;
     overflow: hidden;
 }
-.home-hero-wrap > img {
+/* Птица смещена вправо, чтобы левая половина оставалась чистой для текста */
+.home-hero-wrap::before {
+    content: "";
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 30%;
-    opacity: 0.4;
+    z-index: 0;
+    background: url("{% static 'core/img/catalog-bg.png' %}") 72% center / auto 92% no-repeat;
     pointer-events: none;
 }
-.home-hero-overlay {
+/* Градиент слева затемняет фон под текстом, справа оставляет птицу видимой */
+.home-hero-wrap::after {
+    content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(165deg,
-        rgba(51,5,7,0.05) 0%,
-        rgba(51,5,7,0.52) 52%,
-        rgba(51,5,7,0.85) 100%);
+    z-index: 1;
+    background-image:
+        linear-gradient(
+            to right,
+            rgba(10, 2, 2, 0.96) 0%,
+            rgba(10, 2, 2, 0.82) 32%,
+            rgba(10, 2, 2, 0.30) 54%,
+            transparent 72%
+        ),
+        linear-gradient(
+            to bottom,
+            transparent 60%,
+            rgba(10, 2, 2, 0.55) 100%
+        );
+    background-size: 100% 100%, 100% 100%;
     pointer-events: none;
 }
+/* Контейнер: на мобиле — колонка, на десктопе — две колонки */
 .home-hero-body {
     position: relative;
     z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
     flex: 1;
     padding: 0 2.5rem 5.5rem;
-    max-width: 1180px;
+    max-width: 1280px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
 }
-@media (min-width: 1024px) { .home-hero-body { padding: 0 3.5rem 7rem; } }
+@media (min-width: 1024px) {
+    .home-hero-body {
+        grid-template-columns: 1fr 1fr;
+        padding: 0 3.5rem;
+        min-height: min(88vh, 860px);
+    }
+}
+.home-hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    padding: 5rem 0;
+}
+@media (max-width: 1023px) {
+    .home-hero-content {
+        align-items: center;
+        text-align: center;
+        padding: 4rem 0 5.5rem;
+    }
+}
 
 .home-hero-eyebrow {
     font-size: 9px;
@@ -57,12 +96,12 @@
 }
 .home-hero-headline {
     font-family: var(--font-serif);
-    font-size: clamp(2.8rem, 6.5vw, 5.6rem);
+    font-size: clamp(2.8rem, 5vw, 5.2rem);
     font-weight: 600;
     line-height: 1.04;
     letter-spacing: 0.01em;
     color: #f7f5f1;
-    text-shadow: 0 6px 48px rgba(0,0,0,0.25);
+    text-shadow: 0 6px 48px rgba(0,0,0,0.35);
     max-width: 14ch;
     margin-bottom: 2.25rem;
 }
@@ -70,8 +109,8 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     color: rgba(247,245,241,0.66);
-    max-width: 34ch;
     line-height: 1.9;
+    max-width: 34ch;
     margin-bottom: 3rem;
 }
 .home-hero-cta {
@@ -274,7 +313,7 @@
     min-height: 0;
 }
 .bento-cta {
-    background: #330507;
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -284,12 +323,27 @@
     color: #f7f5f1;
     min-height: 180px;
     height: 100%;
-    transition: background 300ms ease;
+    background-color: #330507;
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(51, 5, 7, 0.18) 0%,
+            rgba(51, 5, 7, 0.62) 48%,
+            rgba(51, 5, 7, 0.94) 100%
+        ),
+        url("{% static 'core/img/catalog-bg.png' %}");
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    transition: filter 280ms ease;
 }
 @media (min-width: 768px) {
     .bento-cta { min-height: 0; }
 }
-.bento-cta:hover { background: #3d080a; color: #f7f5f1; }
+.bento-cta:hover {
+    filter: brightness(0.92);
+    color: #f7f5f1;
+}
 .bento-cta__label {
     font-size: 8px;
     letter-spacing: 0.3em;
@@ -304,6 +358,7 @@
     line-height: 1.1;
     color: #f7f5f1;
     margin-bottom: 1.5rem;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
 }
 .bento-cta__link {
     display: inline-flex;
@@ -476,22 +531,11 @@
 
         <!-- ══ HERO ══════════════════════════════════════════════════ -->
         <section class="home-hero-wrap">
-            <img
-                src="{% static 'core/img/content1.jpg' %}"
-                alt=""
-                width="1920"
-                height="1080"
-                decoding="async"
-                fetchpriority="high"
-                loading="eager"
-                aria-hidden="true"
-            >
-            <div class="home-hero-overlay"></div>
             <div class="home-hero-body">
-                <p class="home-hero-eyebrow">Нишевая парфюмерия — Accord</p>
-                <h2 class="home-hero-headline">Ароматы,<br>которые остаются</h2>
-                <p class="home-hero-sub">Кюрированная коллекция редких ароматов<br>от мировых парфюмерных домов</p>
-                <div>
+                <div class="home-hero-content">
+                    <p class="home-hero-eyebrow">Нишевая парфюмерия — Accord</p>
+                    <h2 class="home-hero-headline">Ароматы,<br>которые остаются</h2>
+                    <p class="home-hero-sub">Кюрированная коллекция редких ароматов<br>от мировых парфюмерных домов</p>
                     <a href="{% url 'products:catalog' %}" class="home-hero-cta">
                         Перейти в каталог
                         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
