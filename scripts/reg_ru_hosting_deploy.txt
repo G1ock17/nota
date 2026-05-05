@@ -1,0 +1,59 @@
+Деплой на виртуальный хостинг REG.RU (ispmanager + Passenger)
+============================================================
+
+Подготовка в панели
+-------------------
+1. Сайты → ваш домен → Изменить → дополнительно: включить «CGI-скрипты», «Python»,
+   выбрать версию Python 3.10+ (для Django 5.2).
+2. Привязать домен к хостингу и SSL (у вас уже есть).
+
+Загрузка кода
+-------------
+3. Загрузите в КОРЕНЬ сайта (как в инструкции REG: www/ваш-домен/) содержимое репозитория:
+   manage.py, passenger_wsgi.py, perfume_store/, core/, products/, api/, requirements.txt
+4. Не загружайте .env с секретами через публичный Git — создайте .env на сервере вручную
+   или через файловый менеджер (см. .env.example).
+
+SSH
+---
+5. Подключитесь по SSH, перейдите в каталог сайта (корень, где manage.py).
+
+6. Создайте venv (версию Python возьмите из ls -la /opt/python/*/bin/python):
+   /opt/python/python-3.12.x/bin/python -m venv djangoenv
+   source djangoenv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+
+7. В панели для сайта укажите интерпретатор Python из djangoenv/bin/python
+   (если есть такой пункт).
+
+Переменные окружения
+--------------------
+8. Файл .env в корне сайта, минимум:
+   DEBUG=False
+   SECRET_KEY=...
+   ALLOWED_HOSTS=вашдомен.ru,www.вашдомен.ru
+   CSRF_TRUSTED_ORIGINS=https://вашдомен.ru,https://www.вашдомен.ru
+   YOOKASSA_*= боевые ключи
+   DJANGO_FILE_LOG=1   (по желанию при отладке)
+
+9. Права на запись для веб-сервера:
+   mkdir -p logs media staticfiles
+   (при необходимости chmod — уточните у поддержки для вашего тарифа)
+
+База и статика
+--------------
+10. python manage.py migrate
+11. python manage.py collectstatic --noinput
+12. python manage.py createsuperuser   (по желанию)
+
+Перезапуск Passenger
+--------------------
+13. touch .restart-app
+
+Проверка
+--------
+Откройте сайт в браузере. Ошибки смотрите в logs/django.log (если включено логирование).
+
+Если «No module named django» в passenger_wsgi.py раскомментируйте строку
+sys.path.insert(1, "...site-packages...") с путём из панели / SSH.

@@ -7,7 +7,7 @@
 
 /* Cinzel только для цифр 0–9; остальные глифы берутся из следующего шрифта в стеке */
 @font-face {
-    font-family: "Nota Numerals";
+    font-family: "Accord Numerals";
     font-style: normal;
     font-weight: 400;
     font-display: swap;
@@ -16,7 +16,7 @@
 }
 
 @font-face {
-    font-family: "Nota Numerals";
+    font-family: "Accord Numerals";
     font-style: normal;
     font-weight: 500;
     font-display: swap;
@@ -25,7 +25,7 @@
 }
 
 @font-face {
-    font-family: "Nota Numerals";
+    font-family: "Accord Numerals";
     font-style: normal;
     font-weight: 600;
     font-display: swap;
@@ -34,7 +34,7 @@
 }
 
 @font-face {
-    font-family: "Nota Numerals";
+    font-family: "Accord Numerals";
     font-style: normal;
     font-weight: 700;
     font-display: swap;
@@ -42,13 +42,13 @@
     unicode-range: U+0030-0039;
 }
 
-/* NOTA theme-nota: premium light canvas with clean solid backgrounds */
+/* ACCORD theme-accord: premium light canvas with clean solid backgrounds */
 :root,
-html.theme-nota {
+html.theme-accord {
     /* Constantine — только если установлен локально; иначе Cormorant Garamond из base.html */
-    --font-serif: "Nota Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", serif;
-    --font-display: "Nota Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", serif;
-    --font-ui-sans: "Nota Numerals", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-serif: "Accord Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", serif;
+    --font-display: "Accord Numerals", "Constantine", "Cormorant Garamond", "Times New Roman", serif;
+    --font-ui-sans: "Accord Numerals", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
     --background-color: #f7f5f1;
     --background-color-rgb: 247 245 241;
@@ -434,7 +434,7 @@ main section {
 #catalog-sidebar-filters *,
 #catalog-load-more-shell,
 #catalog-load-more-shell * {
-    font-family: "Nota Numerals", "Noto Serif", "Times New Roman", serif !important;
+    font-family: "Accord Numerals", "Noto Serif", "Times New Roman", serif !important;
 }
 
 /* Карточка товара: заголовок — display serif (--font-serif), мета и цена — sans */
@@ -557,7 +557,7 @@ main section {
     background: rgb(var(--color-surface-1-rgb));
 }
 
-/* Алиас из гайда NOTA; в шапке используется .nav-mega.nav-mega--dock */
+/* Алиас из гайда ACCORD; в шапке используется .nav-mega.nav-mega--dock */
 .mega-menu {
     background: var(--color-mega-paper);
     color: rgb(var(--color-mega-ink-rgb));
@@ -1179,7 +1179,7 @@ main section {
     filter: drop-shadow(0 0 0.75px rgba(51, 5, 7, 0.55));
 }
 
-/* ── Личный кабинет (тема nota) ── */
+/* ── Личный кабинет (тема accord) ── */
 .account-cabinet-root.section-deep {
     background-color: var(--background-color);
     color: rgb(var(--color-text-rgb));
@@ -2044,7 +2044,7 @@ main section {
     border-color: var(--color-border-strong);
 }
 
-/* ── Страница заказа (тема nota, как кабинет) ── */
+/* ── Страница заказа (тема accord, как кабинет) ── */
 .order-detail-root.section-deep {
     background-color: var(--background-color);
     color: rgb(var(--color-text-rgb));

@@ -28,7 +28,7 @@
   >
     <h3 class="product-title">{{ product.name }}</h3>
     <span class="product-volume-line">
-      {% with v=product.first_in_stock_variant %}
+      {% with v=product.smallest_in_stock_variant %}
         {% if v %}{{ v.get_volume_display }}{% else %}100 ML{% endif %}
       {% endwith %}
     </span>

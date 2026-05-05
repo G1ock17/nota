@@ -167,7 +167,7 @@ def _fetch_placeholder_file(seed: str) -> ContentFile:
     safe = urllib.parse.quote(seed[:20])
     url = f"https://via.placeholder.com/300x400.jpg?text={safe}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "nota-seed/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "accord-seed/1.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = resp.read()
         if data:

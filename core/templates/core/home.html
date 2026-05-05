@@ -1,85 +1,782 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+.home-hero-wrap {
+    position: relative;
+    min-height: min(88vh, 860px);
+    display: flex;
+    flex-direction: column;
+    background: #330507;
+    overflow: hidden;
+}
+.home-hero-wrap > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    opacity: 0.4;
+    pointer-events: none;
+}
+.home-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(165deg,
+        rgba(51,5,7,0.05) 0%,
+        rgba(51,5,7,0.52) 52%,
+        rgba(51,5,7,0.85) 100%);
+    pointer-events: none;
+}
+.home-hero-body {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex: 1;
+    padding: 0 2.5rem 5.5rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (min-width: 1024px) { .home-hero-body { padding: 0 3.5rem 7rem; } }
+
+.home-hero-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247,245,241,0.58);
+    margin-bottom: 1.5rem;
+}
+.home-hero-headline {
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 6.5vw, 5.6rem);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: 0.01em;
+    color: #f7f5f1;
+    text-shadow: 0 6px 48px rgba(0,0,0,0.25);
+    max-width: 14ch;
+    margin-bottom: 2.25rem;
+}
+.home-hero-sub {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(247,245,241,0.66);
+    max-width: 34ch;
+    line-height: 1.9;
+    margin-bottom: 3rem;
+}
+.home-hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #f7f5f1;
+    border: 1px solid rgba(247,245,241,0.52);
+    padding: 1.05rem 2.75rem;
+    background: transparent;
+    transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
+}
+.home-hero-cta:hover { background: #f7f5f1; border-color: #f7f5f1; color: #330507; }
+
+/* ═══════════════════════════════════════════════════════════
+   TICKER
+═══════════════════════════════════════════════════════════ */
+.home-ticker {
+    background: #330507;
+    border-top: 1px solid rgba(247,245,241,0.12);
+    border-bottom: 1px solid rgba(247,245,241,0.12);
+    overflow: hidden;
+    padding: 1.1rem 0;
+}
+.home-ticker__track {
+    display: flex;
+    width: max-content;
+    animation: home-ticker-move 36s linear infinite;
+}
+.home-ticker:hover .home-ticker__track { animation-play-state: paused; }
+@keyframes home-ticker-move {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+.home-ticker__set { display: flex; align-items: center; gap: 2.5rem; padding-right: 2.5rem; white-space: nowrap; }
+.home-ticker__link {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+    color: rgba(247,245,241,0.72); text-decoration: none;
+    transition: color 180ms ease;
+}
+.home-ticker__link:hover { color: #f7f5f1; }
+.home-ticker__dot { font-size: 6px; color: rgba(247,245,241,0.28); flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════
+   PHILOSOPHY QUOTE
+═══════════════════════════════════════════════════════════ */
+.home-quote {
+    text-align: center;
+    padding: 7rem 2rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--background-color);
+}
+.home-quote blockquote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.6rem, 3.4vw, 2.65rem);
+    font-weight: 500;
+    line-height: 1.32;
+    letter-spacing: 0.01em;
+    color: #330507;
+    max-width: 22ch;
+    margin: 0 auto 2.5rem;
+}
+.home-quote__divider { width: 3rem; height: 1px; background: rgba(51,5,7,0.2); margin: 0 auto 2.25rem; }
+.home-quote__body {
+    font-size: 12px; letter-spacing: 0.07em; line-height: 1.95;
+    color: rgba(51,5,7,0.56); max-width: 38ch; margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURED BENTO GRID
+═══════════════════════════════════════════════════════════ */
+.featured-bento {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+}
+.featured-bento > .reveal {
+    min-height: 0;
+}
+@media (min-width: 768px) {
+    .featured-bento {
+        grid-template-columns: 1.05fr 0.92fr 1fr;
+        /* Две равные строки — высота левой «толстой» карточки = сумме двух справа */
+        grid-template-rows: 1fr 1fr;
+        align-items: stretch;
+        min-height: clamp(400px, 48vh, 560px);
+    }
+    .featured-bento__tall {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+    .featured-bento__c2r1 { grid-column: 2; grid-row: 1; }
+    .featured-bento__c2r2 { grid-column: 2; grid-row: 2; }
+    .featured-bento__c3r1 { grid-column: 3; grid-row: 1; }
+    .featured-bento__c3r2 { grid-column: 3; grid-row: 2; }
+    .featured-bento > .reveal,
+    .featured-bento > .featured-bento__cta-wrap {
+        height: 100%;
+    }
+}
+
+/* Bento product card */
+.bento-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #e9e3d9;
+    overflow: hidden;
+    text-decoration: none;
+    color: #330507;
+}
+.bento-card:hover { color: #330507; }
+
+.bento-card__media {
+    position: relative;
+    flex: 1;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem 1.5rem;
+    overflow: hidden;
+}
+@media (min-width: 768px) { .bento-card__media { min-height: 0; } }
+
+.bento-card__media img {
+    max-width: 52%;
+    max-height: 65%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    position: relative;
+    z-index: 0;
+    transition: transform 480ms ease;
+    pointer-events: none;
+    display: block;
+}
+.bento-card:hover .bento-card__media img { transform: scale(1.04); }
+
+.bento-card__fav {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+}
+
+.bento-card__info {
+    flex-shrink: 0;
+    padding: 1.2rem 1.6rem 1.7rem;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-top: 1px solid rgba(51,5,7,0.09);
+}
+.bento-card__brand {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(51,5,7,0.45);
+    margin-bottom: 0.5rem;
+}
+.bento-card__name {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 1.8vw, 1.65rem);
+    font-weight: 600;
+    line-height: 1.12;
+    color: #330507;
+    margin-bottom: 0.85rem;
+}
+.bento-card__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.bento-card__volume {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(51,5,7,0.42);
+}
+.bento-card__price {
+    font-family: var(--font-serif);
+    font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+    font-weight: 600;
+    color: #330507;
+    white-space: nowrap;
+}
+
+/* CTA card inside bento */
+.featured-bento__cta-wrap {
+    min-height: 0;
+}
+.bento-cta {
+    background: #330507;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    padding: 2.25rem 2rem;
+    text-decoration: none;
+    color: #f7f5f1;
+    min-height: 180px;
+    height: 100%;
+    transition: background 300ms ease;
+}
+@media (min-width: 768px) {
+    .bento-cta { min-height: 0; }
+}
+.bento-cta:hover { background: #3d080a; color: #f7f5f1; }
+.bento-cta__label {
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(247,245,241,0.5);
+    margin-bottom: 1rem;
+}
+.bento-cta__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: #f7f5f1;
+    margin-bottom: 1.5rem;
+}
+.bento-cta__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 9px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(247,245,241,0.65);
+    transition: color 200ms ease;
+}
+.bento-cta:hover .bento-cta__link { color: #f7f5f1; }
+
+/* Favorite btn inside bento */
+.bento-card .favorite-btn--catalog {
+    color: #330507 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CATEGORIES
+═══════════════════════════════════════════════════════════ */
+.home-cat-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    align-items: stretch;
+}
+@media (min-width: 768px) { .home-cat-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.home-cat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding: 2rem 1.75rem;
+    background: #330507;
+    border: 1px solid rgba(247,245,241,0.12);
+    color: #f7f5f1;
+    text-decoration: none;
+    transition: background 360ms ease;
+    position: relative;
+    overflow: hidden;
+}
+.home-cat-card:hover { background: #3d080a; color: #f7f5f1; }
+
+/* Fix: section-deep overrides h3 to dark; force cream here */
+.home-cat-card h3,
+.home-cat-card .home-cat-card-name {
+    font-family: var(--font-serif) !important;
+    font-size: clamp(1.65rem, 3vw, 2.2rem) !important;
+    font-weight: 600 !important;
+    color: #f7f5f1 !important;
+    margin: 0 0 0.65rem !important;
+    line-height: 1.08 !important;
+}
+.home-cat-card-desc {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(247,245,241,0.48);
+}
+.home-cat-card-arrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(247,245,241,0.48);
+    margin-top: 1.35rem;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 280ms ease, transform 280ms ease;
+}
+.home-cat-card:hover .home-cat-card-arrow { opacity: 1; transform: translateX(0); }
+
+/* ═══════════════════════════════════════════════════════════
+   BRANDS MOSAIC
+═══════════════════════════════════════════════════════════ */
+.home-brands-mosaic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    background: var(--color-border);
+    gap: 1px;
+}
+@media (min-width: 640px)  { .home-brands-mosaic { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) { .home-brands-mosaic { grid-template-columns: repeat(4, 1fr); } }
+
+.home-brands-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.25rem 1.5rem;
+    background: #330507;
+    color: rgba(247,245,241,0.68);
+    font-family: var(--font-serif);
+    font-size: clamp(0.95rem, 1.45vw, 1.2rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-align: center;
+    transition: color 220ms ease, background 220ms ease;
+    word-break: break-word;
+}
+.home-brands-cell:hover { color: #f7f5f1; background: #3d080a; }
+
+/* Reveal на обёртке (как у бенто): иначе transition на карточке затирает opacity/transform из site.css */
+#categories .home-cat-grid > .reveal {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+#categories .home-cat-grid > .reveal .home-cat-card {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+@media (min-width: 768px) {
+    /* Одна высота ряда по самому высокому контенту, без искусственного «пустого» минимума */
+    #categories .home-cat-grid > .reveal .home-cat-card {
+        min-height: 100%;
+    }
+    #categories .home-cat-card {
+        padding: 2.1rem 1.85rem 2.15rem;
+    }
+    #categories .home-cat-card .home-cat-card-arrow {
+        margin-top: auto;
+        padding-top: 1.1rem;
+    }
+}
+
+#brands .home-brands-mosaic > .reveal {
+    display: flex;
+    min-width: 0;
+}
+#brands .home-brands-mosaic > .reveal .home-brands-cell {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Stagger — те же шаги, что у «Рекомендуемые ароматы» (0 / 150 / 300 ms) */
+#categories .home-cat-grid > .reveal:nth-child(1) { transition-delay: 0ms; }
+#categories .home-cat-grid > .reveal:nth-child(2) { transition-delay: 150ms; }
+#categories .home-cat-grid > .reveal:nth-child(3) { transition-delay: 300ms; }
+
+/* Бренды: тот же reveal + stagger; шаг 60 ms, чтобы сетка не «тянулась» секундами */
+#brands .home-brands-mosaic > .reveal:nth-child(1)  { transition-delay: 0ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(2)  { transition-delay: 60ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(3)  { transition-delay: 120ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(4)  { transition-delay: 180ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(5)  { transition-delay: 240ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(6)  { transition-delay: 300ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(7)  { transition-delay: 360ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(8)  { transition-delay: 420ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(9)  { transition-delay: 480ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(10) { transition-delay: 540ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(11) { transition-delay: 600ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(12) { transition-delay: 660ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(13) { transition-delay: 720ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(14) { transition-delay: 780ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(15) { transition-delay: 840ms; }
+#brands .home-brands-mosaic > .reveal:nth-child(16) { transition-delay: 900ms; }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="min-h-screen text-foreground">
     {% include "core/partials/navbar.html" %}
+    <h1 class="sr-only">Accord — нишевый парфюмерный бутик</h1>
 
     <main>
-        <section class="section-deep home-hero border-b border-edge py-6 lg:py-8">
-            <h1 class="sr-only">Nota — нишевый парфюмерный бутик</h1>
-            <div class="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-10">
-                <img
-                    class="block h-auto w-full object-cover"
-                    src="{% static 'core/img/content1.jpg' %}"
-                    alt=""
-                    width="1920"
-                    height="1080"
-                    decoding="async"
-                    fetchpriority="high"
-                    loading="eager"
-                    aria-hidden="true"
-                >
-            </div>
-        </section>
 
-        <section id="featured" class="section-deep mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
-            <div class="mb-16 flex items-end justify-between gap-6">
-                <div class="reveal max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Рекомендуемые ароматы</p>
-                    <h2 class="font-serif text-4xl text-heading md:text-5xl">Избранные композиции</h2>
+        <!-- ══ HERO ══════════════════════════════════════════════════ -->
+        <section class="home-hero-wrap">
+            <img
+                src="{% static 'core/img/content1.jpg' %}"
+                alt=""
+                width="1920"
+                height="1080"
+                decoding="async"
+                fetchpriority="high"
+                loading="eager"
+                aria-hidden="true"
+            >
+            <div class="home-hero-overlay"></div>
+            <div class="home-hero-body">
+                <p class="home-hero-eyebrow">Нишевая парфюмерия — Accord</p>
+                <h2 class="home-hero-headline">Ароматы,<br>которые остаются</h2>
+                <p class="home-hero-sub">Кюрированная коллекция редких ароматов<br>от мировых парфюмерных домов</p>
+                <div>
+                    <a href="{% url 'products:catalog' %}" class="home-hero-cta">
+                        Перейти в каталог
+                        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+                            <path d="M1 5h12M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
                 </div>
-                <a href="{% url 'products:catalog' %}" class="nav-link hidden text-xs uppercase tracking-[0.22em] text-drift md:inline-block">Смотреть все</a>
-            </div>
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-                {% for product in featured_products %}
-                    {% include "products/partials/catalog_product_card.html" with product=product %}
-                {% empty %}
-                    <div class="col-span-full border border-dashed border-edge-strong bg-surface p-12 text-center">
-                        <p class="font-serif text-2xl text-heading">Пока нет товаров</p>
-                        <p class="mt-2 text-sm text-muted">Скоро здесь появятся избранные композиции.</p>
-                    </div>
-                {% endfor %}
             </div>
         </section>
 
+        <!-- ══ TICKER ═════════════════════════════════════════════════ -->
+        <div class="home-ticker" aria-hidden="true">
+            <div class="home-ticker__track">
+                <span class="home-ticker__set">
+                    {% for name, slug in featured_brands %}
+                    <a href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}" class="home-ticker__link">{{ name }}</a>
+                    <span class="home-ticker__dot">◆</span>
+                    {% endfor %}
+                </span>
+                <span class="home-ticker__set">
+                    {% for name, slug in featured_brands %}
+                    <span class="home-ticker__link">{{ name }}</span>
+                    <span class="home-ticker__dot">◆</span>
+                    {% endfor %}
+                </span>
+            </div>
+        </div>
+
+        <!-- ══ PHILOSOPHY ══════════════════════════════════════════════ -->
+        <section class="home-quote section-deep">
+            <div class="reveal">
+                <p class="text-[9px] uppercase tracking-[0.3em] text-accent mb-8">Философия</p>
+                <blockquote>
+                    «Нишевый аромат — это не просто парфюм.<br>Это подпись, характер, память.»
+                </blockquote>
+                <div class="home-quote__divider"></div>
+                <p class="home-quote__body">
+                    Accord — кюрированный выбор из лучших парфюмерных домов мира.<br>
+                    Только подлинные ароматы, только те, что стоят вашего внимания.
+                </p>
+            </div>
+        </section>
+
+        <!-- ══ FEATURED BENTO ══════════════════════════════════════════ -->
+        <section id="featured" class="section-deep mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
+
+            <div class="mb-14 flex items-end justify-between gap-6">
+                <div class="reveal">
+                    <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Рекомендуемые ароматы</p>
+                </div>
+                <a href="{% url 'products:catalog' %}" class="reveal nav-link hidden text-[10px] uppercase tracking-[0.22em] text-drift md:inline-flex items-center gap-2"
+                   style="transition-delay: 120ms">
+                    Смотреть все
+                    <svg width="13" height="9" viewBox="0 0 13 9" fill="none" aria-hidden="true"><path d="M1 4.5h11M8 1l3.5 3.5L8 8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                </a>
+            </div>
+
+            {% if featured_products %}
+            <div class="featured-bento">
+
+                <!-- Col 1: tall — product 0 -->
+                {% with product=featured_products.0 %}
+                <div class="reveal featured-bento__tall" style="transition-delay: 0ms">
+                    <article class="bento-card h-full">
+                        <div class="bento-card__media">
+                            <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-[1]" aria-label="{{ product.name }}" tabindex="-1"></a>
+                            {% with imgs=product.images.all %}
+                            {% if imgs %}
+                            <img src="{{ imgs.0.image.url }}" alt="{{ product.name }}" loading="lazy" width="320" height="400">
+                            {% else %}
+                            <div class="text-xs text-muted" style="color: rgba(51,5,7,0.35)">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="bento-card__fav">
+                                {% include "products/partials/favorite_btn_catalog.html" %}
+                            </div>
+                        </div>
+                        <a href="{% url 'products:product_detail' product.slug %}" class="bento-card__info" tabindex="-1" aria-hidden="true">
+                            <span class="bento-card__brand">{{ product.brand.name }}</span>
+                            <span class="bento-card__name">{{ product.name }}</span>
+                            <div class="bento-card__meta">
+                                <span class="bento-card__volume">
+                                    {% with v=product.smallest_in_stock_variant %}{% if v %}{{ v.get_volume_display }}{% else %}100 ml{% endif %}{% endwith %}
+                                </span>
+                                <span class="bento-card__price">
+                                    {% if product.min_price != None %}{{ product.min_price|floatformat:0 }} ₽{% else %}sold out{% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+                {% endwith %}
+
+                <!-- Col 2 row 1 — product 1 -->
+                {% with product=featured_products.1 %}
+                {% if product %}
+                <div class="reveal featured-bento__c2r1" style="transition-delay: 120ms">
+                    <article class="bento-card h-full">
+                        <div class="bento-card__media">
+                            <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-[1]" aria-label="{{ product.name }}" tabindex="-1"></a>
+                            {% with imgs=product.images.all %}
+                            {% if imgs %}
+                            <img src="{{ imgs.0.image.url }}" alt="{{ product.name }}" loading="lazy" width="320" height="400">
+                            {% else %}
+                            <div class="text-xs text-muted" style="color: rgba(51,5,7,0.35)">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="bento-card__fav">
+                                {% include "products/partials/favorite_btn_catalog.html" %}
+                            </div>
+                        </div>
+                        <a href="{% url 'products:product_detail' product.slug %}" class="bento-card__info" tabindex="-1" aria-hidden="true">
+                            <span class="bento-card__brand">{{ product.brand.name }}</span>
+                            <span class="bento-card__name">{{ product.name }}</span>
+                            <div class="bento-card__meta">
+                                <span class="bento-card__volume">
+                                    {% with v=product.smallest_in_stock_variant %}{% if v %}{{ v.get_volume_display }}{% else %}100 ml{% endif %}{% endwith %}
+                                </span>
+                                <span class="bento-card__price">
+                                    {% if product.min_price != None %}{{ product.min_price|floatformat:0 }} ₽{% else %}sold out{% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <!-- Col 2 row 2 — product 2 -->
+                {% with product=featured_products.2 %}
+                {% if product %}
+                <div class="reveal featured-bento__c2r2" style="transition-delay: 200ms">
+                    <article class="bento-card h-full">
+                        <div class="bento-card__media">
+                            <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-[1]" aria-label="{{ product.name }}" tabindex="-1"></a>
+                            {% with imgs=product.images.all %}
+                            {% if imgs %}
+                            <img src="{{ imgs.0.image.url }}" alt="{{ product.name }}" loading="lazy" width="320" height="400">
+                            {% else %}
+                            <div class="text-xs text-muted" style="color: rgba(51,5,7,0.35)">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="bento-card__fav">
+                                {% include "products/partials/favorite_btn_catalog.html" %}
+                            </div>
+                        </div>
+                        <a href="{% url 'products:product_detail' product.slug %}" class="bento-card__info" tabindex="-1" aria-hidden="true">
+                            <span class="bento-card__brand">{{ product.brand.name }}</span>
+                            <span class="bento-card__name">{{ product.name }}</span>
+                            <div class="bento-card__meta">
+                                <span class="bento-card__volume">
+                                    {% with v=product.smallest_in_stock_variant %}{% if v %}{{ v.get_volume_display }}{% else %}100 ml{% endif %}{% endwith %}
+                                </span>
+                                <span class="bento-card__price">
+                                    {% if product.min_price != None %}{{ product.min_price|floatformat:0 }} ₽{% else %}sold out{% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <!-- Col 3 row 1 — product 3 -->
+                {% with product=featured_products.3 %}
+                {% if product %}
+                <div class="reveal featured-bento__c3r1" style="transition-delay: 260ms">
+                    <article class="bento-card h-full">
+                        <div class="bento-card__media">
+                            <a href="{% url 'products:product_detail' product.slug %}" class="absolute inset-0 z-[1]" aria-label="{{ product.name }}" tabindex="-1"></a>
+                            {% with imgs=product.images.all %}
+                            {% if imgs %}
+                            <img src="{{ imgs.0.image.url }}" alt="{{ product.name }}" loading="lazy" width="320" height="400">
+                            {% else %}
+                            <div class="text-xs text-muted" style="color: rgba(51,5,7,0.35)">Нет изображения</div>
+                            {% endif %}
+                            {% endwith %}
+                            <div class="bento-card__fav">
+                                {% include "products/partials/favorite_btn_catalog.html" %}
+                            </div>
+                        </div>
+                        <a href="{% url 'products:product_detail' product.slug %}" class="bento-card__info" tabindex="-1" aria-hidden="true">
+                            <span class="bento-card__brand">{{ product.brand.name }}</span>
+                            <span class="bento-card__name">{{ product.name }}</span>
+                            <div class="bento-card__meta">
+                                <span class="bento-card__volume">
+                                    {% with v=product.smallest_in_stock_variant %}{% if v %}{{ v.get_volume_display }}{% else %}100 ml{% endif %}{% endwith %}
+                                </span>
+                                <span class="bento-card__price">
+                                    {% if product.min_price != None %}{{ product.min_price|floatformat:0 }} ₽{% else %}sold out{% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <!-- Col 3 row 2 — CTA (desktop) -->
+                <div class="featured-bento__cta-wrap reveal featured-bento__c3r2 hidden md:block" style="transition-delay: 320ms">
+                    <a href="{% url 'products:catalog' %}" class="bento-cta" aria-label="Открыть каталог">
+                        <p class="bento-cta__label">Новинки сезона</p>
+                        <p class="bento-cta__title">Открыть каталог</p>
+                        <span class="bento-cta__link">
+                            Все ароматы
+                            <svg width="13" height="9" viewBox="0 0 13 9" fill="none" aria-hidden="true"><path d="M1 4.5h11M8 1l3.5 3.5L8 8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                        </span>
+                    </a>
+                </div>
+
+            </div>
+            <div class="reveal mt-4 md:hidden">
+                <a href="{% url 'products:catalog' %}" class="bento-cta" aria-label="Открыть каталог">
+                    <p class="bento-cta__label">Новинки сезона</p>
+                    <p class="bento-cta__title">Открыть каталог</p>
+                    <span class="bento-cta__link">
+                        Все ароматы
+                        <svg width="13" height="9" viewBox="0 0 13 9" fill="none" aria-hidden="true"><path d="M1 4.5h11M8 1l3.5 3.5L8 8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                    </span>
+                </a>
+            </div>
+            {% else %}
+            <div class="border border-dashed border-edge-strong p-12 text-center reveal">
+                <p class="font-serif text-2xl text-heading">Пока нет товаров</p>
+                <p class="mt-2 text-sm text-muted">Скоро здесь появятся избранные композиции.</p>
+            </div>
+            {% endif %}
+
+        </section>
+
+        <!-- ══ CATEGORIES ══════════════════════════════════════════════ -->
         <section id="categories" class="section-deep border-y border-edge">
             <div class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
                 <div class="reveal mb-14 max-w-xl">
-                    <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Категории</p>
-                    <h2 class="font-serif text-4xl text-heading md:text-5xl">По характеру</h2>
+                    <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Категории</p>
                 </div>
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <a href="{% url 'products:catalog' %}?category=man" class="reveal group home-premium-card border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-heading">Мужские</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Яркие / Древесные / Пряные</p>
-                    </a>
-                    <a href="{% url 'products:catalog' %}?category=woman" class="reveal group home-premium-card border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-heading">Женские</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Цветочные / Пудровые / Мягкие</p>
-                    </a>
-                    <a href="{% url 'products:catalog' %}?category=unisex" class="reveal group home-premium-card border border-edge p-10 text-center transition duration-500 hover:scale-[1.03]">
-                        <h3 class="font-serif text-3xl text-heading">Унисекс</h3>
-                        <p class="mt-4 text-xs uppercase tracking-[0.2em] text-muted">Чистые / Цитрусовые / Мускусные</p>
-                    </a>
+                <div class="home-cat-grid">
+                    <div class="reveal">
+                        <a href="{% url 'products:catalog' %}?category=man" class="home-cat-card">
+                            <div>
+                                <h3 class="home-cat-card-name">Мужские</h3>
+                                <p class="home-cat-card-desc">Яркие · Древесные · Пряные</p>
+                            </div>
+                            <span class="home-cat-card-arrow">Смотреть →</span>
+                        </a>
+                    </div>
+                    <div class="reveal">
+                        <a href="{% url 'products:catalog' %}?category=woman" class="home-cat-card">
+                            <div>
+                                <h3 class="home-cat-card-name">Женские</h3>
+                                <p class="home-cat-card-desc">Цветочные · Пудровые · Мягкие</p>
+                            </div>
+                            <span class="home-cat-card-arrow">Смотреть →</span>
+                        </a>
+                    </div>
+                    <div class="reveal">
+                        <a href="{% url 'products:catalog' %}?category=unisex" class="home-cat-card">
+                            <div>
+                                <h3 class="home-cat-card-name">Унисекс</h3>
+                                <p class="home-cat-card-desc">Чистые · Цитрусовые · Мускусные</p>
+                            </div>
+                            <span class="home-cat-card-arrow">Смотреть →</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- ══ BRANDS ══════════════════════════════════════════════════ -->
         <section id="brands" class="section-deep mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="reveal mb-14 max-w-xl">
-                <p class="mb-4 text-[10px] uppercase tracking-[0.24em] text-accent">Премиальные дома</p>
-                <h2 class="font-serif text-4xl text-heading md:text-5xl">Премиальные дома</h2>
+                <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Коллекция домов</p>
             </div>
-            <div class="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+            <div class="home-brands-mosaic">
                 {% for name, slug in featured_brands %}
-                <a
-                    href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}"
-                    class="reveal group home-premium-card border border-edge px-4 py-8 text-center font-serif text-xl text-drift transition duration-300 hover:border-edge-strong hover:text-heading md:text-2xl"
-                >{{ name }}</a>
+                <div class="reveal">
+                    <a
+                        href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}"
+                        class="home-brands-cell"
+                    >{{ name }}</a>
+                </div>
                 {% endfor %}
             </div>
         </section>
+
     </main>
 
     {% include "core/partials/footer.html" %}

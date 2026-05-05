@@ -57,7 +57,7 @@ def purchase_gift_card(request):
     if buyer_email:
         # Почтовая отправка может быть отключена в локальной среде.
         send_mail(
-            subject="Подарочная карта nota",
+            subject="Подарочная карта accord",
             message=f"Ваш код подарочной карты: {card.code}\nНоминал: {card.nominal} ₽",
             from_email=None,
             recipient_list=[buyer_email],

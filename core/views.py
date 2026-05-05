@@ -40,7 +40,7 @@ def home(request):
             ),
         )
         .filter(min_price__isnull=False)
-        .order_by("-created_at")[:3]
+        .order_by("-created_at")[:4]
     )
     return render(
         request,

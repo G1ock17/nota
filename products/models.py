@@ -11,6 +11,30 @@ from django.utils.text import slugify
 User = get_user_model()
 
 
+def parse_volume_ml(value) -> float | None:
+    """Число миллилитров из строки поля volume; None, если не извлечь."""
+    value = (value or "").strip()
+    match = re.match(r"^(\d+(?:[.,]\d+)?)\s*ml$", value, flags=re.I)
+    if match:
+        return float(match.group(1).replace(",", "."))
+    match2 = re.match(r"^(\d+(?:[.,]\d+)?)", value)
+    if match2:
+        return float(match2.group(1).replace(",", "."))
+    return None
+
+
+def sort_volume_strings(volumes):
+    """Уникальные строки объёмов по возрастанию числа мл (30, 50, 100, не 100, 30, 50)."""
+    uniq = list(dict.fromkeys(volumes))
+
+    def key(s):
+        ml = parse_volume_ml(s)
+        return (ml is None, ml if ml is not None else 0, (s or "").lower())
+
+    uniq.sort(key=key)
+    return uniq
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -102,6 +126,36 @@ class Product(models.Model):
                 return variant
         return None
 
+    def smallest_in_stock_variant(self):
+        """Вариант с минимальным числовым объёмом среди тех, что в наличии (для карточки каталога)."""
+        best = None
+        best_ml = None
+        for variant in self.variants.all():
+            if variant.stock <= 0:
+                continue
+            ml = variant.numeric_volume_ml()
+            if ml is None:
+                continue
+            if best is None or ml < best_ml:
+                best = variant
+                best_ml = ml
+        if best is not None:
+            return best
+        return self.first_in_stock_variant()
+
+    def variants_sorted_by_volume_numeric(self, *, in_stock_only: bool = False):
+        """Варианты по возрастанию числового объёма (для карточки товара и т.п.)."""
+        variants = [
+            v for v in self.variants.all() if (not in_stock_only or v.stock > 0)
+        ]
+
+        def sort_key(v):
+            ml = v.numeric_volume_ml()
+            return (ml is None, ml if ml is not None else 0, (v.volume or "").lower())
+
+        variants.sort(key=sort_key)
+        return variants
+
     @property
     def is_new(self) -> bool:
         """Новинка: первые 60 дней после появления в каталоге."""
@@ -156,6 +210,10 @@ class Variant(models.Model):
         if match:
             return f"{match.group(1).replace(',', '.')} ml"
         return value
+
+    def numeric_volume_ml(self):
+        """Число миллилитров для сортировки; None, если из строки не извлечь."""
+        return parse_volume_ml(self.volume)
 
 
 class Order(models.Model):

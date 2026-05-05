@@ -5,7 +5,15 @@ from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.views.generic import DetailView, ListView
 
-from .models import Brand, Category, Product, ProductImage, Variant, FragranceNote
+from .models import (
+    Brand,
+    Category,
+    FragranceNote,
+    Product,
+    ProductImage,
+    Variant,
+    sort_volume_strings,
+)
 
 
 def parse_notes_filter_params(params):
@@ -282,13 +290,12 @@ class CatalogListView(ListView):
         ctx["notes_filter_selected_count"] = len(selected_group_values)
         ctx["current_sort"] = self.request.GET.get("sort", "newest")
         ctx["current_query"] = (self.request.GET.get("q") or "").strip()
-        ctx["volume_choices"] = [
-            (v, v)
-            for v in Variant.objects.filter(stock__gt=0)
+        distinct_volumes = list(
+            Variant.objects.filter(stock__gt=0)
             .values_list("volume", flat=True)
             .distinct()
-            .order_by("volume")
-        ]
+        )
+        ctx["volume_choices"] = [(s, s) for s in sort_volume_strings(distinct_volumes)]
         ctx["selected_categories"] = self.request.GET.getlist("category")
         ctx["selected_brands"] = self.request.GET.getlist("brand")
         ctx["selected_notes"] = selected_notes_raw
@@ -358,8 +365,8 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         product = self.object
-        ctx["in_stock_variants"] = product.variants.filter(stock__gt=0).order_by(
-            "volume"
+        ctx["in_stock_variants"] = product.variants_sorted_by_volume_numeric(
+            in_stock_only=True
         )
         notes = list(product.notes.all())
         ctx["top_notes"] = [n for n in notes if n.type == FragranceNote.NoteType.TOP]

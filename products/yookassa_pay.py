@@ -35,7 +35,7 @@ def create_redirect_payment(order, return_url: str):
         "amount": {"value": value, "currency": "RUB"},
         "confirmation": {"type": "redirect", "return_url": return_url},
         "capture": True,
-        "description": f"Заказ №{order.pk} — nota",
+        "description": f"Заказ №{order.pk} — accord",
         "metadata": {"order_id": str(order.pk)},
     }
     return Payment.create(body, str(uuid.uuid4()))

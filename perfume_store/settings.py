@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import logging
+import logging.handlers
 import os
 from pathlib import Path
 
@@ -29,13 +31,22 @@ YOOKASSA_SECRET_KEY = os.environ.get("YOOKASSA_SECRET_KEY", "").strip()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7^(+ng0r29ylo51zy=tb49ek&*7@w4^8bqxghaf-!caj%5i!pp'
+# На сервере задайте в .env: SECRET_KEY, DEBUG=False, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS.
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-7^(+ng0r29ylo51zy=tb49ek&*7@w4^8bqxghaf-!caj%5i!pp",
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True").strip().lower() in ("1", "true", "yes")
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if h.strip()
+]
+
+_csrf_origins = os.environ.get("CSRF_TRUSTED_ORIGINS", "").strip()
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
 
 
 # Application definition
@@ -54,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,7 +142,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
@@ -140,6 +153,59 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Логи в файл на сервере (ispmanager часто не показывает traceback в браузере).
+# Включается при DEBUG=False или если в .env задано DJANGO_FILE_LOG=1.
+_log_to_file = (not DEBUG) or os.environ.get("DJANGO_FILE_LOG", "").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+)
+if _log_to_file:
+    _log_dir = BASE_DIR / "logs"
+    _log_path = _log_dir / "django.log"
+    try:
+        _log_dir.mkdir(exist_ok=True)
+    except OSError:
+        _log_path = BASE_DIR / "django.log"
+    _log_level_name = os.environ.get("DJANGO_LOG_LEVEL", "ERROR").strip().upper()
+    _file_log_level = getattr(logging, _log_level_name, logging.ERROR)
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "%(levelname)s %(asctime)s %(name)s %(process)d: %(message)s",
+            },
+        },
+        "handlers": {
+            "file": {
+                "level": _file_log_level,
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": str(_log_path),
+                "maxBytes": 2 * 1024 * 1024,
+                "backupCount": 5,
+                "formatter": "verbose",
+                "encoding": "utf-8",
+            },
+        },
+        "loggers": {
+            "django.request": {
+                "handlers": ["file"],
+                "level": _file_log_level,
+                "propagate": False,
+            },
+            "django": {
+                "handlers": ["file"],
+                "level": _file_log_level,
+                "propagate": False,
+            },
+        },
+        "root": {
+            "handlers": ["file"],
+            "level": _file_log_level,
+        },
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
