@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Accord — Бренды{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/brands.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="brands-page">
+  {% include "core/partials/navbar.html" %}
+
+  <section class="page-hero">
+    <div class="page-hero-left">
+      <h1 class="ph-title">Все<br><em>бренды</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <div class="ph-count" id="totalCount">48</div>
+    </div>
+  </section>
+
+  <section class="brands-search-section mb-2 border-b border-edge pb-4 pt-8 text-center">
+    <form class="mx-auto max-w-2xl" onsubmit="return false;">
+      <label class="sr-only" for="searchInput">Поиск брендов</label>
+      <div class="relative">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="ПОИСК"
+          class="w-full bg-transparent py-4 text-center text-4xl font-medium tracking-[0.01em] text-heading placeholder:text-heading/95 md:text-5xl focus:outline-none"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+      </div>
+    </form>
+    <div class="result-count mt-3 justify-center border-0 pl-0">
+      <strong id="countNum">0</strong> брендов
+    </div>
+  </section>
+
+  <div class="alpha-strip" id="alphaStrip"></div>
+
+  <main class="brands-main" id="brandsMain" data-catalog-url="{% url 'products:catalog' %}">
+    <div class="no-results" id="noResults">
+      <div class="nr-char">∅</div>
+      <div class="nr-title">Ничего не найдено</div>
+      <div class="nr-sub">Попробуйте другой запрос</div>
+    </div>
+  </main>
+</div>
+{{ brands_payload|json_script:"brands-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/brands.js' %}"></script>
+{% endblock %}

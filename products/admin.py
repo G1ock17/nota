@@ -41,9 +41,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "origin", "featured", "slug")
+    list_filter = ("featured", "origin")
     prepopulated_fields = {"slug": ("name",)}
-    search_fields = ("name",)
+    search_fields = ("name", "origin")
 
 
 @admin.register(FragranceNote)

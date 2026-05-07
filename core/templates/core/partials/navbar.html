@@ -58,7 +58,7 @@
         >
             <a href="{% url 'products:catalog' %}" class="nav-link shrink-0 pb-1 font-semibold">Каталог</a>
             <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
-                <a href="{% url 'home' %}#brands" class="nav-link shrink-0 pb-1 font-semibold">Бренды</a>
+                <a href="{% url 'brands' %}" class="nav-link shrink-0 pb-1 font-semibold">Бренды</a>
             </div>
             <a href="{% url 'gift_cards' %}" class="nav-link shrink-0 pb-1 font-semibold">Подарочная карта</a>
         </div>
@@ -139,7 +139,7 @@
 
         <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[12px] uppercase tracking-[0.2em] text-nav lg:hidden">
             <a href="{% url 'products:catalog' %}" class="nav-link pb-1 font-semibold">Каталог</a>
-            <a href="{% url 'home' %}#brands" class="nav-link pb-1 font-semibold">Бренды</a>
+            <a href="{% url 'brands' %}" class="nav-link pb-1 font-semibold">Бренды</a>
             <a href="{% url 'gift_cards' %}" class="nav-link pb-1 font-semibold">Подарочная карта</a>
             {% if user.is_authenticated %}
             <a

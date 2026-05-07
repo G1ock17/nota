@@ -53,7 +53,10 @@ class Category(models.Model):
 
 
 class Brand(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=100)
+    origin = models.CharField(max_length=100, default="")
+    tags = models.JSONField(default=list)
+    featured = models.BooleanField(default=False)
     slug = models.SlugField(max_length=255, unique=True)
 
     class Meta:

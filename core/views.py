@@ -11,7 +11,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.generic.edit import FormView
 
-from products.models import Favorite, Order, Product, ProductImage, Variant
+from products.models import Brand, Favorite, Order, Product, ProductImage, Variant
 from products.gift_cards import total_active_balance
 from products.models import GiftCard, GiftCardTransaction
 from products.cart_utils import cart_total_items, get_cart
@@ -50,6 +50,20 @@ def home(request):
             "featured_products": featured_products,
         },
     )
+
+
+def brands(request):
+    brands_payload = [
+        {
+            "name": brand.name,
+            "origin": brand.origin or "",
+            "tags": brand.tags if isinstance(brand.tags, list) else [],
+            "featured": bool(brand.featured),
+            "slug": brand.slug,
+        }
+        for brand in Brand.objects.all().order_by("name")
+    ]
+    return render(request, "brands.html", {"brands_payload": brands_payload})
 
 
 class SiteLoginView(LoginView):

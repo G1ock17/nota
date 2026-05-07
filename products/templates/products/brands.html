@@ -1,0 +1,70 @@
+{% extends "products/base_catalog.html" %}
+
+{% block body %}
+<div class="min-h-screen section-deep text-foreground">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="mx-auto w-full max-w-[min(100%,1680px)] px-5 pb-16 pt-8 sm:px-6 lg:px-8 xl:px-10">
+    <div class="mb-7 text-[10px] uppercase tracking-[0.2em] text-muted">
+      <a href="{% url 'home' %}" class="nav-link">Главная</a>
+      <span class="mx-2">/</span>
+      <span>Бренды</span>
+    </div>
+
+    <section class="mb-10 border-b border-edge pb-4 text-center">
+      <form method="get" action="{% url 'products:brands' %}" class="mx-auto max-w-2xl">
+        <label class="sr-only" for="brands-page-input">Поиск бренда</label>
+        <div class="relative">
+          <input
+            id="brands-page-input"
+            type="text"
+            name="q"
+            value="{{ current_query }}"
+            placeholder="ПОИСК БРЕНДА"
+            class="w-full bg-transparent py-4 text-center text-4xl font-medium tracking-[0.01em] text-heading placeholder:text-heading/95 md:text-5xl focus:outline-none"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            autofocus
+          >
+        </div>
+      </form>
+    </section>
+
+    {% if brand_list %}
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
+      {% for brand in brand_list %}
+      <a
+        href="{% url 'products:catalog' %}?brand={{ brand.slug|urlencode }}"
+        class="group flex min-h-[86px] items-center justify-center rounded border border-edge-strong bg-surface px-3 py-4 text-center transition-colors hover:border-foreground"
+      >
+        <span class="text-sm uppercase tracking-[0.12em] text-heading group-hover:text-foreground">
+          {{ brand.name }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="border border-dashed border-edge-strong bg-surface p-12 text-center">
+      <p class="font-serif text-2xl text-heading">Бренды не найдены</p>
+      {% if current_query %}
+      <p class="mt-2 text-sm text-muted">Попробуйте другой запрос.</p>
+      {% else %}
+      <p class="mt-2 text-sm text-muted">Пока нет доступных брендов.</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if page_obj.has_next %}
+    <div class="mt-10 flex justify-center">
+      <a
+        class="btn-luxury px-8 py-3 text-[10px] sm:text-[11px]"
+        href="{% url 'products:brands' %}?q={{ current_query|urlencode }}&page={{ page_obj.next_page_number }}"
+      >Показать больше</a>
+    </div>
+    {% endif %}
+  </main>
+
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}

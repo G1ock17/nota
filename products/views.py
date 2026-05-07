@@ -1,6 +1,6 @@
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import DecimalField, Max, Min, Prefetch, Q, Sum, Value
+from django.db.models import Count, DecimalField, Max, Min, Prefetch, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.views.generic import DetailView, ListView
@@ -124,6 +124,11 @@ class SearchListView(ListView):
     context_object_name = "product_list"
     paginate_by = 24
 
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["products/partials/search_results.html"]
+        return [self.template_name]
+
     def get_queryset(self):
         query = (self.request.GET.get("q") or "").strip()
         qs = (
@@ -149,6 +154,31 @@ class SearchListView(ListView):
         if query:
             qs = qs.filter(Q(name__icontains=query) | Q(brand__name__icontains=query))
         return qs.distinct().order_by("name")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["current_query"] = (self.request.GET.get("q") or "").strip()
+        return ctx
+
+
+class BrandListView(ListView):
+    model = Brand
+    template_name = "products/brands.html"
+    context_object_name = "brand_list"
+    paginate_by = 36
+
+    def get_queryset(self):
+        query = (self.request.GET.get("q") or "").strip()
+        qs = Brand.objects.annotate(
+            available_products=Count(
+                "products",
+                filter=Q(products__variants__stock__gt=0),
+                distinct=True,
+            )
+        ).filter(available_products__gt=0)
+        if query:
+            qs = qs.filter(name__icontains=query)
+        return qs.order_by("name")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

@@ -1,0 +1,28 @@
+{% if current_query %}
+  {% if product_list %}
+  <div id="catalog-product-grid" class="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
+    {% for product in product_list %}
+      {% include "products/partials/catalog_product_card.html" with product=product %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="border border-dashed border-edge-strong bg-surface p-12 text-center">
+    <p class="font-serif text-2xl text-heading">Ничего не найдено</p>
+    <p class="mt-2 text-sm text-muted">Попробуйте другой запрос.</p>
+  </div>
+  {% endif %}
+{% else %}
+<div class="border border-dashed border-edge-strong bg-surface p-12 text-center">
+  <p class="font-serif text-2xl text-heading">Начните поиск</p>
+  <p class="mt-2 text-sm text-muted">Введите название товара или бренда.</p>
+</div>
+{% endif %}
+
+{% if current_query and page_obj.has_next %}
+<div class="mt-10 flex justify-center">
+  <a
+    class="btn-luxury px-8 py-3 text-[10px] sm:text-[11px]"
+    href="{% url 'products:search' %}?q={{ current_query|urlencode }}&page={{ page_obj.next_page_number }}"
+  >Показать больше</a>
+</div>
+{% endif %}
