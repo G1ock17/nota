@@ -66,24 +66,26 @@
   .catalog-price-slider-thumb::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 0.95rem;
-    height: 0.95rem;
+    width: 1rem;
+    height: 1rem;
     margin-top: 10px;
     border-radius: 9999px;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    background: #ffffff;
+    border: 2px solid #f7f5f1;
+    background: #330507;
     cursor: pointer;
     pointer-events: auto;
+    box-shadow: 0 1px 4px rgba(51,5,7,.35);
   }
   .catalog-price-slider-thumb::-moz-range-thumb {
-    width: 0.95rem;
-    height: 0.95rem;
+    width: 1rem;
+    height: 1rem;
     transform: translateY(10px);
     border-radius: 9999px;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    background: #ffffff;
+    border: 2px solid #f7f5f1;
+    background: #330507;
     cursor: pointer;
     pointer-events: auto;
+    box-shadow: 0 1px 4px rgba(51,5,7,.35);
   }
   .catalog-price-slider-thumb {
     pointer-events: none;
@@ -111,7 +113,8 @@
 
     const boundsMin = toInt(minRange.min, 0);
     const boundsMax = toInt(maxRange.max, 100000);
-    const minGap = 1;
+    // Минимальный зазор ≈ 1% диапазона — ползунки не могут визуально слипнуться
+    const minGap = Math.max(1, Math.round((boundsMax - boundsMin) * 0.01));
 
     const isClickNearThumb = (event, rangeEl) => {
       const rect = rangeEl.getBoundingClientRect();
@@ -125,6 +128,20 @@
       return Math.abs(event.clientX - thumbX) <= threshold;
     };
 
+    // z-index: когда ползунки рядом (≤ minGap) или min у левого края —
+    // max выходит наверх, чтобы его можно было потянуть вправо.
+    const syncZIndex = () => {
+      const minValue = toInt(minRange.value, boundsMin);
+      const maxValue = toInt(maxRange.value, boundsMax);
+      if (maxValue - minValue <= minGap || minValue <= boundsMin) {
+        minRange.style.zIndex = "10";
+        maxRange.style.zIndex = "20";
+      } else {
+        minRange.style.zIndex = "20";
+        maxRange.style.zIndex = "10";
+      }
+    };
+
     const syncRangeFill = () => {
       const minValue = toInt(minRange.value, boundsMin);
       const maxValue = toInt(maxRange.value, boundsMax);
@@ -133,6 +150,7 @@
       const right = ((maxValue - boundsMin) / total) * 100;
       activeRange.style.left = `${left}%`;
       activeRange.style.width = `${Math.max(right - left, 0)}%`;
+      syncZIndex();
     };
 
     const normalizeRangePair = (changed) => {

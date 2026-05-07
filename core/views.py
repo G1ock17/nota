@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
 from django.db.models import Min, Prefetch, Q, Sum
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -303,49 +304,9 @@ def order_detail(request, order_id: int):
 
 
 def gift_cards_catalog(request):
-    if request.method == "POST":
-        nominal_raw = (request.POST.get("nominal") or "").strip()
-        custom_raw = (request.POST.get("custom_nominal") or "").strip()
-        email = (request.POST.get("email") or "").strip()
-        raw_value = custom_raw or nominal_raw
-        try:
-            nominal = Decimal(raw_value)
-        except (InvalidOperation, TypeError):
-            return render(
-                request,
-                "core/gift_cards.html",
-                {"purchase_error": "Укажите корректный номинал.", "presets": [1000, 2000, 5000]},
-            )
-        if nominal <= 0:
-            return render(
-                request,
-                "core/gift_cards.html",
-                {"purchase_error": "Номинал должен быть больше 0.", "presets": [1000, 2000, 5000]},
-            )
-        card = GiftCard.objects.create(
-            code=GiftCard.generate_code(),
-            nominal=nominal,
-            balance=nominal,
-            buyer_email=email,
-        )
-        GiftCardTransaction.objects.create(
-            gift_card=card,
-            amount=nominal,
-            type=GiftCardTransaction.TxType.PURCHASE,
-        )
-        return render(
-            request,
-            "core/gift_cards.html",
-            {
-                "purchase_ok": True,
-                "created_code": card.code,
-                "presets": [1000, 2000, 5000],
-            },
-        )
-
-    return render(request, "core/gift_cards.html", {"presets": [1000, 2000, 5000]})
+    raise Http404("Gift cards are temporarily unavailable.")
 
 
 @login_required
 def account_gift_cards(request):
-    return redirect(f"{reverse('account')}?section=gift")
+    raise Http404("Gift cards are temporarily unavailable.")

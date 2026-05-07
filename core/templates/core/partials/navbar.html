@@ -60,7 +60,6 @@
             <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
                 <a href="{% url 'brands' %}" class="nav-link shrink-0 pb-1 font-semibold">Бренды</a>
             </div>
-            <a href="{% url 'gift_cards' %}" class="nav-link shrink-0 pb-1 font-semibold">Подарочная карта</a>
         </div>
 
         <div
@@ -140,7 +139,6 @@
         <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[12px] uppercase tracking-[0.2em] text-nav lg:hidden">
             <a href="{% url 'products:catalog' %}" class="nav-link pb-1 font-semibold">Каталог</a>
             <a href="{% url 'brands' %}" class="nav-link pb-1 font-semibold">Бренды</a>
-            <a href="{% url 'gift_cards' %}" class="nav-link pb-1 font-semibold">Подарочная карта</a>
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}"
@@ -183,26 +181,26 @@
         aria-label="Бренды в каталоге"
         aria-hidden="true"
     >
-        <div class="nav-mega__inner mx-auto w-full max-w-7xl px-6 py-6 lg:px-12">
+        <div class="nav-mega__inner mx-auto w-full max-w-7xl px-6 py-5 lg:px-12">
+            <div class="nav-mega__eyebrow">Популярные бренды</div>
             <div class="nav-mega__grid">
                 {% for item in nav_mega_brands %}
                 <a
                     href="{% url 'products:catalog' %}?brand={{ item.slug|urlencode }}"
                     class="nav-mega__item"
                 >
-                    <img
-                        class="nav-mega__thumb"
-                        src="{{ item.thumb_url }}"
-                        alt=""
-                        width="40"
-                        height="40"
-                        loading="lazy"
-                        decoding="async"
-                    >
                     <span class="nav-mega__name">{{ item.name }}</span>
                 </a>
                 {% endfor %}
             </div>
+        </div>
+        <div class="nav-mega__footer mx-auto w-full max-w-7xl px-6 lg:px-12">
+            <a href="{% url 'brands' %}" class="nav-mega__all-link">
+                Все бренды
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                </svg>
+            </a>
         </div>
     </div>
 </header>

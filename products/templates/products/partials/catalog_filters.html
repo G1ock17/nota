@@ -1,151 +1,135 @@
 <aside
   id="catalog-sidebar-filters"
-  class="catalog-mobile-filters-aside pointer-events-none fixed inset-0 z-[150] flex h-[100dvh] max-h-[100dvh] flex-col translate-y-full overflow-hidden bg-background pt-[env(safe-area-inset-top,0px)] transition-transform duration-300 ease-out [&.is-open]:translate-y-0 [&.is-open]:pointer-events-auto lg:items-center lg:justify-center lg:bg-black/60 lg:pt-0 lg:opacity-0 lg:transition-opacity lg:duration-200 lg:[&.is-open]:opacity-100"
+  class="catalog-mobile-filters-aside pointer-events-none fixed inset-0 z-[150] flex h-[100dvh] max-h-[100dvh] flex-col translate-y-full overflow-hidden transition-transform duration-300 ease-out [&.is-open]:translate-y-0 [&.is-open]:pointer-events-auto lg:translate-y-0 lg:opacity-0 lg:transition-opacity lg:duration-[320ms] lg:[&.is-open]:opacity-100"
 >
+  {# Прозрачный backdrop — закрывает drawer при клике вне панели (десктоп) #}
   <div
-    class="filter-sidebar min-h-0 flex-1 space-y-8 overflow-y-auto border border-edge p-6 max-lg:rounded-none max-lg:border-0 lg:max-h-[80vh] lg:w-full lg:max-w-[720px] lg:flex-none lg:rounded-sm lg:border lg:shadow-[0_20px_70px_rgba(0,0,0,0.45)]"
-    style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));"
+    class="absolute inset-0 hidden lg:block"
+    data-catalog-mobile-filters-close
+    aria-hidden="true"
+  ></div>
+
+  <div
+    class="filter-sidebar relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+    style="padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); padding-left: 1.5rem; padding-right: 1.5rem;"
   >
-    <div class="flex items-center justify-between gap-2 lg:justify-between">
-      <h2 class="font-serif text-2xl text-heading">фильтры</h2>
-      <div class="flex items-center gap-3">
-        <a
-          href="{% url 'products:catalog' %}"
-          class="nav-link text-[10px] uppercase tracking-[0.2em] text-accent"
-        >Очистить</a>
+
+    {# ── Шапка ── #}
+    <div class="cfs-header">
+      <h2 class="cfs-title">Фильтры</h2>
+      <div class="cfs-header-actions">
+        <a href="{% url 'products:catalog' %}" class="cfs-clear-btn">Очистить всё</a>
         <button
           type="button"
-          class="text-[10px] uppercase tracking-[0.2em] text-accent"
+          class="cfs-close-btn"
           data-catalog-mobile-filters-close
+          aria-label="Закрыть фильтры"
         >
-          Готово
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
         </button>
       </div>
     </div>
 
-    <div class="max-lg:border-t max-lg:border-edge max-lg:pt-6">
-      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">Категории</span>
-      <div class="space-y-2">
+    {# ── Категории ── #}
+    <div class="cfs-section">
+      <span class="cfs-section-label">Категории</span>
+      <div>
         {% for c in categories %}
-          <label class="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <label class="cfs-row">
             <input
               type="checkbox"
               name="category"
               value="{{ c.slug }}"
-              class="h-4 w-4 border border-edge-strong bg-transparent text-accent accent-accent focus:outline-none focus:ring-0 focus:ring-offset-0"
+              class="cfs-row-checkbox"
               {% if c.slug in selected_categories %}checked{% endif %}
             >
-            <span>{{ c.name }}</span>
+            <span class="cfs-row-text">{{ c.name }}</span>
           </label>
         {% empty %}
-          <p class="text-sm text-muted">—</p>
+          <p class="text-sm" style="color: rgba(51,5,7,.4);">—</p>
         {% endfor %}
       </div>
     </div>
 
-    <div class="border-t border-edge pt-6">
-      <div class="mb-4">
-        <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">Диапазон цены</span>
-        <div class="relative px-1 pb-3">
-          <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-1 -translate-y-1/2 rounded bg-track"></div>
-          <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-1 -translate-y-1/2 rounded bg-accent"></div>
+    {# ── Цена ── #}
+    <div class="cfs-section">
+      <span class="cfs-section-label">Диапазон цены</span>
+      <div class="relative px-1 pb-4 mb-4">
+        <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-[2px] -translate-y-1/2 rounded bg-track"></div>
+        <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-[2px] -translate-y-1/2 rounded bg-accent"></div>
+        <input
+          type="range"
+          id="id_min_price_range"
+          min="{{ price_slider_min }}"
+          max="{{ price_slider_max }}"
+          value="{% if min_price %}{{ min_price }}{% else %}{{ price_slider_min }}{% endif %}"
+          step="1"
+          class="catalog-price-slider-thumb absolute inset-x-0 top-0 z-20 h-6 w-full appearance-none bg-transparent"
+        >
+        <input
+          type="range"
+          id="id_max_price_range"
+          min="{{ price_slider_min }}"
+          max="{{ price_slider_max }}"
+          value="{% if max_price %}{{ max_price }}{% else %}{{ price_slider_max }}{% endif %}"
+          step="1"
+          class="catalog-price-slider-thumb catalog-price-slider-thumb-max absolute inset-x-0 top-0 z-10 h-6 w-full appearance-none bg-transparent"
+        >
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="id_min_price" class="cfs-section-label" style="margin-bottom: 0.5rem;">От, ₽</label>
           <input
-            type="range"
-            id="id_min_price_range"
-            min="{{ price_slider_min }}"
-            max="{{ price_slider_max }}"
-            value="{% if min_price %}{{ min_price }}{% else %}{{ price_slider_min }}{% endif %}"
+            type="number"
+            name="min_price"
+            id="id_min_price"
+            value="{{ min_price }}"
+            min="0"
             step="1"
-            class="catalog-price-slider-thumb absolute inset-x-0 top-0 z-20 h-6 w-full appearance-none bg-transparent"
+            placeholder="0"
+            class="cfs-price-input"
           >
+        </div>
+        <div>
+          <label for="id_max_price" class="cfs-section-label" style="margin-bottom: 0.5rem;">До, ₽</label>
           <input
-            type="range"
-            id="id_max_price_range"
-            min="{{ price_slider_min }}"
-            max="{{ price_slider_max }}"
-            value="{% if max_price %}{{ max_price }}{% else %}{{ price_slider_max }}{% endif %}"
+            type="number"
+            name="max_price"
+            id="id_max_price"
+            value="{{ max_price }}"
+            min="0"
             step="1"
-            class="catalog-price-slider-thumb catalog-price-slider-thumb-max absolute inset-x-0 top-0 z-10 h-6 w-full appearance-none bg-transparent"
+            placeholder="∞"
+            class="cfs-price-input"
           >
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label for="id_min_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Цена мин</label>
-        <input
-          type="number"
-          name="min_price"
-          id="id_min_price"
-          value="{{ min_price }}"
-          min="0"
-          step="0.01"
-          placeholder="0"
-          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
-        >
-      </div>
-      <div>
-        <label for="id_max_price" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Цена макс</label>
-        <input
-          type="number"
-          name="max_price"
-          id="id_max_price"
-          value="{{ max_price }}"
-          min="0"
-          step="0.01"
-          placeholder="∞"
-          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
-        >
-      </div>
-      </div>
     </div>
 
-    <div class="border-t border-edge pt-6">
-      <span class="mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent">По параметрам</span>
+    {# ── Бренды / Ноты / Год / Страна ── #}
+    <div class="cfs-section">
+      <span class="cfs-section-label">По параметрам</span>
       {% include "products/partials/catalog_filter_modal_triggers.html" %}
     </div>
+
   </div>
 
-  {# Скрытые поля брендов и нот — только для формы/HTMX и синхронизации с модалками #}
+  {# Скрытые поля — синхронизация с модалками через JS #}
   <div class="hidden" aria-hidden="true">
     {% for b in brands %}
-      <label>
-        <input
-          type="checkbox"
-          name="brand"
-          value="{{ b.slug }}"
-          {% if b.slug in selected_brands %}checked{% endif %}
-        >
-      </label>
+      <label><input type="checkbox" name="brand" value="{{ b.slug }}" {% if b.slug in selected_brands %}checked{% endif %}></label>
     {% endfor %}
     {% for note_group in notes_catalog_unique %}
-      <label>
-        <input
-          type="checkbox"
-          name="notes"
-          value="{{ note_group.value }}"
-          {% if note_group.value in notes_selected_group_values %}checked{% endif %}
-        >
-      </label>
+      <label><input type="checkbox" name="notes" value="{{ note_group.value }}" {% if note_group.value in notes_selected_group_values %}checked{% endif %}></label>
     {% endfor %}
     {% for year in available_years %}
-      <label>
-        <input
-          type="checkbox"
-          name="year"
-          value="{{ year }}"
-          {% if year|stringformat:"s" in selected_years %}checked{% endif %}
-        >
-      </label>
+      <label><input type="checkbox" name="year" value="{{ year }}" {% if year|stringformat:"s" in selected_years %}checked{% endif %}></label>
     {% endfor %}
     {% for country in available_countries %}
-      <label>
-        <input
-          type="checkbox"
-          name="country"
-          value="{{ country }}"
-          {% if country in selected_countries %}checked{% endif %}
-        >
-      </label>
+      <label><input type="checkbox" name="country" value="{{ country }}" {% if country in selected_countries %}checked{% endif %}></label>
     {% endfor %}
   </div>
+
 </aside>

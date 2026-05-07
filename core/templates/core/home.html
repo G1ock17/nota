@@ -11,24 +11,21 @@
     min-height: min(88vh, 860px);
     display: flex;
     flex-direction: column;
-    /*
-      У catalog-bg.png внутри квадрата фон #000. При contain поля слева/справа
-      должны быть тем же #000 — иначе видна «рамка» (бордовый #330507).
-      Бордовый даём только мягким виньетом у краёв экрана в ::after.
-    */
-    background-color: #000000;
+    /* Светлая версия hero */
+    background-color: #f7f5f1;
     overflow: hidden;
 }
-/* Птица смещена вправо, чтобы левая половина оставалась чистой для текста */
+/* Логотип смещён вправо, чтобы левая половина оставалась чистой для текста */
 .home-hero-wrap::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: url("{% static 'core/img/catalog-bg.png' %}") 72% center / auto 92% no-repeat;
+    background: url("{% static 'core/img/store-logo-red.png' %}") 74% center / auto 86% no-repeat;
+    opacity: 0.92;
     pointer-events: none;
 }
-/* Градиент слева затемняет фон под текстом, справа оставляет птицу видимой */
+/* Светлый градиент слева улучшает читаемость текста */
 .home-hero-wrap::after {
     content: "";
     position: absolute;
@@ -37,15 +34,15 @@
     background-image:
         linear-gradient(
             to right,
-            rgba(10, 2, 2, 0.96) 0%,
-            rgba(10, 2, 2, 0.82) 32%,
-            rgba(10, 2, 2, 0.30) 54%,
+            rgba(247, 245, 241, 0.98) 0%,
+            rgba(247, 245, 241, 0.92) 34%,
+            rgba(247, 245, 241, 0.28) 58%,
             transparent 72%
         ),
         linear-gradient(
             to bottom,
             transparent 60%,
-            rgba(10, 2, 2, 0.55) 100%
+            rgba(247, 245, 241, 0.4) 100%
         );
     background-size: 100% 100%, 100% 100%;
     pointer-events: none;
@@ -91,7 +88,7 @@
     font-size: 9px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba(247,245,241,0.58);
+    color: rgba(51,5,7,0.56);
     margin-bottom: 1.5rem;
 }
 .home-hero-headline {
@@ -100,15 +97,15 @@
     font-weight: 600;
     line-height: 1.04;
     letter-spacing: 0.01em;
-    color: #f7f5f1;
-    text-shadow: 0 6px 48px rgba(0,0,0,0.35);
+    color: #330507;
+    text-shadow: none;
     max-width: 14ch;
     margin-bottom: 2.25rem;
 }
 .home-hero-sub {
     font-size: 11px;
     letter-spacing: 0.08em;
-    color: rgba(247,245,241,0.66);
+    color: rgba(51,5,7,0.72);
     line-height: 1.9;
     max-width: 34ch;
     margin-bottom: 3rem;
@@ -121,13 +118,13 @@
     letter-spacing: 0.28em;
     text-transform: uppercase;
     text-decoration: none;
-    color: #f7f5f1;
-    border: 1px solid rgba(247,245,241,0.52);
+    color: #330507;
+    border: 1px solid rgba(51,5,7,0.46);
     padding: 1.05rem 2.75rem;
     background: transparent;
     transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
 }
-.home-hero-cta:hover { background: #f7f5f1; border-color: #f7f5f1; color: #330507; }
+.home-hero-cta:hover { background: #330507; border-color: #330507; color: #f7f5f1; }
 
 /* ═══════════════════════════════════════════════════════════
    TICKER
@@ -394,15 +391,15 @@
     justify-content: flex-start;
     box-sizing: border-box;
     padding: 2rem 1.75rem;
-    background: #330507;
-    border: 1px solid rgba(247,245,241,0.12);
-    color: #f7f5f1;
+    background: #e9e3d9;
+    border: 1px solid rgba(51,5,7,0.18);
+    color: #330507;
     text-decoration: none;
     transition: background 360ms ease;
     position: relative;
     overflow: hidden;
 }
-.home-cat-card:hover { background: #3d080a; color: #f7f5f1; }
+.home-cat-card:hover { background: #ddd5c8; color: #330507; }
 
 /* Fix: section-deep overrides h3 to dark; force cream here */
 .home-cat-card h3,
@@ -410,7 +407,7 @@
     font-family: var(--font-serif) !important;
     font-size: clamp(1.65rem, 3vw, 2.2rem) !important;
     font-weight: 600 !important;
-    color: #f7f5f1 !important;
+    color: #330507 !important;
     margin: 0 0 0.65rem !important;
     line-height: 1.08 !important;
 }
@@ -418,13 +415,13 @@
     font-size: 9px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(247,245,241,0.48);
+    color: rgba(51,5,7,0.58);
 }
 .home-cat-card-arrow {
     font-size: 9px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(247,245,241,0.48);
+    color: rgba(51,5,7,0.58);
     margin-top: 1.35rem;
     opacity: 0;
     transform: translateX(-8px);
@@ -449,8 +446,8 @@
     align-items: center;
     justify-content: center;
     padding: 2.25rem 1.5rem;
-    background: #330507;
-    color: rgba(247,245,241,0.68);
+    background: #e9e3d9;
+    color: #330507;
     font-family: var(--font-serif);
     font-size: clamp(0.95rem, 1.45vw, 1.2rem);
     font-weight: 600;
@@ -460,7 +457,7 @@
     transition: color 220ms ease, background 220ms ease;
     word-break: break-word;
 }
-.home-brands-cell:hover { color: #f7f5f1; background: #3d080a; }
+.home-brands-cell:hover { color: #330507; background: #ddd5c8; }
 
 /* Reveal на обёртке (как у бенто): иначе transition на карточке затирает opacity/transform из site.css */
 #categories .home-cat-grid > .reveal {
