@@ -379,6 +379,9 @@
 
     document.body.addEventListener("htmx:afterSwap", function (e) {
         var t = e.detail && e.detail.target;
+        if (t && t.id === "search-results") {
+            observeRevealElements(t.querySelectorAll(".reveal"));
+        }
         if (t && t.id === "catalog-results") {
             observeRevealElements(t.querySelectorAll(".reveal"));
         }

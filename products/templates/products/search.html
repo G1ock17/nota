@@ -17,11 +17,11 @@
         id="search-page-form"
         method="get"
         action="{% url 'products:search' %}"
+        class="mx-auto max-w-2xl"
         hx-get="{% url 'products:search' %}"
         hx-target="#search-results"
+        hx-trigger="input changed delay:600ms from:#search-page-input, search"
         hx-push-url="true"
-        hx-trigger="input delay:350ms from:#search-page-input"
-        class="mx-auto max-w-2xl"
       >
       <label class="sr-only" for="search-page-input">Поиск товаров</label>
       <div class="relative">
@@ -50,3 +50,20 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+{{ block.super }}
+<script>
+  (() => {
+    const form = document.getElementById("search-page-form");
+    const input = document.getElementById("search-page-input");
+    if (!form || !input) return;
+
+    form.addEventListener("htmx:beforeRequest", (event) => {
+      const q = (input.value || "").trim();
+      if (q.length > 0 && q.length < 2) {
+        event.preventDefault();
+      }
+    });
+  })();
+</script>
+{% endblock %}

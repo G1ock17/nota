@@ -12,25 +12,6 @@ const alphaStrip = document.getElementById("alphaStrip");
 const catalogUrl = (brandsMain?.dataset.catalogUrl || "/products/").trim();
 
 if (searchInput) {
-  const params = new URLSearchParams(window.location.search);
-  query = (params.get("q") || "").trim();
-  if (query) {
-    searchInput.value = query;
-  }
-
-  function syncQueryToUrl(value) {
-    const next = new URLSearchParams(window.location.search);
-    const trimmed = (value || "").trim();
-    if (trimmed) {
-      next.set("q", trimmed);
-    } else {
-      next.delete("q");
-    }
-    const nextQs = next.toString();
-    const nextUrl = `${window.location.pathname}${nextQs ? `?${nextQs}` : ""}`;
-    window.history.replaceState(null, "", nextUrl);
-  }
-
   function filteredBrands() {
     return BRANDS.filter((b) => {
       const q = query.trim().toLowerCase();
@@ -124,7 +105,6 @@ if (searchInput) {
 
   searchInput.addEventListener("input", () => {
     query = searchInput.value;
-    syncQueryToUrl(query);
     render();
   });
 
@@ -136,7 +116,6 @@ if (searchInput) {
     if (e.key === "Escape") {
       searchInput.value = "";
       query = "";
-      syncQueryToUrl("");
       render();
     }
   });
