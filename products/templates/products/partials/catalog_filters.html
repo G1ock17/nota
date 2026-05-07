@@ -55,57 +55,42 @@
 
     {# ── Цена ── #}
     <div class="cfs-section">
-      <span class="cfs-section-label">Диапазон цены</span>
-      <div class="relative px-1 pb-4 mb-4">
-        <div class="catalog-price-slider-track absolute left-1 right-1 top-1/2 h-[2px] -translate-y-1/2 rounded bg-track"></div>
-        <div id="catalog-price-slider-range" class="catalog-price-slider-range absolute left-1 top-1/2 h-[2px] -translate-y-1/2 rounded bg-accent"></div>
-        <input
-          type="range"
-          id="id_min_price_range"
-          min="{{ price_slider_min }}"
-          max="{{ price_slider_max }}"
-          value="{% if min_price %}{{ min_price }}{% else %}{{ price_slider_min }}{% endif %}"
-          step="1"
-          class="catalog-price-slider-thumb absolute inset-x-0 top-0 z-20 h-6 w-full appearance-none bg-transparent"
-        >
-        <input
-          type="range"
-          id="id_max_price_range"
-          min="{{ price_slider_min }}"
-          max="{{ price_slider_max }}"
-          value="{% if max_price %}{{ max_price }}{% else %}{{ price_slider_max }}{% endif %}"
-          step="1"
-          class="catalog-price-slider-thumb catalog-price-slider-thumb-max absolute inset-x-0 top-0 z-10 h-6 w-full appearance-none bg-transparent"
-        >
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.9rem;">
+        <span class="cfs-section-label" style="margin-bottom:0;">Диапазон цены</span>
+        <span id="price-display" style="font-size:12px;letter-spacing:0.03em;color:#330507;white-space:nowrap;">
+          от <span id="price-val-min">—</span> до <span id="price-val-max">—</span> ₽
+        </span>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="id_min_price" class="cfs-section-label" style="margin-bottom: 0.5rem;">От, ₽</label>
-          <input
-            type="number"
-            name="min_price"
-            id="id_min_price"
-            value="{{ min_price }}"
-            min="0"
-            step="1"
-            placeholder="0"
-            class="cfs-price-input"
-          >
-        </div>
-        <div>
-          <label for="id_max_price" class="cfs-section-label" style="margin-bottom: 0.5rem;">До, ₽</label>
-          <input
-            type="number"
-            name="max_price"
-            id="id_max_price"
-            value="{{ max_price }}"
-            min="0"
-            step="1"
-            placeholder="∞"
-            class="cfs-price-input"
-          >
-        </div>
+      <div id="price-slider-wrap"
+           data-min="{{ price_slider_min }}"
+           data-max="{{ price_slider_max }}"
+           class="mb-5"
+           style="position:relative;height:2.25rem;display:flex;align-items:center;user-select:none;">
+        <div id="price-slider-track"
+             class="catalog-price-slider-track"
+             style="position:absolute;left:0;right:0;height:2px;"></div>
+        <div id="catalog-price-slider-range"
+             class="catalog-price-slider-range"
+             style="position:absolute;height:2px;pointer-events:none;left:0;right:100%;"></div>
+        <div id="price-thumb-min"
+             class="price-slider-thumb"
+             tabindex="0"
+             role="slider"
+             aria-label="Минимальная цена"
+             aria-valuemin="{{ price_slider_min }}"
+             aria-valuemax="{{ price_slider_max }}"
+             style="position:absolute;top:50%;transform:translate(-50%,-50%);z-index:2;"></div>
+        <div id="price-thumb-max"
+             class="price-slider-thumb"
+             tabindex="0"
+             role="slider"
+             aria-label="Максимальная цена"
+             aria-valuemin="{{ price_slider_min }}"
+             aria-valuemax="{{ price_slider_max }}"
+             style="position:absolute;top:50%;transform:translate(-50%,-50%);z-index:2;"></div>
       </div>
+      <input type="hidden" name="min_price" id="id_min_price" value="{{ min_price }}">
+      <input type="hidden" name="max_price" id="id_max_price" value="{{ max_price }}">
     </div>
 
     {# ── Бренды / Ноты / Год / Страна ── #}

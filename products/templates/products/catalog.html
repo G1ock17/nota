@@ -63,156 +63,153 @@
     opacity: 0;
     pointer-events: none;
   }
-  .catalog-price-slider-thumb::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
+  .price-slider-thumb {
     width: 1rem;
     height: 1rem;
-    margin-top: 10px;
-    border-radius: 9999px;
-    border: 2px solid #f7f5f1;
+    border-radius: 50% !important;
     background: #330507;
-    cursor: pointer;
-    pointer-events: auto;
-    box-shadow: 0 1px 4px rgba(51,5,7,.35);
-  }
-  .catalog-price-slider-thumb::-moz-range-thumb {
-    width: 1rem;
-    height: 1rem;
-    transform: translateY(10px);
-    border-radius: 9999px;
     border: 2px solid #f7f5f1;
-    background: #330507;
-    cursor: pointer;
-    pointer-events: auto;
-    box-shadow: 0 1px 4px rgba(51,5,7,.35);
+    box-shadow: 0 1px 5px rgba(51,5,7,.4);
+    box-sizing: border-box;
+    cursor: grab;
+    flex-shrink: 0;
+    transition: box-shadow .15s ease;
   }
-  .catalog-price-slider-thumb {
-    pointer-events: none;
+  .price-slider-thumb:focus-visible {
+    outline: 2px solid rgba(51,5,7,.4);
+    outline-offset: 2px;
+    border-radius: 50% !important;
   }
-  .catalog-price-slider-thumb::-webkit-slider-runnable-track {
-    background: transparent;
-  }
-  .catalog-price-slider-thumb::-moz-range-track {
-    background: transparent;
+  .price-slider-thumb.is-dragging {
+    cursor: grabbing;
+    box-shadow: 0 0 0 5px rgba(51,5,7,.12), 0 1px 5px rgba(51,5,7,.4);
   }
 </style>
 <script>
   (() => {
-    const minInput = document.getElementById("id_min_price");
-    const maxInput = document.getElementById("id_max_price");
-    const minRange = document.getElementById("id_min_price_range");
-    const maxRange = document.getElementById("id_max_price_range");
-    const activeRange = document.getElementById("catalog-price-slider-range");
-    if (!minInput || !maxInput || !minRange || !maxRange || !activeRange) return;
+    const wrap      = document.getElementById('price-slider-wrap');
+    const trackEl   = document.getElementById('price-slider-track');
+    const rangeEl   = document.getElementById('catalog-price-slider-range');
+    const thumbMin  = document.getElementById('price-thumb-min');
+    const thumbMax  = document.getElementById('price-thumb-max');
+    const minInput  = document.getElementById('id_min_price');
+    const maxInput  = document.getElementById('id_max_price');
+    const valMinEl  = document.getElementById('price-val-min');
+    const valMaxEl  = document.getElementById('price-val-max');
+    if (!wrap || !trackEl || !rangeEl || !thumbMin || !thumbMax || !minInput || !maxInput) return;
 
-    const toInt = (value, fallback) => {
-      const parsed = parseInt(value, 10);
-      return Number.isFinite(parsed) ? parsed : fallback;
-    };
+    const fmt = (v) => v.toLocaleString('ru-RU');
 
-    const boundsMin = toInt(minRange.min, 0);
-    const boundsMax = toInt(maxRange.max, 100000);
-    // Минимальный зазор ≈ 1% диапазона — ползунки не могут визуально слипнуться
-    const minGap = Math.max(1, Math.round((boundsMax - boundsMin) * 0.01));
+    const BOUNDS_MIN = parseInt(wrap.dataset.min, 10) || 0;
+    const BOUNDS_MAX = parseInt(wrap.dataset.max, 10) || 100000;
+    const GAP = 0;
 
-    const isClickNearThumb = (event, rangeEl) => {
-      const rect = rangeEl.getBoundingClientRect();
-      if (!rect.width) return false;
-      const value = toInt(rangeEl.value, boundsMin);
-      const min = toInt(rangeEl.min, boundsMin);
-      const max = toInt(rangeEl.max, boundsMax);
-      const ratio = (value - min) / Math.max(max - min, 1);
-      const thumbX = rect.left + ratio * rect.width;
-      const threshold = 12;
-      return Math.abs(event.clientX - thumbX) <= threshold;
-    };
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function pct(v) { return (v - BOUNDS_MIN) / Math.max(BOUNDS_MAX - BOUNDS_MIN, 1) * 100; }
+    function toInt(s, fb) { const n = parseInt(s, 10); return isFinite(n) ? n : fb; }
 
-    // z-index: когда ползунки рядом (≤ minGap) или min у левого края —
-    // max выходит наверх, чтобы его можно было потянуть вправо.
-    const syncZIndex = () => {
-      const minValue = toInt(minRange.value, boundsMin);
-      const maxValue = toInt(maxRange.value, boundsMax);
-      if (maxValue - minValue <= minGap || minValue <= boundsMin) {
-        minRange.style.zIndex = "10";
-        maxRange.style.zIndex = "20";
+    let minVal = toInt(minInput.value, BOUNDS_MIN);
+    let maxVal = toInt(maxInput.value, BOUNDS_MAX);
+    if (!minInput.value) minVal = BOUNDS_MIN;
+    if (!maxInput.value) maxVal = BOUNDS_MAX;
+
+    function render() {
+      const pMin = pct(minVal)-2, pMax = pct(maxVal)+ 2;
+      thumbMin.style.left = pMin + '%';
+      thumbMax.style.left = pMax + '%';
+      rangeEl.style.left  = pMin + '%';
+      rangeEl.style.right = (100 - pMax) + '%';
+      // когда совпадают — max сверху (можно тянуть вправо)
+      if (pMin >= pMax) {
+        thumbMin.style.zIndex = '1';
+        thumbMax.style.zIndex = '3';
       } else {
-        minRange.style.zIndex = "20";
-        maxRange.style.zIndex = "10";
+        thumbMin.style.zIndex = '2';
+        thumbMax.style.zIndex = '2';
       }
-    };
+      thumbMin.setAttribute('aria-valuenow', minVal);
+      thumbMax.setAttribute('aria-valuenow', maxVal);
+      if (valMinEl) valMinEl.textContent = fmt(minVal);
+      if (valMaxEl) valMaxEl.textContent = fmt(maxVal);
+    }
 
-    const syncRangeFill = () => {
-      const minValue = toInt(minRange.value, boundsMin);
-      const maxValue = toInt(maxRange.value, boundsMax);
-      const total = Math.max(boundsMax - boundsMin, 1);
-      const left = ((minValue - boundsMin) / total) * 100;
-      const right = ((maxValue - boundsMin) / total) * 100;
-      activeRange.style.left = `${left}%`;
-      activeRange.style.width = `${Math.max(right - left, 0)}%`;
-      syncZIndex();
-    };
+    function syncInputs() {
+      minInput.value = minVal === BOUNDS_MIN ? '' : String(minVal);
+      maxInput.value = maxVal === BOUNDS_MAX ? '' : String(maxVal);
+      minInput.dispatchEvent(new Event('input', { bubbles: true }));
+      maxInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
-    const normalizeRangePair = (changed) => {
-      let minValue = toInt(minRange.value, boundsMin);
-      let maxValue = toInt(maxRange.value, boundsMax);
-      if (changed === "min" && minValue >= maxValue) {
-        minValue = Math.max(boundsMin, maxValue - minGap);
+    function valueFromEvent(e) {
+      const r = trackEl.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const ratio = clamp((clientX - r.left) / r.width, 0, 1);
+      return Math.round(BOUNDS_MIN + ratio * (BOUNDS_MAX - BOUNDS_MIN));
+    }
+
+    function makeDraggable(thumb, isMin) {
+      let active = false;
+      function start(e) {
+        active = true;
+        thumb.classList.add('is-dragging');
+        e.preventDefault();
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', end);
+        document.addEventListener('touchmove', move, { passive: false });
+        document.addEventListener('touchend', end);
       }
-      if (changed === "max" && maxValue <= minValue) {
-        maxValue = Math.min(boundsMax, minValue + minGap);
+      function move(e) {
+        if (!active) return;
+        const v = valueFromEvent(e);
+        if (isMin) minVal = clamp(v, BOUNDS_MIN, maxVal - GAP);
+        else       maxVal = clamp(v, minVal + GAP, BOUNDS_MAX);
+        render();
+        e.preventDefault();
       }
-      minRange.value = String(minValue);
-      maxRange.value = String(maxValue);
-      minInput.value = String(minValue);
-      maxInput.value = String(maxValue);
-      syncRangeFill();
-      minInput.dispatchEvent(new Event("input", { bubbles: true }));
-      maxInput.dispatchEvent(new Event("input", { bubbles: true }));
-    };
-
-    const normalizeNumberPair = (keepEmpty = false) => {
-      const minRaw = (minInput.value || "").trim();
-      const maxRaw = (maxInput.value || "").trim();
-      let minValue = toInt(minRaw, boundsMin);
-      let maxValue = toInt(maxRaw, boundsMax);
-      minValue = Math.min(Math.max(minValue, boundsMin), boundsMax);
-      maxValue = Math.min(Math.max(maxValue, boundsMin), boundsMax);
-      if (minValue >= maxValue) {
-        if (minRaw && !maxRaw) {
-          maxValue = Math.min(boundsMax, minValue + minGap);
+      function end() {
+        if (!active) return;
+        active = false;
+        thumb.classList.remove('is-dragging');
+        syncInputs();
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', end);
+        document.removeEventListener('touchmove', move);
+        document.removeEventListener('touchend', end);
+      }
+      thumb.addEventListener('mousedown', start);
+      thumb.addEventListener('touchstart', start, { passive: false });
+      thumb.addEventListener('keydown', (e) => {
+        const d = e.shiftKey ? 1000 : 100;
+        if (isMin) {
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp')   minVal = clamp(minVal + d, BOUNDS_MIN, maxVal - GAP);
+          if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') minVal = clamp(minVal - d, BOUNDS_MIN, maxVal - GAP);
         } else {
-          minValue = Math.max(boundsMin, maxValue - minGap);
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp')   maxVal = clamp(maxVal + d, minVal + GAP, BOUNDS_MAX);
+          if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') maxVal = clamp(maxVal - d, minVal + GAP, BOUNDS_MAX);
         }
-      }
-      minInput.value = keepEmpty && !minRaw ? "" : String(minValue);
-      maxInput.value = keepEmpty && !maxRaw ? "" : String(maxValue);
-      minRange.value = String(minValue);
-      maxRange.value = String(maxValue);
-      syncRangeFill();
-    };
-
-    const blockTrackClick = (rangeEl) => {
-      rangeEl.addEventListener("pointerdown", (event) => {
-        if (!isClickNearThumb(event, rangeEl)) {
-          event.preventDefault();
-        }
+        render();
+        syncInputs();
+        e.preventDefault();
       });
-      rangeEl.addEventListener("mousedown", (event) => {
-        if (!isClickNearThumb(event, rangeEl)) {
-          event.preventDefault();
-        }
-      });
-    };
+    }
 
-    blockTrackClick(minRange);
-    blockTrackClick(maxRange);
-    minRange.addEventListener("input", () => normalizeRangePair("min"));
-    maxRange.addEventListener("input", () => normalizeRangePair("max"));
-    minInput.addEventListener("change", normalizeNumberPair);
-    maxInput.addEventListener("change", normalizeNumberPair);
+    // Синхронизация при ручном вводе в number-поля
+    minInput.addEventListener('change', () => {
+      const v = toInt(minInput.value, BOUNDS_MIN);
+      minVal = clamp(v, BOUNDS_MIN, BOUNDS_MAX);
+      if (minVal > maxVal) maxVal = minVal;
+      render();
+    });
+    maxInput.addEventListener('change', () => {
+      const v = toInt(maxInput.value, BOUNDS_MAX);
+      maxVal = clamp(v, BOUNDS_MIN, BOUNDS_MAX);
+      if (maxVal < minVal) minVal = maxVal;
+      render();
+    });
 
-    normalizeNumberPair(true);
+    makeDraggable(thumbMin, true);
+    makeDraggable(thumbMax, false);
+    render();
   })();
 </script>
 {% endblock %}
