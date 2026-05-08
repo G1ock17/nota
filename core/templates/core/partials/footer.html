@@ -1,7 +1,63 @@
-<footer class="border-t border-edge">
-    <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-6 py-10 text-xs uppercase tracking-[0.18em] text-muted lg:flex-row lg:items-center lg:justify-between lg:px-12">
-        <p>Парфюмерный дом Accord</p>
-        <p>© {% now "Y" %} Все права защищены</p>
-        <a href="mailto:hello@accordroyally.com" class="nav-link text-nav">hello@accordroyally.com</a>
+{% load static %}
+<footer class="border-t border-edge bg-background">
+
+    <!-- ═══ MAIN GRID ══════════════════════════════════════════════════════ -->
+    <div class="mx-auto w-full max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
+        <div class="footer-grid">
+
+            <!-- Brand col -->
+            <div class="footer-brand-col">
+                <a href="{% url 'home' %}" class="mb-5 inline-block" aria-label="На главную">
+                    <img src="{% static 'core/img/brand-logo.png' %}" alt="Accord" class="h-16 w-auto object-contain opacity-90">
+                </a>
+                <p class="footer-desc">
+                    Тщательно отобранные ароматы со всего мира —<br class="hidden sm:inline"> от классических домов до редких нишевых марок.
+                </p>
+                <a href="mailto:hello@accordroyally.com" class="footer-contact-link mt-5 inline-flex items-center gap-2">
+                    <svg class="h-3.5 w-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect width="20" height="16" x="2" y="4" rx="0"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    hello@accordroyally.com
+                </a>
+            </div>
+
+            <!-- Catalog col -->
+            <div class="footer-nav-col">
+                <p class="footer-col-label">Каталог</p>
+                <ul class="footer-nav-list">
+                    <li><a href="{% url 'products:catalog' %}" class="footer-nav-link">Все ароматы</a></li>
+                    <li><a href="{% url 'products:catalog' %}?category=man" class="footer-nav-link">Мужские</a></li>
+                    <li><a href="{% url 'products:catalog' %}?category=woman" class="footer-nav-link">Женские</a></li>
+                    <li><a href="{% url 'products:catalog' %}?category=unisex" class="footer-nav-link">Унисекс</a></li>
+                    <li><a href="{% url 'brands' %}" class="footer-nav-link">Бренды</a></li>
+                </ul>
+            </div>
+
+            <!-- Service col -->
+            <div class="footer-nav-col">
+                <p class="footer-col-label">Сервис</p>
+                <ul class="footer-nav-list">
+                    <li><a href="#" class="footer-nav-link">Доставка</a></li>
+                    <li><a href="#" class="footer-nav-link">Возврат и обмен</a></li>
+                    <li><a href="#" class="footer-nav-link">Программа лояльности</a></li>
+                    <li><a href="#" class="footer-nav-link">Подбор аромата</a></li>
+                    <li><a href="#" class="footer-nav-link">О нас</a></li>
+                    <li><a href="#" class="footer-nav-link">Контакты</a></li>
+                </ul>
+            </div>
+
+        </div>
     </div>
+
+    <!-- ═══ BOTTOM BAR ═════════════════════════════════════════════════════ -->
+    <div class="border-t border-edge">
+        <div class="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-muted sm:flex-row lg:px-12">
+            <p>© {% now "Y" %} Accord. Все права защищены.</p>
+            <div class="flex items-center gap-5">
+                <a href="#" class="footer-nav-link opacity-60 hover:opacity-100">Политика конфиденциальности</a>
+                <a href="#" class="footer-nav-link opacity-60 hover:opacity-100">Оферта</a>
+            </div>
+        </div>
+    </div>
+
 </footer>

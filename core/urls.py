@@ -8,8 +8,12 @@ urlpatterns = [
     path('brands/', views.brands, name='brands'),
     path('gift-cards/', views.gift_cards_catalog, name='gift_cards'),
     path('account/gift-cards/', views.account_gift_cards, name='account_gift_cards'),
-    path('accounts/login/', views.SiteLoginView.as_view(), name='login'),
-    path('accounts/register/', views.RegisterView.as_view(), name='register'),
+
+    path('accounts/login/', views.login_view, name='login'),
+    path('accounts/register/', views.register_view, name='register'),
+    path('accounts/verify/<str:token>/', views.email_verify, name='email_verify'),
+    path('accounts/resend-verification/', views.resend_verification, name='resend_verification'),
+    path('accounts/profile-setup/', views.profile_setup, name='profile_setup'),
     path(
         'accounts/logout/',
         LogoutView.as_view(next_page='/'),

@@ -1,13 +1,17 @@
 {% if error %}
-<div class="border border-edge-strong bg-surface px-5 py-4 text-xs uppercase tracking-[0.14em] text-danger">
+<div class="cart-toast__panel border border-edge-strong bg-surface px-4 py-3 text-xs uppercase tracking-[0.14em] text-danger">
   {{ error }}
 </div>
 {% else %}
-<div class="border border-edge-strong bg-background px-5 py-4 text-xs text-foreground">
-  <p class="uppercase tracking-[0.14em] text-accent">Товар добавлен</p>
-  <p class="mt-2 font-serif text-base normal-case text-heading">{{ product_name }}</p>
-  <p class="mt-2 text-muted">Товаров в корзине: {{ item_count }}</p>
-  <a href="{% url 'products:cart' %}" class="btn-luxury mt-4 inline-flex px-4 py-2 text-[10px]">В корзину</a>
+<div class="cart-toast__panel border border-edge-strong bg-background" data-toast-autohide-ms="5000">
+  <div class="flex items-start gap-4 px-5 py-4 max-sm:pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))]">
+    <div class="flex-1 min-w-0">
+      <p class="uppercase tracking-[0.14em] text-[10px] text-accent">Товар добавлен</p>
+      <p class="mt-1.5 font-serif text-base normal-case text-heading leading-tight truncate">{{ product_name }}</p>
+      <p class="mt-1 text-[11px] text-muted">Товаров в корзине: {{ item_count }}</p>
+    </div>
+    <a href="{% url 'products:cart' %}" class="btn-luxury shrink-0 mt-0.5 px-3 py-2 text-[10px] whitespace-nowrap">В корзину</a>
+  </div>
 </div>
 {% include "core/partials/nav_cart_badge.html" with count=item_count hx_oob=True only %}
 {% endif %}

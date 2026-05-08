@@ -1244,6 +1244,284 @@ main section {
     border-color: #ffffff !important;
 }
 
+/* ═══════════════════════════════════════════════════════════ */
+/* AUTH COMPONENT SYSTEM                                      */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ── Labels ─────────────────────────────────────────────── */
+.auth-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(247, 245, 241, 0.65);
+}
+
+/* ── Inputs ─────────────────────────────────────────────── */
+.auth-input {
+    width: 100%;
+    border: 1px solid rgba(247, 245, 241, 0.22);
+    background: rgba(247, 245, 241, 0.06);
+    color: #f7f5f1;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 250ms ease, background-color 250ms ease;
+}
+
+.auth-input::placeholder {
+    color: rgba(247, 245, 241, 0.35);
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: rgba(247, 245, 241, 0.55);
+    background: rgba(247, 245, 241, 0.1);
+}
+
+.auth-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Eye toggle (show password) ─────────────────────────── */
+.auth-eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(247, 245, 241, 0.45);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    transition: color 200ms;
+}
+
+.auth-eye:hover {
+    color: rgba(247, 245, 241, 0.8);
+}
+
+/* ── Primary button ─────────────────────────────────────── */
+.auth-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(247, 245, 241, 0.5);
+    background: transparent;
+    color: #f7f5f1;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 11px;
+    font-family: inherit;
+    padding: 13px 24px;
+    cursor: pointer;
+    transition: color 250ms ease, background-color 250ms ease, border-color 250ms ease, opacity 250ms;
+    text-decoration: none;
+}
+
+.auth-btn:hover {
+    background: #f7f5f1;
+    color: #330507;
+    border-color: #f7f5f1;
+}
+
+.auth-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-btn--outline {
+    border-color: rgba(247, 245, 241, 0.25);
+    color: rgba(247, 245, 241, 0.7);
+}
+
+.auth-btn--outline:hover {
+    border-color: rgba(247, 245, 241, 0.5);
+    color: #f7f5f1;
+    background: transparent;
+}
+
+/* ── Error text ─────────────────────────────────────────── */
+.auth-error {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #d7a3a3;
+    line-height: 1.4;
+}
+
+/* ── Alert banners ──────────────────────────────────────── */
+.auth-alert {
+    border: 1px solid rgba(247, 245, 241, 0.15);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.auth-alert--error {
+    background: rgba(215, 163, 163, 0.12);
+    border-color: rgba(215, 163, 163, 0.3);
+    color: #d7a3a3;
+}
+
+.auth-alert--warning {
+    background: rgba(212, 167, 106, 0.12);
+    border-color: rgba(212, 167, 106, 0.3);
+    color: #d4a76a;
+}
+
+.auth-alert--success {
+    background: rgba(107, 179, 107, 0.12);
+    border-color: rgba(107, 179, 107, 0.3);
+    color: #8fc98f;
+}
+
+/* ── Link in auth context ───────────────────────────────── */
+.auth-link {
+    color: rgba(247, 245, 241, 0.85);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(247, 245, 241, 0.3);
+    transition: color 200ms, text-decoration-color 200ms;
+}
+
+.auth-link:hover {
+    color: #f7f5f1;
+    text-decoration-color: rgba(247, 245, 241, 0.7);
+}
+
+/* ── Password strength bar ──────────────────────────────── */
+.auth-pw-strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-pw-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(247, 245, 241, 0.12);
+    overflow: hidden;
+}
+
+.auth-pw-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    transition: width 300ms ease, background-color 300ms ease;
+}
+
+.auth-pw-text {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: rgba(247, 245, 241, 0.55);
+    min-width: 60px;
+    text-align: right;
+}
+
+/* ── Step indicator ─────────────────────────────────────── */
+.auth-steps {
+    gap: 0;
+}
+
+.auth-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.auth-step__num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(247, 245, 241, 0.2);
+    font-size: 11px;
+    color: rgba(247, 245, 241, 0.35);
+    transition: all 250ms;
+}
+
+.auth-step__label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(247, 245, 241, 0.35);
+    transition: color 250ms;
+}
+
+.auth-step--active .auth-step__num {
+    border-color: rgba(247, 245, 241, 0.6);
+    color: #f7f5f1;
+    background: rgba(247, 245, 241, 0.08);
+}
+
+.auth-step--active .auth-step__label {
+    color: rgba(247, 245, 241, 0.8);
+}
+
+.auth-step--done .auth-step__num {
+    border-color: rgba(107, 179, 107, 0.5);
+    color: #8fc98f;
+    background: rgba(107, 179, 107, 0.1);
+}
+
+.auth-step--done .auth-step__label {
+    color: rgba(107, 179, 107, 0.7);
+}
+
+.auth-step__line {
+    display: block;
+    width: 36px;
+    height: 1px;
+    background: rgba(247, 245, 241, 0.15);
+    margin: 0 8px;
+    margin-bottom: 18px;
+}
+
+.auth-step__line--done {
+    background: rgba(107, 179, 107, 0.4);
+}
+
+/* ── Divider with text ──────────────────────────────────── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(247, 245, 241, 0.15);
+}
+
+.auth-divider__text {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(247, 245, 241, 0.45);
+    white-space: nowrap;
+}
+
+/* ── Yandex SmartCaptcha ────────────────────────────────── */
+.auth-panel .smart-captcha {
+    margin: 0 auto;
+}
+
+.auth-panel .smart-captcha iframe {
+    max-width: 100% !important;
+    color-scheme: normal;
+}
+
 .account-panel .favorite-btn--catalog {
     border: 1px solid rgba(247, 245, 241, 0.45) !important;
     color: #330507 !important;
@@ -2357,6 +2635,173 @@ main section {
         position: sticky;
         top: calc(var(--site-header-offset, 0px) + 1rem);
     }
+}
+
+/* ── Избранное в ЛК: отложенное удаление с undo ─────────────── */
+.account-favorite-card {
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+/* Pending state: содержимое тускнеет, но кнопка-сердечко остаётся яркой и
+   переключается на «контурное» состояние — однозначный сигнал, что товар
+   НЕ в избранном (можно вернуть кликом по нему же). */
+.account-favorite-card.is-pending-remove {
+    pointer-events: none;
+}
+
+.account-favorite-card.is-pending-remove > a,
+.account-favorite-card.is-pending-remove .account-favorite-card__media > a,
+.account-favorite-card.is-pending-remove .account-favorite-card__media > img,
+.account-favorite-card.is-pending-remove .account-favorite-card__media > div {
+    opacity: 0.32;
+    filter: grayscale(0.45);
+    transition: opacity 0.22s ease, filter 0.22s ease;
+}
+
+.account-favorite-card.is-pending-remove .favorite-btn {
+    pointer-events: auto;
+}
+
+.account-favorite-card.is-pending-remove .favorite-btn__heart {
+    transition: transform 0.18s ease;
+    transform: scale(1.08);
+}
+
+.account-favorite-card.is-pending-remove .favorite-btn__heart path {
+    fill: none !important;
+    stroke-width: 1.6 !important;
+}
+
+.account-favorite-card.is-removing {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+}
+
+.fav-undo-toast {
+    position: fixed;
+    z-index: 110;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem));
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    overflow: hidden;
+    padding: 0.85rem 0.75rem 0.85rem 1.1rem;
+    background: #1a0304;
+    color: #f7f5f1;
+    border: 1px solid rgba(247, 245, 241, 0.16);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+    animation: toast-slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (min-width: 640px) {
+    .fav-undo-toast {
+        left: auto;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        min-width: 22rem;
+        max-width: min(28rem, calc(100vw - 3rem));
+    }
+}
+
+.fav-undo-toast__msg {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    color: rgba(247, 245, 241, 0.92);
+}
+
+.fav-undo-toast__msg-title {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 241, 0.6);
+    margin-bottom: 2px;
+}
+
+.fav-undo-toast__msg-name {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: #f7f5f1;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+.fav-undo-toast__action {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0.55rem 0.95rem;
+    background: transparent;
+    border: 1px solid rgba(247, 245, 241, 0.45);
+    color: #f7f5f1;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    font-family: inherit;
+}
+
+.fav-undo-toast__action:hover {
+    background: rgba(247, 245, 241, 0.12);
+    border-color: rgba(247, 245, 241, 0.7);
+}
+
+.fav-undo-toast__progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: rgba(247, 245, 241, 0.5);
+    transform-origin: left center;
+    animation: fav-undo-countdown var(--fav-undo-duration, 5000ms) linear forwards;
+}
+
+@keyframes fav-undo-countdown {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* ── Toast уведомления ──────────────────────────────────────── */
+@keyframes toast-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(1.25rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cart-toast__panel {
+    animation: toast-slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    box-shadow: 0 8px 32px rgba(51, 5, 7, 0.14);
+}
+
+/* На мобиле: нижняя тень чуть интенсивнее, чтобы панель «отрывалась» от экрана */
+@media (max-width: 639.98px) {
+    .cart-toast__panel {
+        box-shadow: 0 -4px 24px rgba(51, 5, 7, 0.10), 0 8px 32px rgba(51, 5, 7, 0.12);
+    }
+}
+
+/* ── Кнопки-ссылки внутри тоста — немного компактнее ─────────── */
+#cart-toast .btn-luxury {
+    padding: 0.6rem 1rem;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-luxury {
@@ -3621,4 +4066,98 @@ main section {
         min-height: 2.25rem;
         padding: 0.25rem;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════ */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem 3rem;
+}
+
+@media (min-width: 640px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1.8fr 1fr 1fr;
+    }
+}
+
+.footer-brand-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-nav-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-tagline {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.footer-desc {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    max-width: 28ch;
+}
+
+.footer-contact-link {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+
+.footer-contact-link:hover {
+    color: var(--color-text);
+}
+
+.footer-col-label {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.footer-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footer-nav-link {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.18s ease;
+    display: inline-block;
+}
+
+.footer-nav-link:hover {
+    color: var(--color-text);
 }

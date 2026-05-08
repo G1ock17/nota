@@ -1,0 +1,18 @@
+Здравствуйте, {{ order.first_name }}!
+
+Ваш заказ №{{ order.pk }} оформлен.
+
+Состав заказа:
+{% for item in email_items %}- {{ item.name }} x{{ item.quantity }}: {{ item.line_total|floatformat:2 }} RUB
+{% empty %}- Позиции заказа недоступны
+{% endfor %}
+
+Итого: {{ order.total_price|floatformat:2 }} RUB
+К оплате: {{ order.payable_amount|floatformat:2 }} RUB
+{{ payment_note }}
+
+Адрес доставки:
+{{ order.country }}, {{ order.region }}, {{ order.city }}, {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.postal_code }}
+
+Спасибо за заказ!
+Accord

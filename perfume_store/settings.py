@@ -153,7 +153,17 @@ LOGOUT_REDIRECT_URL = 'home'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.yandex.ru"          # или smtp.yandex.ru, smtp.mail.ru и т.д.
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", f"Accord <{EMAIL_HOST_USER}>")
+
+YANDEX_CAPTCHA_CLIENT_KEY = os.getenv("YANDEX_CAPTCHA_CLIENT_KEY", "")
+YANDEX_CAPTCHA_SERVER_KEY = os.getenv("YANDEX_CAPTCHA_SERVER_KEY", "")
 
 # Логи в файл на сервере (ispmanager часто не показывает traceback в браузере).
 # Включается при DEBUG=False или если в .env задано DJANGO_FILE_LOG=1.

@@ -190,6 +190,7 @@
     background: #ffffff !important;
     color: #330507 !important;
     border-color: rgba(51, 5, 7, 0.28) !important;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   }
 
   .cart-qty-btn:hover {
@@ -197,16 +198,39 @@
     color: #330507 !important;
   }
 
+  .cart-qty-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   .cart-qty-value {
     background: #ffffff !important;
     color: #330507 !important;
     border-color: rgba(51, 5, 7, 0.28) !important;
+    transition: opacity 0.15s ease;
   }
 
   .cart-qty-input {
     background: #ffffff !important;
     color: #330507 !important;
     border-color: rgba(51, 5, 7, 0.28) !important;
+    transition: opacity 0.15s ease;
+  }
+
+  .cart-product-card[data-cart-pending="true"] .cart-qty-value,
+  .cart-product-card[data-cart-pending="true"] .cart-qty-input {
+    opacity: 0.6;
+  }
+
+  .cart-product-card[data-cart-pending="true"] .cart-line-total {
+    opacity: 0.5;
+  }
+
+  .cart-product-card.is-removing {
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    opacity: 0;
+    transform: translateX(-12px);
+    pointer-events: none;
   }
 
   .cart-qty-input::-webkit-outer-spin-button,
@@ -287,7 +311,7 @@
 
         <div class="space-y-4 px-4 py-4">
           {% for item in cart_items %}
-            <article class="cart-product-card relative border border-edge p-4">
+            <article class="cart-product-card relative border border-edge p-4" data-cart-line data-variant-id="{{ item.variant.id }}">
               <form method="post" action="{% url 'products:cart_update' %}" class="cart-item-remove-form absolute right-2 top-2 z-10">
                 {% csrf_token %}
                 <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
@@ -311,17 +335,15 @@
                   {% if item.variant.get_volume_display %}
                     <p class="text-[10px] uppercase tracking-[0.14em] text-muted">{{ item.variant.get_volume_display }}</p>
                   {% endif %}
-                  <p class="text-xs text-muted">Количество: {{ item.quantity }} шт.</p>
+                  <p class="text-xs text-muted">Количество: <span data-cart-qty-text>{{ item.quantity }}</span> шт.</p>
 
                   <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    <form method="post" action="{% url 'products:cart_update' %}" class="inline-flex overflow-hidden border border-edge-strong text-sm">
-                      {% csrf_token %}
-                      <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
-                      <button type="submit" name="action" value="dec" class="cart-qty-btn min-h-9 min-w-9 px-2 transition-colors" aria-label="Уменьшить количество">−</button>
-                      <span class="cart-qty-value flex min-w-[2.25rem] items-center justify-center border-x border-edge-strong tabular-nums">{{ item.quantity }}</span>
-                      <button type="submit" name="action" value="inc" class="cart-qty-btn min-h-9 min-w-9 px-2 transition-colors" aria-label="Увеличить количество">+</button>
-                    </form>
-                    <p class="font-serif text-base tabular-nums text-heading">{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
+                    <div class="inline-flex overflow-hidden border border-edge-strong text-sm">
+                      <button type="button" data-cart-qty-action="dec" class="cart-qty-btn min-h-9 min-w-9 px-2" aria-label="Уменьшить количество">−</button>
+                      <span class="cart-qty-value flex min-w-[2.25rem] items-center justify-center border-x border-edge-strong tabular-nums" data-cart-qty-display>{{ item.quantity }}</span>
+                      <button type="button" data-cart-qty-action="inc" class="cart-qty-btn min-h-9 min-w-9 px-2" aria-label="Увеличить количество">+</button>
+                    </div>
+                    <p class="font-serif text-base tabular-nums text-heading cart-line-total" data-cart-line-total>{{ item.line_total|floatformat:2 }}&nbsp;₽</p>
                   </div>
                 </div>
               </div>
@@ -363,7 +385,7 @@
         <div class="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_340px]">
           <section class="space-y-4">
             {% for item in cart_items %}
-              <article class="cart-product-card relative grid grid-cols-1 gap-4 border border-edge p-5 md:grid-cols-[130px_1fr] md:pr-14">
+              <article class="cart-product-card relative grid grid-cols-1 gap-4 border border-edge p-5 md:grid-cols-[130px_1fr] md:pr-14" data-cart-line data-variant-id="{{ item.variant.id }}">
                 <form method="post" action="{% url 'products:cart_update' %}" class="cart-item-remove-form absolute right-3 top-3 z-10 md:right-4 md:top-4">
                   {% csrf_token %}
                   <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
@@ -388,22 +410,20 @@
                   </div>
 
                   <div class="mt-auto flex flex-wrap items-center justify-between gap-4">
-                    <form method="post" action="{% url 'products:cart_update' %}" class="flex items-center gap-2">
-                      {% csrf_token %}
-                      <input type="hidden" name="variant_id" value="{{ item.variant.id }}">
-                      <button type="submit" name="action" value="dec" class="cart-qty-btn h-9 w-9 border border-edge-strong">-</button>
+                    <div class="flex items-center gap-2">
+                      <button type="button" data-cart-qty-action="dec" class="cart-qty-btn h-9 w-9 border border-edge-strong" aria-label="Уменьшить количество">-</button>
                       <input
                         type="number"
                         min="1"
-                        name="quantity"
+                        inputmode="numeric"
                         value="{{ item.quantity }}"
+                        data-cart-qty-input
                         class="cart-qty-input h-9 w-16 border border-edge-strong px-2 text-center text-sm tabular-nums"
-                        onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()"
                       >
-                      <button type="submit" name="action" value="inc" class="cart-qty-btn h-9 w-9 border border-edge-strong">+</button>
-                    </form>
+                      <button type="button" data-cart-qty-action="inc" class="cart-qty-btn h-9 w-9 border border-edge-strong" aria-label="Увеличить количество">+</button>
+                    </div>
 
-                    <p class="font-serif text-2xl text-heading tabular-nums">{{ item.line_total|floatformat:2 }} ₽</p>
+                    <p class="font-serif text-2xl text-heading tabular-nums cart-line-total" data-cart-line-total>{{ item.line_total|floatformat:2 }} ₽</p>
                   </div>
                 </div>
               </article>
@@ -412,7 +432,7 @@
 
           <aside class="cart-summary-panel h-fit border border-edge p-6 lg:sticky lg:top-8">
             <h2 class="font-serif text-3xl text-heading">Итого</h2>
-            <p class="mt-6 border-t border-edge pt-6 font-serif text-4xl text-heading">{{ total_price|floatformat:2 }} ₽</p>
+            <p class="mt-6 border-t border-edge pt-6 font-serif text-4xl text-heading" data-cart-total-display>{{ total_price|floatformat:2 }} ₽</p>
             {% if user.is_authenticated %}
               <a href="{% url 'products:checkout' %}" class="btn-luxury cart-checkout-btn mt-8 inline-flex w-full justify-center">Оформить заказ</a>
             {% else %}
@@ -478,6 +498,241 @@
       });
     }
   }
+
+  var CART_UPDATE_URL = "{% url 'products:cart_update' %}";
+  var DEBOUNCE_MS = 350;
+
+  function getCsrfToken() {
+    var input = document.querySelector("#htmx-csrf input[name=csrfmiddlewaretoken], input[name=csrfmiddlewaretoken]");
+    return input ? input.value : "";
+  }
+
+  function setNavCartBadge(count) {
+    var badge = document.getElementById("nav-cart-badge");
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = String(count);
+      badge.classList.remove("hidden");
+    } else {
+      badge.textContent = "";
+      badge.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Все строки корзины (мобильная и десктоп шапки рендерятся отдельно для одного и того же variant_id),
+   * поэтому индексируем массивом, а не словарём.
+   */
+  function findAllLines(variantId) {
+    return Array.prototype.slice.call(
+      document.querySelectorAll('[data-cart-line][data-variant-id="' + variantId + '"]')
+    );
+  }
+
+  function setLinePending(variantId, pending) {
+    findAllLines(variantId).forEach(function (line) {
+      line.setAttribute("data-cart-pending", pending ? "true" : "false");
+      line.querySelectorAll('[data-cart-qty-action]').forEach(function (b) {
+        b.disabled = pending;
+      });
+    });
+  }
+
+  function setLineDisplay(variantId, qty, lineTotalDisplay) {
+    findAllLines(variantId).forEach(function (line) {
+      line.querySelectorAll('[data-cart-qty-display]').forEach(function (el) {
+        el.textContent = String(qty);
+      });
+      line.querySelectorAll('[data-cart-qty-text]').forEach(function (el) {
+        el.textContent = String(qty);
+      });
+      line.querySelectorAll('[data-cart-qty-input]').forEach(function (el) {
+        if (document.activeElement !== el) el.value = String(qty);
+      });
+      if (lineTotalDisplay !== undefined && lineTotalDisplay !== null) {
+        line.querySelectorAll('[data-cart-line-total]').forEach(function (el) {
+          el.textContent = lineTotalDisplay;
+        });
+      }
+    });
+  }
+
+  function removeLine(variantId) {
+    findAllLines(variantId).forEach(function (line) {
+      line.classList.add("is-removing");
+      window.setTimeout(function () {
+        if (line.parentNode) line.parentNode.removeChild(line);
+      }, 220);
+    });
+  }
+
+  /**
+   * Состояние per-variant: запомнили целевое значение, таймер дебаунса,
+   * и idempotent-флаг чтобы не отправлять параллельные запросы.
+   */
+  var pending = {};
+
+  function ensureState(variantId) {
+    if (!pending[variantId]) {
+      pending[variantId] = {
+        target: null,
+        timer: null,
+        inFlight: false,
+        nextTarget: null,
+      };
+    }
+    return pending[variantId];
+  }
+
+  function scheduleSync(variantId) {
+    var state = ensureState(variantId);
+    if (state.timer) window.clearTimeout(state.timer);
+    state.timer = window.setTimeout(function () {
+      state.timer = null;
+      sendUpdate(variantId);
+    }, DEBOUNCE_MS);
+  }
+
+  function sendUpdate(variantId) {
+    var state = ensureState(variantId);
+    if (state.target == null) return;
+    if (state.inFlight) {
+      state.nextTarget = state.target;
+      return;
+    }
+    state.inFlight = true;
+    setLinePending(variantId, true);
+
+    var body = new URLSearchParams();
+    body.set("variant_id", String(variantId));
+    body.set("quantity", String(Math.max(0, state.target)));
+
+    fetch(CART_UPDATE_URL, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCsrfToken(),
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      credentials: "same-origin",
+      body: body.toString(),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("cart_update_failed");
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || !data.ok) throw new Error("cart_update_failed");
+
+        if (data.removed) {
+          removeLine(variantId);
+        } else {
+          setLineDisplay(variantId, data.quantity, data.line_total_display);
+        }
+
+        var totalEl = document.querySelector("[data-cart-total-display]");
+        if (totalEl && data.total_price_display) {
+          totalEl.textContent = data.total_price_display;
+        }
+        setNavCartBadge(data.item_count);
+
+        if (data.empty) {
+          window.location.reload();
+          return;
+        }
+
+        state.inFlight = false;
+        setLinePending(variantId, false);
+
+        if (state.nextTarget !== null && state.nextTarget !== state.target) {
+          state.target = state.nextTarget;
+          state.nextTarget = null;
+          sendUpdate(variantId);
+        } else {
+          state.nextTarget = null;
+        }
+      })
+      .catch(function () {
+        state.inFlight = false;
+        setLinePending(variantId, false);
+        window.location.reload();
+      });
+  }
+
+  function getCurrentDisplayedQty(variantId) {
+    var line = document.querySelector('[data-cart-line][data-variant-id="' + variantId + '"]');
+    if (!line) return 0;
+    var disp = line.querySelector("[data-cart-qty-display]");
+    if (disp) {
+      var n = parseInt(disp.textContent || "0", 10);
+      if (!isNaN(n)) return n;
+    }
+    var inp = line.querySelector("[data-cart-qty-input]");
+    if (inp) {
+      var v = parseInt(inp.value || "0", 10);
+      if (!isNaN(v)) return v;
+    }
+    return 0;
+  }
+
+  function applyDelta(variantId, delta) {
+    var state = ensureState(variantId);
+    var current = state.target != null ? state.target : getCurrentDisplayedQty(variantId);
+    var next = Math.max(0, current + delta);
+    state.target = next;
+    setLineDisplay(variantId, next, null);
+    scheduleSync(variantId);
+  }
+
+  function applyAbsolute(variantId, qty) {
+    var state = ensureState(variantId);
+    var next = Math.max(0, isNaN(qty) ? 0 : qty);
+    state.target = next;
+    setLineDisplay(variantId, next, null);
+    scheduleSync(variantId);
+  }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest("[data-cart-qty-action]") : null;
+    if (!btn || btn.disabled) return;
+    var line = btn.closest("[data-cart-line]");
+    if (!line) return;
+    var variantId = line.getAttribute("data-variant-id");
+    if (!variantId) return;
+    e.preventDefault();
+    applyDelta(variantId, btn.getAttribute("data-cart-qty-action") === "inc" ? 1 : -1);
+  });
+
+  document.addEventListener("input", function (e) {
+    var inp = e.target;
+    if (!inp || !inp.matches || !inp.matches("[data-cart-qty-input]")) return;
+    var line = inp.closest("[data-cart-line]");
+    if (!line) return;
+    var variantId = line.getAttribute("data-variant-id");
+    if (!variantId) return;
+    var n = parseInt(inp.value || "0", 10);
+    if (isNaN(n)) return;
+    applyAbsolute(variantId, n);
+  });
+
+  document.addEventListener("change", function (e) {
+    var inp = e.target;
+    if (!inp || !inp.matches || !inp.matches("[data-cart-qty-input]")) return;
+    var line = inp.closest("[data-cart-line]");
+    if (!line) return;
+    var variantId = line.getAttribute("data-variant-id");
+    if (!variantId) return;
+    var state = ensureState(variantId);
+    if (state.timer) {
+      window.clearTimeout(state.timer);
+      state.timer = null;
+    }
+    var n = parseInt(inp.value || "0", 10);
+    if (isNaN(n)) n = 0;
+    state.target = Math.max(0, n);
+    sendUpdate(variantId);
+  });
 
 })();
 </script>

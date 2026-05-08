@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Проверьте почту — Accord{% endblock %}
+
+{% block body %}
+<div class="min-h-screen section-deep text-foreground">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-12 lg:py-16">
+    <div class="auth-panel w-full max-w-[26rem] border border-edge px-6 py-10 text-center sm:px-10 sm:py-12">
+
+      <div class="auth-steps mb-8 flex items-center justify-center gap-0">
+        <div class="auth-step auth-step--done">
+          <span class="auth-step__num">&#10003;</span>
+          <span class="auth-step__label">Email</span>
+        </div>
+        <span class="auth-step__line auth-step__line--done"></span>
+        <div class="auth-step auth-step--active">
+          <span class="auth-step__num">2</span>
+          <span class="auth-step__label">Письмо</span>
+        </div>
+        <span class="auth-step__line"></span>
+        <div class="auth-step">
+          <span class="auth-step__num">3</span>
+          <span class="auth-step__label">Профиль</span>
+        </div>
+      </div>
+
+      <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center border border-edge">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted">
+          <rect x="2" y="4" width="20" height="16" rx="0"/><path d="M22 4L12 13 2 4"/>
+        </svg>
+      </div>
+
+      <h1 class="font-serif text-2xl text-heading sm:text-3xl">Проверьте почту</h1>
+
+      <p class="mt-4 text-sm leading-relaxed text-muted">
+        Мы отправили письмо на<br>
+        <strong class="text-foreground">{{ email }}</strong>
+      </p>
+      <p class="mt-2 text-sm text-muted">
+        Перейдите по ссылке в письме, чтобы подтвердить аккаунт.
+      </p>
+
+      {% if not_verified %}
+        <div class="auth-alert auth-alert--warning mt-5">
+          <p>Ваш email ещё не подтверждён. Проверьте почту или запросите новое письмо.</p>
+        </div>
+      {% endif %}
+
+      {% if resent %}
+        <div class="auth-alert auth-alert--success mt-5">
+          <p>Письмо отправлено повторно.</p>
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'resend_verification' %}" class="mt-6">
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ email }}">
+        <button type="submit" class="auth-btn auth-btn--outline w-full text-xs">
+          Отправить письмо повторно
+        </button>
+      </form>
+
+      <p class="mt-5 text-xs text-muted">
+        Не видите письмо? Проверьте папку «Спам».
+      </p>
+    </div>
+  </main>
+</div>
+{% endblock %}

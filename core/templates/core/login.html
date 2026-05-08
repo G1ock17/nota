@@ -1,69 +1,109 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Вход — accord{% endblock %}
+{% block title %}Вход — Accord{% endblock %}
 
 {% block body %}
 <div class="min-h-screen section-deep text-foreground">
   {% include "core/partials/navbar.html" %}
 
-  <main class="auth-panel mx-auto my-12 w-full max-w-md border border-edge px-8 py-12 lg:my-16 lg:px-12 lg:py-14">
-    <h1 class="font-serif text-4xl text-heading">Вход</h1>
-    <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">Войдите в аккаунт</p>
+  <main class="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-12 lg:py-16">
+    <div class="auth-panel w-full max-w-[26rem] border border-edge px-6 py-10 sm:px-10 sm:py-12">
 
-    {% if form.non_field_errors %}
-      <div class="mt-6 border border-edge-strong bg-surface px-4 py-3 text-sm text-danger" role="alert">
-        {{ form.non_field_errors }}
+      <div class="mb-8 text-center">
+        <h1 class="font-serif text-3xl text-heading sm:text-4xl">Вход</h1>
+        <p class="mt-2 text-xs uppercase tracking-[0.18em] text-muted">Войдите в аккаунт</p>
       </div>
-    {% endif %}
 
-    <form method="post" action="{% url 'login' %}" class="mt-10 space-y-6">
-      {% csrf_token %}
-      {% if next %}
-        <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}
+        <div class="auth-alert auth-alert--error mb-6" role="alert">
+          {% for e in form.non_field_errors %}
+            <p>{{ e }}</p>
+          {% endfor %}
+        </div>
       {% endif %}
 
-      <div>
-        <label for="id_username" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Логин</label>
-        <input
-          type="text"
-          name="username"
-          id="id_username"
-          value="{{ form.username.value|default:'' }}"
-          required
-          autocomplete="username"
-          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
-        >
-        {% if form.username.errors %}
-          <p class="mt-2 text-xs text-danger">{{ form.username.errors.0 }}</p>
+      {% if locked %}
+        <div class="auth-alert auth-alert--warning mb-6" role="alert">
+          <p>Аккаунт временно заблокирован из-за многократных неудачных попыток входа.</p>
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}" class="space-y-5" id="login-form">
+        {% csrf_token %}
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
         {% endif %}
-      </div>
 
-      <div>
-        <label for="id_password" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-accent">Пароль</label>
-        <input
-          type="password"
-          name="password"
-          id="id_password"
-          required
-          autocomplete="current-password"
-          class="w-full border border-edge-strong bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
-        >
-        {% if form.password.errors %}
-          <p class="mt-2 text-xs text-danger">{{ form.password.errors.0 }}</p>
-        {% endif %}
-      </div>
+        <div class="auth-field">
+          <label for="id_email" class="auth-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="id_email"
+            value="{{ form.email.value|default:'' }}"
+            required
+            autocomplete="email"
+            class="auth-input"
+            placeholder="email@example.com"
+            {% if locked %}disabled{% endif %}
+          >
+          {% if form.email.errors %}
+            <p class="auth-error">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
 
-      <button type="submit" class="btn-luxury w-full">Войти</button>
-    </form>
+        <div class="auth-field">
+          <label for="id_password" class="auth-label">Пароль</label>
+          <div class="relative">
+            <input
+              type="password"
+              name="password"
+              id="id_password"
+              required
+              autocomplete="current-password"
+              class="auth-input pr-10"
+              placeholder="Пароль"
+              {% if locked %}disabled{% endif %}
+            >
+            <button type="button" class="auth-eye" onclick="togglePw(this)" aria-label="Показать пароль">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          {% if form.password.errors %}
+            <p class="auth-error">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
 
-    <p class="mt-6 text-sm text-muted">
-      Нет аккаунта?
-      <a
-        href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}"
-        class="text-accent transition-colors hover:text-accent-hover"
-      >Зарегистрироваться</a>
-    </p>
+        <button type="submit" class="auth-btn w-full" id="login-btn" {% if locked %}disabled{% endif %}>
+          <span class="auth-btn__text">Войти</span>
+          <span class="auth-btn__spinner hidden">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-muted">
+        Нет аккаунта?
+        <a href="{% url 'register' %}" class="auth-link">Зарегистрироваться</a>
+      </p>
+    </div>
   </main>
 </div>
+
+<script>
+function togglePw(btn){
+  const inp=btn.previousElementSibling;
+  inp.type=inp.type==='password'?'text':'password';
+}
+(function(){
+  document.getElementById('login-form').addEventListener('submit',function(){
+    const b=document.getElementById('login-btn');
+    if(b.disabled)return;
+    b.querySelector('.auth-btn__text').classList.add('hidden');
+    b.querySelector('.auth-btn__spinner').classList.remove('hidden');
+    b.disabled=true;
+  });
+})();
+</script>
 {% endblock %}

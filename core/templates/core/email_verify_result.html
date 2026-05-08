@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Подтверждение email — Accord{% endblock %}
+
+{% block body %}
+<div class="min-h-screen section-deep text-foreground">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-12 lg:py-16">
+    <div class="auth-panel w-full max-w-[26rem] border border-edge px-6 py-10 text-center sm:px-10 sm:py-12">
+
+      {% if status == "expired" %}
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center border border-edge">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-danger">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h1 class="font-serif text-2xl text-heading">Ссылка устарела</h1>
+        <p class="mt-4 text-sm text-muted">Срок действия ссылки истёк. Запросите новое письмо.</p>
+        <a href="{% url 'register' %}" class="auth-btn mt-6 inline-flex">Зарегистрироваться снова</a>
+
+      {% elif status == "invalid" %}
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center border border-edge">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-danger">
+            <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+          </svg>
+        </div>
+        <h1 class="font-serif text-2xl text-heading">Недействительная ссылка</h1>
+        <p class="mt-4 text-sm text-muted">Ссылка уже была использована или не существует.</p>
+        <a href="{% url 'login' %}" class="auth-btn mt-6 inline-flex">Войти</a>
+
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -108,7 +108,7 @@
                     <div class="account-cabinet-stat-label">Заказов</div>
                   </div>
                   <div class="account-cabinet-stat-box">
-                    <div class="account-cabinet-stat-num">{{ favorite_entries|length }}</div>
+                    <div class="account-cabinet-stat-num" data-fav-count-num>{{ favorite_entries|length }}</div>
                     <div class="account-cabinet-stat-label">Избранных</div>
                   </div>
                   <div class="account-cabinet-stat-box">
@@ -223,7 +223,7 @@
         <header class="account-cabinet-page-head">
           <div>
             <h1 class="account-cabinet-page-title font-serif text-heading">Избранное</h1>
-            <p class="account-cabinet-page-sub">{% if favorite_entries %}{{ favorite_entries|length }} в списке{% else %}Список пуст{% endif %}</p>
+            <p class="account-cabinet-page-sub" data-fav-count-label data-fav-total="{{ favorite_entries|length }}">{% if favorite_entries %}{{ favorite_entries|length }} в списке{% else %}Список пуст{% endif %}</p>
           </div>
         </header>
         <div class="account-cabinet-page-body">
@@ -231,7 +231,7 @@
             <div class="account-cabinet-wish-grid grid w-full justify-items-center grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
               {% for fav in favorite_entries %}
                 {% with p=fav.product %}
-                  <article class="account-favorite-card product-card group flex h-full w-full max-w-[320px] flex-col">
+                  <article class="account-favorite-card product-card group flex h-full w-full max-w-[320px] flex-col" data-fav-card data-product-id="{{ p.id }}" data-product-name="{{ p.name }}">
                     <div class="account-favorite-card__media product-card__media relative shrink-0 overflow-hidden">
                       <a href="{% url 'products:product_detail' p.slug %}" class="absolute inset-0 z-0 block" aria-label="{{ p.name }} — открыть карточку" tabindex="-1"></a>
                       {% with imgs=p.images.all %}
@@ -439,7 +439,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 <script>
   const tabButtons = document.querySelectorAll(".lk-tab-btn, [data-tab]");
   const tabPanes = document.querySelectorAll(".lk-tab-pane");
@@ -561,5 +560,206 @@
       }
     });
   });
+
+  /* ── Избранное: отложенное удаление с undo ───────────────── */
+  (function () {
+    var TOGGLE_URL = "{% url 'products:favorite_toggle' %}";
+    var UNDO_MS = 5000;
+
+    function getCsrf() {
+      var inp = document.querySelector("#htmx-csrf input[name=csrfmiddlewaretoken], input[name=csrfmiddlewaretoken]");
+      return inp ? inp.value : "";
+    }
+
+    function buildBody(productId) {
+      var body = new URLSearchParams();
+      body.set("product_id", String(productId));
+      body.set("button", "catalog");
+      body.set("context", "account");
+      return body.toString();
+    }
+
+    function adjustFavCount(delta) {
+      var num = document.querySelector("[data-fav-count-num]");
+      if (num) {
+        var curN = parseInt(num.textContent || "0", 10);
+        if (!isNaN(curN)) num.textContent = String(Math.max(0, curN + delta));
+      }
+      var lbl = document.querySelector("[data-fav-count-label]");
+      if (lbl) {
+        var total = parseInt(lbl.getAttribute("data-fav-total") || "0", 10);
+        if (isNaN(total)) total = 0;
+        total = Math.max(0, total + delta);
+        lbl.setAttribute("data-fav-total", String(total));
+        lbl.textContent = total > 0 ? total + " в списке" : "Список пуст";
+      }
+    }
+
+    var pending = null; // { productId, card, timerId, toastEl }
+    var toastHost = null;
+
+    function ensureToastHost() {
+      if (toastHost && document.body.contains(toastHost)) return toastHost;
+      toastHost = document.createElement("div");
+      toastHost.id = "fav-undo-host";
+      document.body.appendChild(toastHost);
+      return toastHost;
+    }
+
+    function buildToast(productName) {
+      var host = ensureToastHost();
+      host.innerHTML = "";
+      var toast = document.createElement("div");
+      toast.className = "fav-undo-toast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      toast.style.setProperty("--fav-undo-duration", UNDO_MS + "ms");
+
+      var msg = document.createElement("div");
+      msg.className = "fav-undo-toast__msg";
+      var title = document.createElement("span");
+      title.className = "fav-undo-toast__msg-title";
+      title.textContent = "Удалено из избранного";
+      msg.appendChild(title);
+      var name = document.createElement("span");
+      name.className = "fav-undo-toast__msg-name";
+      name.textContent = productName || "Товар";
+      msg.appendChild(name);
+      toast.appendChild(msg);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "fav-undo-toast__action";
+      btn.textContent = "Отменить";
+      btn.addEventListener("click", function () {
+        cancelPending();
+      });
+      toast.appendChild(btn);
+
+      var progress = document.createElement("span");
+      progress.className = "fav-undo-toast__progress";
+      toast.appendChild(progress);
+
+      host.appendChild(toast);
+      return toast;
+    }
+
+    function hideToast() {
+      if (toastHost) toastHost.innerHTML = "";
+    }
+
+    function commitPending(opts) {
+      opts = opts || {};
+      if (!pending) return Promise.resolve();
+      var productId = pending.productId;
+      var card = pending.card;
+      window.clearTimeout(pending.timerId);
+      pending = null;
+      hideToast();
+
+      if (card && !opts.skipDom) {
+        card.classList.remove("is-pending-remove");
+        card.classList.add("is-removing");
+        window.setTimeout(function () {
+          if (card.parentNode) card.parentNode.removeChild(card);
+          if (!document.querySelector("[data-fav-card]")) {
+            window.location.reload();
+          }
+        }, 220);
+      }
+
+      if (opts.useBeacon && navigator.sendBeacon) {
+        var fd = new FormData();
+        fd.set("product_id", String(productId));
+        fd.set("button", "catalog");
+        fd.set("context", "account");
+        fd.set("csrfmiddlewaretoken", getCsrf());
+        navigator.sendBeacon(TOGGLE_URL, fd);
+        return Promise.resolve();
+      }
+
+      return fetch(TOGGLE_URL, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCsrf(),
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        credentials: "same-origin",
+        body: buildBody(productId),
+      }).catch(function () {});
+    }
+
+    function setHeartState(card, active) {
+      if (!card) return;
+      var heart = card.querySelector("[data-fav-account-toggle]");
+      if (!heart) return;
+      heart.classList.toggle("is-active", !!active);
+      heart.setAttribute("aria-pressed", active ? "true" : "false");
+      heart.setAttribute("aria-label", active ? "Убрать из избранного" : "Вернуть в избранное");
+    }
+
+    function cancelPending() {
+      if (!pending) return;
+      var card = pending.card;
+      window.clearTimeout(pending.timerId);
+      pending = null;
+      hideToast();
+      if (card) {
+        card.classList.remove("is-pending-remove");
+        setHeartState(card, true);
+        adjustFavCount(+1);
+      }
+    }
+
+    function startPending(card) {
+      if (pending) {
+        commitPending();
+      }
+      var productId = card.getAttribute("data-product-id");
+      var productName = card.getAttribute("data-product-name") || "";
+      if (!productId) return;
+
+      card.classList.add("is-pending-remove");
+      setHeartState(card, false);
+      adjustFavCount(-1);
+
+      var toastEl = buildToast(productName);
+      var timerId = window.setTimeout(function () {
+        commitPending();
+      }, UNDO_MS);
+
+      pending = {
+        productId: productId,
+        card: card,
+        timerId: timerId,
+        toastEl: toastEl,
+      };
+    }
+
+    document.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest("[data-fav-account-toggle]") : null;
+      if (!btn) return;
+      e.preventDefault();
+      var card = btn.closest("[data-fav-card]");
+      if (!card) return;
+
+      if (pending && pending.card === card) {
+        cancelPending();
+        return;
+      }
+      startPending(card);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (pending) cancelPending();
+    });
+
+    /* Уход со страницы во время pending — сразу коммитим удаление через sendBeacon */
+    window.addEventListener("pagehide", function () {
+      if (pending) commitPending({ useBeacon: true, skipDom: true });
+    });
+  })();
 </script>
 {% endblock %}

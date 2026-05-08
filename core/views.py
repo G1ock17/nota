@@ -1,24 +1,77 @@
-from urllib.parse import urlencode
+import logging
 from decimal import Decimal, InvalidOperation
 
+import requests as http_requests
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.views import LoginView
+from django.core.mail import send_mail
 from django.db.models import Min, Prefetch, Q, Sum
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.html import strip_tags
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
-from django.views.generic.edit import FormView
 
 from products.models import Brand, Favorite, Order, Product, ProductImage, Variant
 from products.gift_cards import total_active_balance
 from products.models import GiftCard, GiftCardTransaction
 from products.cart_utils import cart_total_items, get_cart
 
-from .models import DeliveryAddress, UserProfile
+from .forms import LoginForm, ProfileSetupForm, RegistrationForm
+from .models import DeliveryAddress, LoginAttempt, UserProfile
 from .brand_constants import FEATURED_HOME_BRANDS
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
+
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_COOLDOWN_MINUTES = 15
+
+
+def _get_client_ip(request):
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    return xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR", "0.0.0.0")
+
+
+def _verify_captcha(token: str, ip: str) -> bool:
+    secret = getattr(settings, "YANDEX_CAPTCHA_SERVER_KEY", "")
+    if not secret:
+        return True
+    try:
+        resp = http_requests.get(
+            "https://smartcaptcha.yandexcloud.net/validate",
+            params={"secret": secret, "token": token, "ip": ip},
+            timeout=5,
+        )
+        return resp.json().get("status") == "ok"
+    except Exception:
+        logger.exception("Yandex SmartCaptcha verification failed")
+        return True
+
+
+def _send_verification_email(request, user, profile):
+    token = profile.generate_email_token()
+    verify_url = request.build_absolute_uri(
+        reverse("email_verify", kwargs={"token": token})
+    )
+    subject = "Подтвердите ваш email — Accord"
+    html = render_to_string("core/emails/email_verification.html", {
+        "user": user,
+        "verify_url": verify_url,
+    })
+    send_mail(
+        subject,
+        strip_tags(html),
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        html_message=html,
+        fail_silently=True,
+    )
 
 
 def home(request):
@@ -67,40 +120,176 @@ def brands(request):
     return render(request, "brands.html", {"brands_payload": brands_payload})
 
 
-class SiteLoginView(LoginView):
-    template_name = 'core/login.html'
-    redirect_authenticated_user = True
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        n = ctx.get(self.redirect_field_name) or self.request.GET.get(self.redirect_field_name, "")
-        ctx["next"] = n
-        return ctx
+    captcha_key = getattr(settings, "YANDEX_CAPTCHA_CLIENT_KEY", "")
+
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+        ip = _get_client_ip(request)
+
+        captcha_token = request.POST.get("smart-token", "")
+        if captcha_key and not _verify_captcha(captcha_token, ip):
+            form.add_error(None, "Пожалуйста, подтвердите, что вы не робот.")
+            return render(request, "core/register.html", {
+                "form": form, "captcha_key": captcha_key,
+            })
+
+        if form.is_valid():
+            user = form.save()
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            _send_verification_email(request, user, profile)
+            return render(request, "core/register_done.html", {"email": user.email})
+    else:
+        form = RegistrationForm()
+
+    return render(request, "core/register.html", {
+        "form": form,
+        "captcha_key": captcha_key,
+    })
 
 
-class RegisterView(FormView):
-    template_name = 'core/register.html'
-    form_class = UserCreationForm
-    success_url = reverse_lazy('login')
+def email_verify(request, token: str):
+    try:
+        profile = UserProfile.objects.select_related("user").get(email_token=token)
+    except UserProfile.DoesNotExist:
+        return render(request, "core/email_verify_result.html", {"status": "invalid"})
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["next"] = self.request.GET.get("next", "")
-        return ctx
+    if not profile.is_email_token_valid():
+        return render(request, "core/email_verify_result.html", {"status": "expired"})
 
-    def get_success_url(self):
-        next_path = (self.request.POST.get("next") or self.request.GET.get("next") or "").strip()
-        if next_path and url_has_allowed_host_and_scheme(
-            next_path,
-            allowed_hosts={self.request.get_host()},
-            require_https=self.request.is_secure(),
-        ):
-            return f"{reverse('login')}?{urlencode({'next': next_path})}"
-        return str(reverse_lazy("login"))
+    profile.email_verified = True
+    profile.email_token = ""
+    profile.save(update_fields=["email_verified", "email_token"])
 
-    def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
+    user = profile.user
+    user.is_active = True
+    user.save(update_fields=["is_active"])
+
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    return redirect("profile_setup")
+
+
+def resend_verification(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip().lower()
+        try:
+            user = User.objects.get(email=email, is_active=False)
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            if not profile.email_verified:
+                _send_verification_email(request, user, profile)
+        except User.DoesNotExist:
+            pass
+        return render(request, "core/register_done.html", {
+            "email": email,
+            "resent": True,
+        })
+    return redirect("register")
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    ip = _get_client_ip(request)
+    attempts = LoginAttempt.recent_failures(ip, LOGIN_COOLDOWN_MINUTES)
+    locked = attempts >= MAX_LOGIN_ATTEMPTS
+    next_url = request.GET.get("next", "")
+
+    if request.method == "POST":
+        next_url = request.POST.get("next", next_url)
+        form = LoginForm(request.POST)
+
+        if locked:
+            form.add_error(None, f"Слишком много попыток. Подождите {LOGIN_COOLDOWN_MINUTES} минут.")
+            return render(request, "core/login.html", {
+                "form": form, "next": next_url, "locked": True,
+            })
+
+        if form.is_valid():
+            email = form.cleaned_data["email"].lower()
+            password = form.cleaned_data["password"]
+
+            try:
+                user_obj = User.objects.get(email=email)
+            except User.DoesNotExist:
+                user_obj = None
+
+            user = None
+            if user_obj:
+                user = authenticate(request, username=user_obj.username, password=password)
+
+            if user is not None:
+                if not user.is_active:
+                    profile, _ = UserProfile.objects.get_or_create(user=user)
+                    if not profile.email_verified:
+                        return render(request, "core/register_done.html", {
+                            "email": email,
+                            "not_verified": True,
+                        })
+                login(request, user)
+                LoginAttempt.objects.filter(ip_address=ip).delete()
+                redir = next_url.strip()
+                if redir and url_has_allowed_host_and_scheme(
+                    redir, allowed_hosts={request.get_host()},
+                    require_https=request.is_secure(),
+                ):
+                    return redirect(redir)
+                return redirect("home")
+            else:
+                LoginAttempt.objects.create(ip_address=ip, username=email)
+                remaining = MAX_LOGIN_ATTEMPTS - attempts - 1
+                if remaining <= 0:
+                    form.add_error(None, f"Слишком много попыток. Подождите {LOGIN_COOLDOWN_MINUTES} минут.")
+                else:
+                    form.add_error(None, f"Неверный email или пароль. Осталось попыток: {remaining}")
+    else:
+        form = LoginForm()
+
+    return render(request, "core/login.html", {
+        "form": form,
+        "next": next_url,
+        "locked": locked,
+    })
+
+
+@login_required
+def profile_setup(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = ProfileSetupForm(request.POST)
+        if form.is_valid():
+            d = form.cleaned_data
+            if d.get("first_name"):
+                request.user.first_name = d["first_name"]
+                request.user.save(update_fields=["first_name"])
+            if d.get("phone"):
+                profile.phone = d["phone"]
+            profile.profile_completed = True
+            profile.save(update_fields=["phone", "profile_completed"])
+
+            if d.get("city") and d.get("address_line1"):
+                DeliveryAddress.objects.create(
+                    user=request.user,
+                    country=d.get("country", ""),
+                    city=d["city"],
+                    region="",
+                    postal_code=d.get("postal_code", ""),
+                    address_line1=d["address_line1"],
+                    is_default=True,
+                )
+            messages.success(request, "Профиль успешно заполнен!")
+            return redirect("account")
+    else:
+        form = ProfileSetupForm(initial={
+            "first_name": request.user.first_name,
+            "phone": profile.phone,
+        })
+
+    return render(request, "core/profile_setup.html", {"form": form})
 
 
 @login_required

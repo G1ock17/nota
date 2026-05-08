@@ -1,0 +1,149 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Заполните профиль — Accord{% endblock %}
+
+{% block body %}
+<div class="min-h-screen section-deep text-foreground">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="flex min-h-[calc(100vh-5rem)] items-center justify-center px-4 py-12 lg:py-16">
+    <div class="auth-panel w-full max-w-[26rem] border border-edge px-6 py-10 sm:px-10 sm:py-12">
+
+      <div class="auth-steps mb-8 flex items-center justify-center gap-0">
+        <div class="auth-step auth-step--done">
+          <span class="auth-step__num">&#10003;</span>
+          <span class="auth-step__label">Email</span>
+        </div>
+        <span class="auth-step__line auth-step__line--done"></span>
+        <div class="auth-step auth-step--done">
+          <span class="auth-step__num">&#10003;</span>
+          <span class="auth-step__label">Письмо</span>
+        </div>
+        <span class="auth-step__line auth-step__line--done"></span>
+        <div class="auth-step auth-step--active">
+          <span class="auth-step__num">3</span>
+          <span class="auth-step__label">Профиль</span>
+        </div>
+      </div>
+
+      <div class="mb-8 text-center">
+        <h1 class="font-serif text-2xl text-heading sm:text-3xl">Добро пожаловать!</h1>
+        <p class="mt-2 text-xs uppercase tracking-[0.18em] text-muted">Расскажите немного о себе</p>
+      </div>
+
+      <form method="post" action="{% url 'profile_setup' %}" class="space-y-5" id="profile-form">
+        {% csrf_token %}
+
+        <div class="auth-field">
+          <label for="id_first_name" class="auth-label">Имя</label>
+          <input
+            type="text"
+            name="first_name"
+            id="id_first_name"
+            value="{{ form.first_name.value|default:'' }}"
+            class="auth-input"
+            placeholder="Как к вам обращаться?"
+            autocomplete="given-name"
+          >
+        </div>
+
+        <div class="auth-field">
+          <label for="id_phone" class="auth-label">Телефон</label>
+          <input
+            type="tel"
+            name="phone"
+            id="id_phone"
+            value="{{ form.phone.value|default:'' }}"
+            class="auth-input"
+            placeholder="+7 (___) ___-__-__"
+            autocomplete="tel"
+          >
+          {% if form.phone.errors %}
+            <p class="auth-error">{{ form.phone.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="auth-divider">
+          <span class="auth-divider__text">Адрес доставки</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="auth-field">
+            <label for="id_country" class="auth-label">Страна</label>
+            <input
+              type="text"
+              name="country"
+              id="id_country"
+              value="{{ form.country.value|default:'' }}"
+              class="auth-input"
+              placeholder="Россия"
+              autocomplete="country-name"
+            >
+          </div>
+          <div class="auth-field">
+            <label for="id_city" class="auth-label">Город</label>
+            <input
+              type="text"
+              name="city"
+              id="id_city"
+              value="{{ form.city.value|default:'' }}"
+              class="auth-input"
+              placeholder="Москва"
+              autocomplete="address-level2"
+            >
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="id_address_line1" class="auth-label">Адрес</label>
+          <input
+            type="text"
+            name="address_line1"
+            id="id_address_line1"
+            value="{{ form.address_line1.value|default:'' }}"
+            class="auth-input"
+            placeholder="Улица, дом, квартира"
+            autocomplete="street-address"
+          >
+        </div>
+
+        <div class="auth-field">
+          <label for="id_postal_code" class="auth-label">Индекс</label>
+          <input
+            type="text"
+            name="postal_code"
+            id="id_postal_code"
+            value="{{ form.postal_code.value|default:'' }}"
+            class="auth-input"
+            placeholder="101000"
+            autocomplete="postal-code"
+          >
+        </div>
+
+        <button type="submit" class="auth-btn w-full" id="profile-btn">
+          <span class="auth-btn__text">Сохранить</span>
+          <span class="auth-btn__spinner hidden">
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+        </button>
+
+        <a href="{% url 'account' %}" class="auth-btn auth-btn--outline mt-2 block w-full text-center text-xs">
+          Пропустить
+        </a>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  document.getElementById('profile-form').addEventListener('submit',function(){
+    const b=document.getElementById('profile-btn');
+    b.querySelector('.auth-btn__text').classList.add('hidden');
+    b.querySelector('.auth-btn__spinner').classList.remove('hidden');
+    b.disabled=true;
+  });
+})();
+</script>
+{% endblock %}

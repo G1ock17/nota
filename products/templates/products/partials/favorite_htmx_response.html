@@ -6,7 +6,7 @@
 {% endif %}
 {% endspaceless %}
 {% if favorite_toast_added %}
-<div id="cart-toast" class="fixed bottom-6 right-6 z-[100] max-w-sm empty:hidden" aria-live="polite" hx-swap-oob="true">
+<div id="cart-toast" class="fixed z-[100] empty:hidden max-sm:left-3 max-sm:right-3 max-sm:bottom-3 sm:bottom-6 sm:right-6 sm:w-[22rem]" aria-live="polite" hx-swap-oob="true">
 {% include "products/partials/favorite_toast_added.html" %}
 </div>
 {% endif %}

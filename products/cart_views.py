@@ -4,8 +4,11 @@ from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
+from django.templatetags.static import static
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
@@ -29,6 +32,53 @@ from core.models import DeliveryAddress, UserProfile
 GUEST_CHECKOUT_ADDRESS_KEY = "guest_checkout_address"
 
 logger = logging.getLogger(__name__)
+
+
+def _send_order_confirmation_email(order: Order, checkout_items: list[dict], request=None) -> None:
+    email_items = []
+    for item in checkout_items:
+        variant = item["variant"]
+        product_name = variant.product.name
+        volume = variant.get_volume_display()
+        if volume:
+            product_name = f"{product_name} ({volume})"
+        quantity = int(item["quantity"])
+        line_total = item["line_total"]
+        email_items.append(
+            {
+                "name": product_name,
+                "quantity": quantity,
+                "line_total": line_total,
+            }
+        )
+
+    payment_note = (
+        "Заказ ожидает онлайн-оплату."
+        if order.payable_amount > Decimal("0.00")
+        else "Полностью оплачено подарочной картой."
+    )
+
+    context = {
+        "order": order,
+        "email_items": email_items,
+        "payment_note": payment_note,
+        "logo_url": request.build_absolute_uri(static("core/img/brand-logo.png")) if request else "",
+    }
+
+    text_body = render_to_string("products/emails/order_confirmation.txt", context)
+    html_body = render_to_string("products/emails/order_confirmation.html", context)
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=f"Ваш заказ №{order.pk} оформлен",
+            body=text_body,
+            from_email=None,
+            to=[order.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=False)
+    except Exception:
+        logger.exception("Не удалось отправить email-подтверждение для заказа %s", order.pk)
 
 
 def _guest_address_complete(data) -> bool:
@@ -538,6 +588,7 @@ def checkout_detail(request):
                 requested = Decimal("0.00")
             if requested > 0:
                 apply_gift_cards_to_order(order=order, user=request.user, requested_amount=requested)
+        _send_order_confirmation_email(order, items, request=request)
 
         if order.payable_amount > Decimal("0.00") and is_yookassa_configured():
             try:
@@ -687,16 +738,68 @@ def cart_update(request):
     current_qty = int(cart.get(str(variant_id), 0) or 0)
 
     if action == "inc":
-        set_variant_quantity(request, variant_id, current_qty + 1)
+        new_qty = current_qty + 1
     elif action == "dec":
-        set_variant_quantity(request, variant_id, current_qty - 1)
+        new_qty = current_qty - 1
     elif action == "remove":
-        set_variant_quantity(request, variant_id, 0)
+        new_qty = 0
     else:
         try:
-            quantity = int(request.POST.get("quantity", current_qty))
+            new_qty = int(request.POST.get("quantity", current_qty))
         except (TypeError, ValueError):
-            quantity = current_qty
-        set_variant_quantity(request, variant_id, quantity)
+            new_qty = current_qty
 
-    return redirect("products:cart")
+    set_variant_quantity(request, variant_id, new_qty)
+
+    is_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.headers.get("HX-Request") == "true"
+        or "application/json" in request.headers.get("Accept", "")
+    )
+
+    if not is_ajax:
+        return redirect("products:cart")
+
+    cart_after = get_cart(request)
+    final_qty = int(cart_after.get(str(variant_id), 0) or 0)
+
+    variant_ids: list[int] = []
+    for key in cart_after.keys():
+        try:
+            variant_ids.append(int(key))
+        except (TypeError, ValueError):
+            continue
+
+    prices = {
+        v.pk: v.price
+        for v in Variant.objects.filter(pk__in=variant_ids).only("pk", "price")
+    }
+
+    total_price = Decimal("0")
+    for key, qty in cart_after.items():
+        try:
+            vid = int(key)
+            q = int(qty)
+        except (TypeError, ValueError):
+            continue
+        if q <= 0 or vid not in prices:
+            continue
+        total_price += prices[vid] * q
+
+    line_total = (prices.get(variant_id, Decimal("0")) * final_qty) if final_qty > 0 else Decimal("0")
+    item_count = cart_total_items(cart_after)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "variant_id": variant_id,
+            "quantity": final_qty,
+            "removed": final_qty <= 0,
+            "line_total": format(line_total, "f"),
+            "line_total_display": f"{line_total:.2f} \u20bd",
+            "total_price": format(total_price, "f"),
+            "total_price_display": f"{total_price:.2f} \u20bd",
+            "item_count": item_count,
+            "empty": item_count <= 0,
+        }
+    )

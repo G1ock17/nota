@@ -258,6 +258,9 @@
     top: 0.75rem;
     right: 0.75rem;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .bento-card__info {
@@ -369,9 +372,39 @@
 }
 .bento-cta:hover .bento-cta__link { color: #f7f5f1; }
 
-/* Favorite btn inside bento */
+/* Favorite btn inside bento — единый стиль с каталогом */
 .bento-card .favorite-btn--catalog {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
     color: #330507 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.bento-card .favorite-btn--catalog:not(.is-active) .favorite-btn__heart {
+    filter: drop-shadow(0 0 0.75px rgba(247, 245, 241, 0.95));
+}
+
+.bento-card .favorite-btn--catalog:hover {
+    color: var(--color-accent) !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.bento-card .favorite-btn--catalog:hover .favorite-btn__heart {
+    filter: none;
+}
+
+.bento-card .favorite-btn--catalog.is-active {
+    color: #330507 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+}
+
+.bento-card .favorite-btn--catalog.is-active .favorite-btn__heart {
+    filter: drop-shadow(0 0 0.75px rgba(247, 245, 241, 0.95));
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -530,9 +563,9 @@
         <section class="home-hero-wrap">
             <div class="home-hero-body">
                 <div class="home-hero-content">
-                    <p class="home-hero-eyebrow">Нишевая парфюмерия — Accord</p>
-                    <h2 class="home-hero-headline">Ароматы,<br>которые остаются</h2>
-                    <p class="home-hero-sub">Кюрированная коллекция редких ароматов<br>от мировых парфюмерных домов</p>
+                    <p class="home-hero-eyebrow">Accord</p>
+                    <h2 class="home-hero-headline">Ароматы,<br>которые выбирают</h2>
+                    <p class="home-hero-sub">Подлинные ароматы лучших марок —<br>собранные в одном месте</p>
                     <a href="{% url 'products:catalog' %}" class="home-hero-cta">
                         Перейти в каталог
                         <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
@@ -570,7 +603,7 @@
                 </blockquote>
                 <div class="home-quote__divider"></div>
                 <p class="home-quote__body">
-                    Accord — кюрированный выбор из лучших парфюмерных домов мира.<br>
+                    Accord — выбор лучших.<br>
                     Только подлинные ароматы, только те, что стоят вашего внимания.
                 </p>
             </div>
