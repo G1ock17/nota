@@ -83,10 +83,15 @@
         </button>
       </form>
 
-      <p class="mt-6 text-center text-sm text-muted">
-        Нет аккаунта?
-        <a href="{% url 'register' %}" class="auth-link">Зарегистрироваться</a>
-      </p>
+      <div class="mt-6 space-y-2 text-center text-sm text-muted">
+        <p>
+          <a href="{% url 'password_reset' %}" class="auth-link">Забыли пароль?</a>
+        </p>
+        <p>
+          Нет аккаунта?
+          <a href="{% url 'register' %}" class="auth-link">Зарегистрироваться</a>
+        </p>
+      </div>
     </div>
   </main>
 </div>

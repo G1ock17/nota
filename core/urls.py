@@ -14,6 +14,8 @@ urlpatterns = [
     path('accounts/verify/<str:token>/', views.email_verify, name='email_verify'),
     path('accounts/resend-verification/', views.resend_verification, name='resend_verification'),
     path('accounts/profile-setup/', views.profile_setup, name='profile_setup'),
+    path('accounts/password/reset/', views.password_reset_request, name='password_reset'),
+    path('accounts/password/reset/<str:token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path(
         'accounts/logout/',
         LogoutView.as_view(next_page='/'),

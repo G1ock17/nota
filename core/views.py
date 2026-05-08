@@ -292,6 +292,85 @@ def profile_setup(request):
     return render(request, "core/profile_setup.html", {"form": form})
 
 
+def password_reset_request(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    sent = False
+    email_value = ""
+
+    if request.method == "POST":
+        email_value = request.POST.get("email", "").strip().lower()
+        if email_value:
+            try:
+                user = User.objects.get(email=email_value, is_active=True)
+                profile, _ = UserProfile.objects.get_or_create(user=user)
+                token = profile.generate_email_token()
+                reset_url = request.build_absolute_uri(
+                    reverse("password_reset_confirm", kwargs={"token": token})
+                )
+                html = render_to_string("core/emails/password_reset.html", {
+                    "user": user,
+                    "reset_url": reset_url,
+                })
+                send_mail(
+                    "Восстановление пароля — Accord",
+                    strip_tags(html),
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    html_message=html,
+                    fail_silently=True,
+                )
+            except User.DoesNotExist:
+                pass
+            sent = True
+
+    return render(request, "core/password_reset.html", {
+        "sent": sent,
+        "email": email_value,
+    })
+
+
+def password_reset_confirm(request, token: str):
+    try:
+        profile = UserProfile.objects.select_related("user").get(email_token=token)
+    except UserProfile.DoesNotExist:
+        return render(request, "core/password_reset_confirm.html", {"status": "invalid"})
+
+    if not profile.is_email_token_valid():
+        return render(request, "core/password_reset_confirm.html", {"status": "expired"})
+
+    error = ""
+    if request.method == "POST":
+        pw1 = request.POST.get("password1", "")
+        pw2 = request.POST.get("password2", "")
+
+        if not pw1 or len(pw1) < 8:
+            error = "Пароль должен быть не менее 8 символов."
+        elif pw1 != pw2:
+            error = "Пароли не совпадают."
+        else:
+            from django.contrib.auth.password_validation import validate_password
+            from django.core.exceptions import ValidationError
+            try:
+                validate_password(pw1, profile.user)
+            except ValidationError as e:
+                error = e.messages[0]
+
+        if not error:
+            profile.user.set_password(pw1)
+            profile.user.save(update_fields=["password"])
+            profile.email_token = ""
+            profile.save(update_fields=["email_token"])
+            return render(request, "core/password_reset_confirm.html", {"status": "success"})
+
+    return render(request, "core/password_reset_confirm.html", {
+        "status": "form",
+        "token": token,
+        "error": error,
+    })
+
+
 @login_required
 def account(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
