@@ -328,18 +328,29 @@
     var toggle = document.querySelector(".nav-toggle");
     var nav = document.querySelector(".nav");
     if (toggle && nav) {
+        function openNav() {
+            nav.classList.add("is-open");
+            toggle.setAttribute("aria-expanded", "true");
+            toggle.setAttribute("aria-label", "Закрыть меню");
+            document.body.classList.add("nav-drawer-open");
+        }
+        function closeNav() {
+            nav.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-label", "Открыть меню");
+            document.body.classList.remove("nav-drawer-open");
+        }
+
         toggle.addEventListener("click", function () {
-            var open = nav.classList.toggle("is-open");
-            nav.classList.toggle("hidden", !open);
-            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+            nav.classList.contains("is-open") ? closeNav() : openNav();
         });
 
         nav.querySelectorAll("a").forEach(function (link) {
-            link.addEventListener("click", function () {
-                nav.classList.remove("is-open");
-                nav.classList.add("hidden");
-                toggle.setAttribute("aria-expanded", "false");
-            });
+            link.addEventListener("click", closeNav);
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && nav.classList.contains("is-open")) closeNav();
         });
     }
 
