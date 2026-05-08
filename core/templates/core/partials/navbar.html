@@ -32,12 +32,12 @@
 
             <div class="flex shrink-0 items-center gap-1">
                 {% if user.is_authenticated %}
-                <a href="{% url 'account' %}?section=favorites" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Избранное">
+                <a href="{% url 'account' %}" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Личный кабинет, {{ user.get_username }}">
                 {% else %}
-                <a href="{% url 'login' %}?next={% url 'account' %}%3Fsection%3Dfavorites" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Избранное">
+                <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="inline-flex h-11 w-11 items-center justify-center text-accent transition-colors hover:text-foreground" aria-label="Войти">
                 {% endif %}
                     <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+                        <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
                     </svg>
                 </a>
                 <a
@@ -141,35 +141,25 @@
             <a href="{% url 'brands' %}" class="nav-link pb-1 font-semibold">Бренды</a>
             {% if user.is_authenticated %}
             <a
-              href="{% url 'account' %}"
+              href="{% url 'account' %}?section=favorites"
               class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
-              aria-label="Аккаунт, {{ user.get_username }}"
+              aria-label="Избранное"
             >
-              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
               </svg>
             </a>
             {% else %}
             <a
-              href="{% url 'login' %}?next={{ request.path|urlencode }}"
+              href="{% url 'login' %}?next={% url 'account' %}%3Fsection%3Dfavorites"
               class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
-              aria-label="Войти"
+              aria-label="Избранное"
             >
-              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
               </svg>
             </a>
             {% endif %}
-            <a
-              href="{% url 'products:cart' %}"
-              class="nav-cart nav-link relative inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-accent transition-colors hover:text-foreground"
-              aria-label="Корзина{% if cart_item_count %}, {{ cart_item_count }} шт.{% endif %}"
-            >
-              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              {% include "core/partials/nav_cart_badge.html" with count=cart_item_count only %}
-            </a>
         </nav>
     </div>
 

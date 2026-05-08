@@ -174,11 +174,6 @@
     border-color: rgba(51, 5, 7, 0.16) !important;
   }
 
-  /* Превью: на странице surface = тёмный — в светлой карточке нужен светлый фон */
-  .cart-product-card .bg-surface {
-    background-color: #f4f1eb !important;
-  }
-
   .cart-checkout-btn {
     background: #330507 !important;
     color: #f7f5f1 !important;
@@ -248,6 +243,22 @@
     color: #1a0304;
     opacity: 0.85;
   }
+
+  .cart-mobile-back {
+    display: inline-block;
+    margin: 0 0 0.85rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(51, 5, 7, 0.62);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .cart-mobile-back:hover {
+    color: #330507;
+  }
 </style>
 {% endblock %}
 
@@ -262,21 +273,12 @@
       {# ——— Мобильная корзина ——— #}
       <div id="cart-mobile-root" class="xl:hidden pb-28 text-foreground">
         <div class="section-deep border-b border-edge px-4 py-5">
+          <a href="{% url 'products:catalog' %}" class="cart-mobile-back">← В каталог</a>
           <h1 class="font-serif text-2xl text-heading">Корзина</h1>
           <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-muted">Позиций в заказе: {{ line_total }}</p>
         </div>
 
-        <div class="section-deep flex items-center justify-between border-b border-edge px-4 py-3">
-          <label class="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
-            <input
-              type="checkbox"
-              id="cart-mobile-select-all"
-              class="cart-mobile-item-cb h-[1.125rem] w-[1.125rem] border border-edge-strong bg-background text-accent accent-accent focus:ring-1 focus:ring-edge-strong"
-              checked
-              data-role="select-all"
-            >
-            <span>Выбрать всё (<span data-role="selected-label">{{ line_total }}</span>/{{ line_total }})</span>
-          </label>
+        <div class="section-deep flex items-center justify-end border-b border-edge px-4 py-3">
           <form method="post" action="{% url 'products:cart_clear' %}" class="inline">
             {% csrf_token %}
             <button type="submit" class="text-sm text-muted transition-colors hover:text-accent">Удалить всё</button>
@@ -292,18 +294,8 @@
                 <button type="submit" name="action" value="remove" class="cart-item-remove" aria-label="Удалить из корзины">&times;</button>
               </form>
 
-              <div class="mb-3 flex items-center pr-8">
-                <input
-                  type="checkbox"
-                  class="cart-mobile-item-cb h-[1.125rem] w-[1.125rem] border border-edge-strong bg-background text-accent accent-accent focus:ring-1 focus:ring-edge-strong"
-                  checked
-                  data-role="item"
-                  aria-label="Выбрать {{ item.variant.product.name }}"
-                >
-              </div>
-
               <div class="flex gap-3.5">
-                <div class="h-[5.5rem] w-[5.5rem] shrink-0 overflow-hidden bg-surface">
+                <div class="w-[5.5rem] shrink-0 overflow-hidden aspect-[4/5]">
                   {% with imgs=item.variant.product.images.all %}
                     {% if imgs %}
                       <img src="{{ imgs.0.image.url }}" alt="{{ item.variant.product.name }}" class="h-full w-full object-cover" loading="lazy">
@@ -487,41 +479,6 @@
     }
   }
 
-  var root = document.getElementById("cart-mobile-root");
-  if (!root) return;
-  var items = root.querySelectorAll('.cart-mobile-item-cb[data-role="item"]');
-  var master = root.querySelector('[data-role="select-all"]');
-  var label = root.querySelector("[data-role=selected-label]");
-  if (!items.length || !master || !label) return;
-
-  function selectedCount() {
-    var n = 0;
-    items.forEach(function (cb) {
-      if (cb.checked) n += 1;
-    });
-    return n;
-  }
-
-  function sync() {
-    var n = selectedCount();
-    label.textContent = String(n);
-    master.checked = n === items.length;
-    master.indeterminate = n > 0 && n < items.length;
-  }
-
-  master.addEventListener("change", function () {
-    var on = master.checked;
-    items.forEach(function (cb) {
-      cb.checked = on;
-    });
-    sync();
-  });
-
-  items.forEach(function (cb) {
-    cb.addEventListener("change", sync);
-  });
-
-  sync();
 })();
 </script>
 {% endif %}
