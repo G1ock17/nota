@@ -592,11 +592,10 @@ main section {
     outline: none;
     transition: border-color 160ms ease;
     -moz-appearance: textfield;
-    appearance: textfield;
 }
 
 .cfs-price-input::-webkit-inner-spin-button,
-.cfs-price-input::-webkit-outer-spin-button { -webkit-appearance: none;}
+.cfs-price-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 .cfs-price-input::placeholder { color: rgba(51, 5, 7, 0.25); }
 .cfs-price-input:focus { border-bottom-color: #330507; }
@@ -1174,106 +1173,6 @@ main section {
 
     #catalog-product-grid .product-card .price-row {
         margin-top: 0.65rem;
-    }
-}
-
-/* ——— Burger → X анимация ——— */
-.nav-bar {
-    will-change: transform;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center center;
-}
-
-.nav-toggle[aria-expanded="true"] .nav-bar:nth-child(2) {
-    transform: translateY(3.5px) rotate(45deg);
-}
-
-.nav-toggle[aria-expanded="true"] .nav-bar:nth-child(3) {
-    transform: translateY(-3.5px) rotate(-45deg);
-}
-
-/* ——— Mobile nav drawer ——— */
-body.nav-drawer-open {
-    overflow: hidden;
-}
-
-@media (max-width: 1023.98px) {
-    .nav {
-        position: fixed;
-        inset: 0;
-        top: var(--site-header-offset, 56px);
-        z-index: 98;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        padding: 2.5rem 2rem env(safe-area-inset-bottom, 0px);
-        background: rgb(var(--color-bg-rgb));
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transform: translateY(-16px);
-        transition:
-            opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-            transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-            visibility 0s linear 0.32s;
-    }
-
-    .nav.is-open {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transform: translateY(0);
-        transition:
-            opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-            transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-            visibility 0s linear 0s;
-    }
-
-    .nav-drawer-link {
-        display: block;
-        width: 100%;
-        max-width: 20rem;
-        text-align: center;
-        padding: 1.25rem 1rem;
-        font-family: var(--font-serif);
-        font-size: clamp(1.85rem, 8vw, 2.65rem);
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: var(--color-heading);
-        text-decoration: none;
-        border-bottom: 1px solid var(--color-border);
-        opacity: 0;
-        transform: translateY(14px);
-        transition: opacity 0.28s ease, transform 0.28s ease, color 0.15s ease;
-    }
-
-    .nav-drawer-link:last-child {
-        border-bottom: none;
-    }
-
-    .nav-drawer-link:active {
-        color: var(--color-accent);
-    }
-
-    .nav.is-open .nav-drawer-link:nth-child(1) {
-        opacity: 1;
-        transform: translateY(0);
-        transition-delay: 0.09s;
-    }
-
-    .nav.is-open .nav-drawer-link:nth-child(2) {
-        opacity: 1;
-        transform: translateY(0);
-        transition-delay: 0.16s;
-    }
-
-    .nav.is-open .nav-drawer-link:nth-child(3) {
-        opacity: 1;
-        transform: translateY(0);
-        transition-delay: 0.23s;
     }
 }
 
@@ -3523,7 +3422,44 @@ body.nav-drawer-open {
     font-size: 10px;
 }
 
+@keyframes nav-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes nav-item-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @media (max-width: 1023px) {
+    /* Burger → X анимация */
+    .nav-toggle span:not(.sr-only) {
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.18s ease;
+        transform-origin: center;
+    }
+
+    .nav-toggle[aria-expanded="true"] span:nth-child(2) {
+        transform: translateY(3.5px) rotate(45deg);
+    }
+
+    .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-3.5px) rotate(-45deg);
+    }
+
     /* Anchor dropdown to header bar (needs positioned ancestor on .nav) */
     .nav.is-open {
         display: flex;
@@ -3538,7 +3474,18 @@ body.nav-drawer-open {
         border-bottom: 1px solid var(--color-border-strong);
         background: #fafaf9;
         padding: 1rem 1.5rem;
+        animation: nav-slide-in 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
+
+    /* Staggered появление пунктов */
+    .nav.is-open > * {
+        animation: nav-item-fade-in 0.2s ease both;
+    }
+    .nav.is-open > *:nth-child(1) { animation-delay: 0.06s; }
+    .nav.is-open > *:nth-child(2) { animation-delay: 0.10s; }
+    .nav.is-open > *:nth-child(3) { animation-delay: 0.14s; }
+    .nav.is-open > *:nth-child(4) { animation-delay: 0.18s; }
+    .nav.is-open > *:nth-child(5) { animation-delay: 0.22s; }
 
     header.site-header .nav.is-open a.nav-link {
         color: rgba(var(--color-nav-rgb), 0.92);

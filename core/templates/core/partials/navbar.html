@@ -8,8 +8,8 @@
             <div class="flex shrink-0 items-center gap-1">
                 <button type="button" class="nav-toggle inline-flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-[5px] text-accent" aria-label="Открыть меню" aria-expanded="false">
                     <span class="sr-only">Открыть меню</span>
-                    <span class="nav-bar block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
-                    <span class="nav-bar block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
+                    <span class="block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
+                    <span class="block h-0.5 w-5 rounded-full bg-current" aria-hidden="true"></span>
                 </button>
                 <button
                     type="button"
@@ -136,13 +136,29 @@
             </a>
         </div>
 
-        <nav class="nav lg:hidden" aria-label="Мобильное меню">
-            <a href="{% url 'products:catalog' %}" class="nav-drawer-link">Каталог</a>
-            <a href="{% url 'brands' %}" class="nav-drawer-link">Бренды</a>
+        <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[12px] uppercase tracking-[0.2em] text-nav lg:hidden">
+            <a href="{% url 'products:catalog' %}" class="nav-link pb-1 font-semibold">Каталог</a>
+            <a href="{% url 'brands' %}" class="nav-link pb-1 font-semibold">Бренды</a>
             {% if user.is_authenticated %}
-            <a href="{% url 'account' %}?section=favorites" class="nav-drawer-link">Избранное</a>
+            <a
+              href="{% url 'account' %}?section=favorites"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
+              aria-label="Избранное"
+            >
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+              </svg>
+            </a>
             {% else %}
-            <a href="{% url 'login' %}?next={% url 'account' %}%3Fsection%3Dfavorites" class="nav-drawer-link">Избранное</a>
+            <a
+              href="{% url 'login' %}?next={% url 'account' %}%3Fsection%3Dfavorites"
+              class="nav-auth nav-link inline-flex min-h-11 min-w-11 items-center justify-center pb-1 text-nav transition-colors hover:text-foreground"
+              aria-label="Избранное"
+            >
+              <svg class="h-6 w-6 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+              </svg>
+            </a>
             {% endif %}
         </nav>
     </div>
