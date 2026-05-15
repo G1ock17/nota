@@ -96,10 +96,11 @@
     width: min(100%, 34rem);
   }
   .product-detail-luxe__brand {
-    font-size: 0.64rem;
-    letter-spacing: 0.24em;
+    font-size: 0.8125rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.78);
+    color: rgba(247, 245, 241, 0.94);
+    font-weight: 400;
     margin-bottom: 1.15rem;
   }
   .product-detail-luxe__title {
@@ -117,23 +118,24 @@
   }
   .product-detail-luxe__year-country {
     margin: 0.85rem 0 0;
-    font-size: 0.64rem;
-    letter-spacing: 0.2em;
+    font-size: 0.8125rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.72);
+    color: rgba(247, 245, 241, 0.9);
+    font-weight: 400;
   }
   .section-deep .product-detail-luxe__content .product-detail-luxe__year-country {
-    color: rgba(247, 245, 241, 0.72) !important;
+    color: rgba(247, 245, 241, 0.9) !important;
   }
   .product-detail-luxe__year-country-sep {
-    color: rgba(247, 245, 241, 0.45);
+    color: rgba(247, 245, 241, 0.55);
     font-weight: 400;
   }
   .product-detail-luxe__desc {
     margin-top: 1.75rem;
-    color: rgba(247, 245, 241, 0.8);
-    line-height: 1.76;
-    font-size: clamp(0.95rem, 1.05vw, 1.02rem);
+    color: rgba(247, 245, 241, 0.92);
+    line-height: 1.8;
+    font-size: clamp(1rem, 1.15vw, 1.125rem);
     max-width: 30rem;
   }
   .product-detail-luxe__desc[data-collapsible] {
@@ -155,8 +157,8 @@
     padding: 0;
     background: transparent;
     color: rgba(247, 245, 241, 0.92);
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     border-bottom: 1px solid rgba(247, 245, 241, 0.55);
     transition: border-color 0.25s ease, color 0.25s ease;
@@ -171,11 +173,15 @@
     padding-top: 1.6rem;
   }
   .product-detail-luxe__meta-label {
-    font-size: 0.64rem;
-    letter-spacing: 0.22em;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.72);
+    color: rgba(247, 245, 241, 0.88);
+    font-weight: 400;
     margin-bottom: 0.95rem;
+  }
+  .section-deep .product-detail-luxe__content .product-detail-luxe__meta-label {
+    color: rgba(247, 245, 241, 0.88) !important;
   }
   .product-detail-luxe__size-list {
     display: flex;
@@ -194,17 +200,18 @@
     pointer-events: none;
   }
   .product-detail-luxe__size-option-text {
-    font-size: 0.76rem;
-    letter-spacing: 0.18em;
+    font-size: 0.875rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.56);
+    color: rgba(247, 245, 241, 0.82);
+    font-weight: 400;
     border-bottom: 1px solid transparent;
     transition: color 0.25s ease, border-color 0.25s ease;
     padding-bottom: 0.15rem;
     cursor: pointer;
   }
   .product-detail-luxe__size-option:hover .product-detail-luxe__size-option-text {
-    color: rgba(247, 245, 241, 0.9);
+    color: #f7f5f1;
   }
   .product-detail-luxe__size-option input:checked + .product-detail-luxe__size-option-text {
     color: #f7f5f1;
@@ -218,8 +225,13 @@
   .product-detail-luxe__price-value {
     margin: 0;
     font-family: var(--font-serif);
-    font-size: clamp(2rem, 4.2vw, 2.6rem);
+    font-size: clamp(2.15rem, 4.5vw, 2.85rem);
+    font-weight: 500;
+    line-height: 1.1;
     color: #f7f5f1;
+  }
+  .section-deep .product-detail-luxe__content .product-detail-luxe__price-value {
+    color: #f7f5f1 !important;
   }
   .product-detail-luxe__actions {
     margin-top: 2.2rem;
@@ -334,20 +346,22 @@
     margin-bottom: 0;
   }
   .product-detail-luxe__notes-label {
-    margin: 0 0 0.55rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.26em;
+    margin: 0 0 0.65rem;
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(51, 5, 7, 0.55) !important;
+    color: rgba(51, 5, 7, 0.78) !important;
+    font-weight: 400;
   }
   .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-label {
-    color: rgba(51, 5, 7, 0.55) !important;
+    color: rgba(51, 5, 7, 0.78) !important;
   }
   .product-detail-luxe__notes-value {
     margin: 0;
-    font-size: clamp(1.2rem, 2.4vw, 1.65rem);
-    line-height: 1.45;
+    font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+    line-height: 1.5;
     letter-spacing: 0.02em;
+    font-weight: 400;
     color: #330507 !important;
   }
   .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-value {
@@ -355,12 +369,12 @@
   }
   .product-detail-luxe__notes-empty-msg {
     margin: 0;
-    font-size: 1.05rem;
-    line-height: 1.55;
-    color: rgba(51, 5, 7, 0.65) !important;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: rgba(51, 5, 7, 0.82) !important;
   }
   .section-deep .product-detail-luxe__notes p.product-detail-luxe__notes-empty-msg {
-    color: rgba(51, 5, 7, 0.65) !important;
+    color: rgba(51, 5, 7, 0.82) !important;
   }
   .product-detail-luxe__notes-aside {
     display: flex;

@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ page_title }} — Accord{% endblock %}
+
+{% block body %}
+<div class="info-page min-h-screen text-foreground">
+  {% include "core/partials/navbar.html" %}
+
+  <header class="info-hero">
+    <p class="info-hero-eyebrow">{% block info_eyebrow %}Сервис{% endblock %}</p>
+    <h1 class="info-hero-title">{{ page_title }}</h1>
+  </header>
+
+  <main class="info-main">
+    <div class="info-content">
+      {% block info_content %}{% endblock %}
+    </div>
+  </main>
+
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}

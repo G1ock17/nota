@@ -382,19 +382,20 @@ main section {
 }
 
 .product-card .product-volume-line {
-    margin-top: 0.2rem;
+    margin-top: 0.35rem;
     display: block;
     font-family: var(--font-ui-sans);
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(51, 5, 7, 0.42);
+    color: #330507;
 }
 
 @media (min-width: 640px) {
     .product-card .product-volume-line {
-        font-size: 10px;
+        font-size: 13px;
+        letter-spacing: 0.09em;
     }
 }
 
@@ -775,8 +776,9 @@ main section {
     color: #330507 !important;
 }
 
-.section-deep .product-card .product-volume {
-    color: rgba(51, 5, 7, 0.55) !important;
+.section-deep .product-card .product-volume,
+.section-deep .product-card .product-volume-line {
+    color: #330507 !important;
 }
 
 .section-deep .product-card .divider {
@@ -1162,9 +1164,9 @@ main section {
     }
 
     #catalog-product-grid .product-card .product-volume-line {
-        font-size: 8px;
-        letter-spacing: 0.16em;
-        margin-top: 0.15rem;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        margin-top: 0.25rem;
     }
 
     #catalog-product-grid .product-card .product-info {
@@ -3022,12 +3024,12 @@ main section {
 }
 
 .nav-mega__eyebrow {
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: 0.35em;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.3);
-    margin-bottom: 1rem;
+    color: rgba(247, 245, 241, 0.62);
+    margin-bottom: 1.25rem;
 }
 
 .nav-mega__grid {
@@ -3047,13 +3049,14 @@ main section {
     align-items: center;
     min-width: 0;
     text-decoration: none;
-    color: rgba(247, 245, 241, 0.65);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
+    color: rgba(247, 245, 241, 0.92);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 0.7rem 0.5rem;
+    padding: 0.8rem 0.65rem;
     border-left: 2px solid transparent;
+    -webkit-font-smoothing: antialiased;
     transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
 }
 
@@ -3066,9 +3069,10 @@ main section {
 }
 
 .nav-mega__name {
-    line-height: 1.3;
+    line-height: 1.45;
     text-align: left;
     word-break: break-word;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .nav-mega__footer {
@@ -3083,11 +3087,11 @@ main section {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.3em;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(247, 245, 241, 0.4);
+    color: rgba(247, 245, 241, 0.78);
     text-decoration: none;
     padding: 0.3rem 0;
     border-bottom: 1px solid transparent;
@@ -4109,11 +4113,12 @@ main section {
 }
 
 .footer-desc {
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    line-height: 1.75;
-    color: var(--color-text-muted);
-    max-width: 28ch;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    line-height: 1.7;
+    color: var(--color-text);
+    max-width: 32ch;
+    font-weight: 500;
 }
 
 .footer-contact-link {
@@ -4160,4 +4165,119 @@ main section {
 
 .footer-nav-link:hover {
     color: var(--color-text);
+}
+
+/* ── Info / legal pages ─────────────────────────────────────────────── */
+.info-page {
+    background: var(--background-color);
+}
+
+.info-hero {
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
+    padding: 56px 48px 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.info-hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+}
+
+.info-hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--color-heading);
+    letter-spacing: -0.01em;
+}
+
+.info-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 48px 96px;
+}
+
+.info-content {
+    font-size: 14px;
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+    color: var(--color-text-muted);
+}
+
+.info-content > * + * {
+    margin-top: 1.25rem;
+}
+
+.info-content h2 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--color-heading);
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0;
+}
+
+.info-content h2:first-child {
+    margin-top: 0;
+}
+
+.info-content h3 {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-heading);
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-content ul,
+.info-content ol {
+    margin: 0.75rem 0 0;
+    padding-left: 1.25rem;
+}
+
+.info-content li + li {
+    margin-top: 0.5rem;
+}
+
+.info-content a {
+    color: var(--color-heading);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.info-content a:hover {
+    opacity: 0.75;
+}
+
+.info-content strong {
+    color: var(--color-heading);
+    font-weight: 500;
+}
+
+.info-card {
+    border: 1px solid var(--color-border);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.info-card p {
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .info-hero {
+        padding: 40px 20px 32px;
+    }
+
+    .info-main {
+        padding: 32px 20px 64px;
+    }
 }

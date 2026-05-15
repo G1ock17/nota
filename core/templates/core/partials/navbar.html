@@ -60,6 +60,8 @@
             <div class="nav-dropdown nav-dropdown--brands relative shrink-0" data-nav-brands-trigger>
                 <a href="{% url 'brands' %}" class="nav-link shrink-0 pb-1 font-semibold">Бренды</a>
             </div>
+            <a href="{% url 'info_contacts' %}" class="nav-link shrink-0 pb-1 font-semibold">Подбор аромата</a>
+            <a href="{% url 'info_about' %}" class="nav-link shrink-0 pb-1 font-semibold">О нас</a>
         </div>
 
         <div
@@ -139,6 +141,8 @@
         <nav class="nav order-4 hidden w-full flex-wrap items-center justify-center gap-x-10 gap-y-3 text-[12px] uppercase tracking-[0.2em] text-nav lg:hidden">
             <a href="{% url 'products:catalog' %}" class="nav-link pb-1 font-semibold">Каталог</a>
             <a href="{% url 'brands' %}" class="nav-link pb-1 font-semibold">Бренды</a>
+            <a href="{% url 'info_contacts' %}" class="nav-link pb-1 font-semibold">Подбор аромата</a>
+            <a href="{% url 'info_about' %}" class="nav-link pb-1 font-semibold">О нас</a>
             {% if user.is_authenticated %}
             <a
               href="{% url 'account' %}?section=favorites"

@@ -578,3 +578,21 @@ def gift_cards_catalog(request):
 @login_required
 def account_gift_cards(request):
     raise Http404("Gift cards are temporarily unavailable.")
+
+
+INFO_PAGES = {
+    "delivery": ("Доставка", "core/info/delivery.html"),
+    "returns": ("Возврат и обмен", "core/info/returns.html"),
+    "about": ("О нас", "core/info/about.html"),
+    "contacts": ("Контакты", "core/info/contacts.html"),
+    "privacy": ("Политика конфиденциальности", "core/info/privacy.html"),
+    "offer": ("Оферта", "core/info/offer.html"),
+}
+
+
+def info_page(request, page):
+    entry = INFO_PAGES.get(page)
+    if not entry:
+        raise Http404
+    page_title, template = entry
+    return render(request, template, {"page_title": page_title})

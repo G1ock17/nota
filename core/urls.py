@@ -9,6 +9,13 @@ urlpatterns = [
     path('gift-cards/', views.gift_cards_catalog, name='gift_cards'),
     path('account/gift-cards/', views.account_gift_cards, name='account_gift_cards'),
 
+    path('delivery/', views.info_page, {'page': 'delivery'}, name='info_delivery'),
+    path('returns/', views.info_page, {'page': 'returns'}, name='info_returns'),
+    path('about/', views.info_page, {'page': 'about'}, name='info_about'),
+    path('contacts/', views.info_page, {'page': 'contacts'}, name='info_contacts'),
+    path('privacy/', views.info_page, {'page': 'privacy'}, name='info_privacy'),
+    path('offer/', views.info_page, {'page': 'offer'}, name='info_offer'),
+
     path('accounts/login/', views.login_view, name='login'),
     path('accounts/register/', views.register_view, name='register'),
     path('accounts/verify/<str:token>/', views.email_verify, name='email_verify'),

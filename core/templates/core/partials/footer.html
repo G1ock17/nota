@@ -37,12 +37,12 @@
             <div class="footer-nav-col">
                 <p class="footer-col-label">Сервис</p>
                 <ul class="footer-nav-list">
-                    <li><a href="#" class="footer-nav-link">Доставка</a></li>
-                    <li><a href="#" class="footer-nav-link">Возврат и обмен</a></li>
+                    <li><a href="{% url 'info_delivery' %}" class="footer-nav-link">Доставка</a></li>
+                    <li><a href="{% url 'info_returns' %}" class="footer-nav-link">Возврат и обмен</a></li>
                     <li><a href="#" class="footer-nav-link">Программа лояльности</a></li>
                     <li><a href="#" class="footer-nav-link">Подбор аромата</a></li>
-                    <li><a href="#" class="footer-nav-link">О нас</a></li>
-                    <li><a href="#" class="footer-nav-link">Контакты</a></li>
+                    <li><a href="{% url 'info_about' %}" class="footer-nav-link">О нас</a></li>
+                    <li><a href="{% url 'info_contacts' %}" class="footer-nav-link">Контакты</a></li>
                 </ul>
             </div>
 
@@ -54,8 +54,8 @@
         <div class="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-muted sm:flex-row lg:px-12">
             <p>© {% now "Y" %} Accord. Все права защищены.</p>
             <div class="flex items-center gap-5">
-                <a href="#" class="footer-nav-link opacity-60 hover:opacity-100">Политика конфиденциальности</a>
-                <a href="#" class="footer-nav-link opacity-60 hover:opacity-100">Оферта</a>
+                <a href="{% url 'info_privacy' %}" class="footer-nav-link opacity-60 hover:opacity-100">Политика конфиденциальности</a>
+                <a href="{% url 'info_offer' %}" class="footer-nav-link opacity-60 hover:opacity-100">Оферта</a>
             </div>
         </div>
     </div>

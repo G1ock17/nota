@@ -100,10 +100,11 @@
 }
 
 .home-hero-eyebrow {
-    font-size: 9px;
-    letter-spacing: 0.32em;
+    font-size: clamp(12px, 1.1vw, 14px);
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(51,5,7,0.56);
+    color: #330507;
+    font-weight: 400;
     margin-bottom: 1.5rem;
 }
 @media (max-width: 1023px) {
@@ -129,15 +130,17 @@
     }
 }
 .home-hero-sub {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    color: rgba(51,5,7,0.72);
-    line-height: 1.9;
-    max-width: 34ch;
+    font-size: clamp(15px, 1.65vw, 18px);
+    letter-spacing: 0.04em;
+    color: #330507;
+    line-height: 1.65;
+    max-width: 36ch;
     margin-bottom: 3rem;
+    font-weight: 500;
 }
 @media (max-width: 1023px) {
     .home-hero-sub {
+        font-size: 15px;
         margin-bottom: 2rem;
     }
 }
@@ -206,9 +209,28 @@
     margin: 0 auto 2.5rem;
 }
 .home-quote__divider { width: 3rem; height: 1px; background: rgba(51,5,7,0.2); margin: 0 auto 2.25rem; }
+.home-quote__eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #330507;
+    margin-bottom: 2rem;
+}
 .home-quote__body {
-    font-size: 12px; letter-spacing: 0.07em; line-height: 1.95;
-    color: rgba(51,5,7,0.56); max-width: 38ch; margin: 0 auto;
+    font-size: clamp(16px, 2vw, 20px);
+    letter-spacing: 0.03em;
+    line-height: 1.75;
+    color: #330507;
+    max-width: 42ch;
+    margin: 0 auto;
+    font-weight: 500;
+}
+.home-section-label {
+    font-size: clamp(13px, 1.25vw, 16px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #330507;
+    font-weight: 400;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -304,10 +326,11 @@
 }
 .bento-card__brand {
     display: block;
-    font-size: 8px;
-    letter-spacing: 0.28em;
+    font-size: 12px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(51,5,7,0.45);
+    color: #330507;
+    font-weight: 400;
     margin-bottom: 0.5rem;
 }
 .bento-card__name {
@@ -326,10 +349,11 @@
     gap: 0.5rem;
 }
 .bento-card__volume {
-    font-size: 9px;
-    letter-spacing: 0.14em;
+    font-size: 13px;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: rgba(51,5,7,0.42);
+    color: #330507;
+    font-weight: 400;
 }
 .bento-card__price {
     font-family: var(--font-serif);
@@ -358,9 +382,9 @@
     background-image:
         linear-gradient(
             180deg,
-            rgba(51, 5, 7, 0.18) 0%,
-            rgba(51, 5, 7, 0.62) 48%,
-            rgba(51, 5, 7, 0.94) 100%
+            rgba(51, 5, 7, 0.35) 0%,
+            rgba(51, 5, 7, 0.72) 42%,
+            rgba(51, 5, 7, 0.97) 100%
         ),
         url("{% static 'core/img/catalog-bg.png' %}");
     background-size: cover, cover;
@@ -376,29 +400,32 @@
     color: #f7f5f1;
 }
 .bento-cta__label {
-    font-size: 8px;
-    letter-spacing: 0.3em;
+    font-size: 12px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(247,245,241,0.5);
-    margin-bottom: 1rem;
+    color: rgba(247,245,241,0.92);
+    font-weight: 400;
+    margin-bottom: 0.85rem;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
 }
 .bento-cta__title {
     font-family: var(--font-serif);
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-size: clamp(1.65rem, 2.8vw, 2.25rem);
     font-weight: 600;
     line-height: 1.1;
     color: #f7f5f1;
-    margin-bottom: 1.5rem;
-    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
+    margin-bottom: 1.35rem;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
 }
 .bento-cta__link {
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    font-size: 9px;
-    letter-spacing: 0.24em;
+    font-size: 11px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(247,245,241,0.65);
+    color: rgba(247,245,241,0.9);
+    font-weight: 500;
     transition: color 200ms ease;
 }
 .bento-cta:hover .bento-cta__link { color: #f7f5f1; }
@@ -476,16 +503,18 @@
     line-height: 1.08 !important;
 }
 .home-cat-card-desc {
-    font-size: 9px;
-    letter-spacing: 0.2em;
+    font-size: clamp(12px, 1.1vw, 14px);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(51,5,7,0.58);
+    color: #330507;
+    font-weight: 500;
+    line-height: 1.5;
 }
 .home-cat-card-arrow {
-    font-size: 9px;
-    letter-spacing: 0.22em;
+    font-size: 11px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(51,5,7,0.58);
+    color: rgba(51,5,7,0.75);
     margin-top: 1.35rem;
     opacity: 0;
     transform: translateX(-8px);
@@ -628,7 +657,7 @@
         <!-- ══ PHILOSOPHY ══════════════════════════════════════════════ -->
         <section class="home-quote section-deep">
             <div class="reveal">
-                <p class="text-[9px] uppercase tracking-[0.3em] text-accent mb-8">Философия</p>
+                <p class="home-quote__eyebrow">Философия</p>
                 <blockquote>
                     «Нишевый аромат — это не просто парфюм.<br>Это подпись, характер, память.»
                 </blockquote>
@@ -643,15 +672,8 @@
         <!-- ══ FEATURED BENTO ══════════════════════════════════════════ -->
         <section id="featured" class="section-deep mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
 
-            <div class="mb-14 flex items-end justify-between gap-6">
-                <div class="reveal">
-                    <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Рекомендуемые ароматы</p>
-                </div>
-                <a href="{% url 'products:catalog' %}" class="reveal nav-link hidden text-[10px] uppercase tracking-[0.22em] text-drift md:inline-flex items-center gap-2"
-                   style="transition-delay: 120ms">
-                    Смотреть все
-                    <svg width="13" height="9" viewBox="0 0 13 9" fill="none" aria-hidden="true"><path d="M1 4.5h11M8 1l3.5 3.5L8 8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-                </a>
+            <div class="mb-14 reveal">
+                <p class="home-section-label">Рекомендуемые ароматы</p>
             </div>
 
             {% if featured_products %}
@@ -831,7 +853,7 @@
         <section id="categories" class="section-deep border-y border-edge">
             <div class="mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
                 <div class="reveal mb-14 max-w-xl">
-                    <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Категории</p>
+                    <p class="home-section-label">Категории</p>
                 </div>
                 <div class="home-cat-grid">
                     <div class="reveal">
@@ -868,7 +890,7 @@
         <!-- ══ BRANDS ══════════════════════════════════════════════════ -->
         <section id="brands" class="section-deep mx-auto w-full max-w-7xl px-6 py-28 lg:px-12">
             <div class="reveal mb-14 max-w-xl">
-                <p class="text-[10px] uppercase tracking-[0.24em] text-accent">Коллекция домов</p>
+                <p class="home-section-label">Коллекция домов</p>
             </div>
             <div class="home-brands-mosaic">
                 {% for name, slug in featured_brands %}
