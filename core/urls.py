@@ -6,6 +6,8 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('brands/', views.brands, name='brands'),
+    path('podbor/', views.podbor, name='podbor'),
+    path('podbor/api/results/', views.podbor_results, name='podbor_results'),
     path('gift-cards/', views.gift_cards_catalog, name='gift_cards'),
     path('account/gift-cards/', views.account_gift_cards, name='account_gift_cards'),
 

@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db.models import Min, Prefetch, Q, Sum
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -17,7 +17,7 @@ from django.utils.html import strip_tags
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 
-from products.models import Brand, Favorite, Order, Product, ProductImage, Variant
+from products.models import Brand, Favorite, FragranceNote, Order, Product, ProductImage, Variant
 from products.gift_cards import total_active_balance
 from products.models import GiftCard, GiftCardTransaction
 from products.cart_utils import cart_total_items, get_cart
@@ -578,6 +578,122 @@ def gift_cards_catalog(request):
 @login_required
 def account_gift_cards(request):
     raise Http404("Gift cards are temporarily unavailable.")
+
+
+def podbor(request):
+    return render(request, "core/podbor.html")
+
+
+_AVOID_NOTE_FILTERS = {
+    "vanilla": (
+        Q(notes__name__icontains="ваниль") | Q(notes__name__icontains="vanilla")
+    ),
+    "musk": (
+        Q(notes__name__icontains="мускус") | Q(notes__name__icontains="musk")
+    ),
+    "patchouli": (
+        Q(notes__name__icontains="пачули") | Q(notes__name__icontains="patchouli")
+    ),
+    "citrus": (
+        Q(notes__name__icontains="лимон") | Q(notes__name__icontains="lemon")
+        | Q(notes__name__icontains="грейпфрут") | Q(notes__name__icontains="grapefruit")
+        | Q(notes__name__icontains="мандарин") | Q(notes__name__icontains="mandarin")
+        | Q(notes__name__icontains="цитрус") | Q(notes__name__icontains="citrus")
+        | Q(notes__name__icontains="бергамот") | Q(notes__name__icontains="bergamot")
+    ),
+}
+
+_GENDER_SLUGS = {
+    "male":   ["man", "men", "male", "мужской"],
+    "female": ["woman", "women", "female", "женский"],
+    "unisex": ["unisex", "унисекс"],
+}
+
+
+def podbor_results(request):
+    """JSON endpoint: return up to 6 real catalog products for quiz results."""
+    for_whom = request.GET.get("for_whom", "")
+    gift_gender = request.GET.get("gift_gender", "")
+    budget_raw = request.GET.get("budget", "")
+    avoid_raw = request.GET.get("avoid", "")
+
+    avoid_keys = [k.strip() for k in avoid_raw.split(",") if k.strip()]
+
+    qs = (
+        Product.objects.select_related("brand", "category")
+        .prefetch_related(
+            Prefetch("images", queryset=ProductImage.objects.order_by("-is_main", "id")),
+            Prefetch("variants", queryset=Variant.objects.order_by("price")),
+            "notes",
+        )
+        .annotate(min_price=Min("variants__price", filter=Q(variants__stock__gt=0)))
+        .filter(min_price__isnull=False)
+    )
+
+    # Gender filter (only when choosing a gift with a specified gender)
+    if for_whom == "gift" and gift_gender in _GENDER_SLUGS:
+        qs = qs.filter(category__slug__in=_GENDER_SLUGS[gift_gender])
+
+    # Budget filter
+    try:
+        budget_val = float(budget_raw) if budget_raw else None
+    except ValueError:
+        budget_val = None
+    if budget_val and budget_val < 999000:
+        qs = qs.filter(min_price__lte=budget_val)
+
+    # Exclude products containing avoided notes
+    for key in avoid_keys:
+        avoid_q = _AVOID_NOTE_FILTERS.get(key)
+        if avoid_q:
+            avoid_ids = Product.objects.filter(avoid_q).values_list("id", flat=True)
+            qs = qs.exclude(id__in=avoid_ids)
+
+    products = list(qs.order_by("-created_at")[:24])
+
+    results = []
+    for product in products:
+        # Cheapest in-stock variant
+        cheapest = None
+        for v in product.variants.all():
+            if v.stock > 0:
+                if cheapest is None or v.price < cheapest.price:
+                    cheapest = v
+        if not cheapest:
+            continue
+
+        # Main image URL
+        image_url = None
+        for img in product.images.all():
+            if img.is_main:
+                image_url = request.build_absolute_uri(img.image.url)
+                break
+        if image_url is None:
+            for img in product.images.all():
+                image_url = request.build_absolute_uri(img.image.url)
+                break
+
+        # Notes grouped by type
+        notes: dict[str, list[str]] = {"top": [], "middle": [], "base": []}
+        for note in product.notes.all():
+            if note.type in notes:
+                notes[note.type].append(note.name)
+
+        results.append({
+            "id": product.id,
+            "name": product.name,
+            "brand": product.brand.name,
+            "slug": product.slug,
+            "image_url": image_url,
+            "price": float(cheapest.price),
+            "variant_id": cheapest.id,
+            "notes": notes,
+        })
+
+        if len(results) >= 6:
+            break
+
+    return JsonResponse({"results": results})
 
 
 INFO_PAGES = {

@@ -1,0 +1,1108 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Подбор аромата — Accord{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page layout ──────────────────────────────────────────────────────── */
+.podbor-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+.podbor-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4rem 1.5rem 6rem;
+}
+#quiz-root {
+  width: 100%;
+  max-width: 660px;
+  transition: max-width 400ms ease;
+}
+#qz-results-screen:not([hidden]) ~ .qz-wide-hack,
+#quiz-root:has(#qz-results-screen:not([hidden])) {
+  max-width: 1200px;
+}
+.quiz-screen[hidden] { display: none !important; }
+
+/* ── Intro ────────────────────────────────────────────────────────────── */
+.quiz-intro {
+  text-align: center;
+  padding: 4.5rem 0 3rem;
+}
+.quiz-intro__eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.quiz-intro__eyebrow::before,
+.quiz-intro__eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.35;
+}
+.quiz-intro__title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5.5vw, 3.75rem);
+  font-weight: 400;
+  color: var(--color-heading);
+  line-height: 1.08;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+}
+.quiz-intro__desc {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.85;
+  max-width: 420px;
+  margin: 0 auto 3rem;
+  letter-spacing: 0.02em;
+}
+.quiz-intro__steps {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+.quiz-intro__dot {
+  width: 5px;
+  height: 5px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+/* ── Progress ─────────────────────────────────────────────────────────── */
+.quiz-progress {
+  margin-bottom: 3rem;
+}
+.quiz-progress__track {
+  height: 1px;
+  background: rgba(51,5,7,.1);
+  position: relative;
+  margin-bottom: 1rem;
+}
+.quiz-progress__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+  transition: width 600ms cubic-bezier(.22,1,.36,1);
+}
+.quiz-progress__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.quiz-progress__label {
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+.quiz-progress__name {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  opacity: 0.55;
+}
+
+/* ── Step ─────────────────────────────────────────────────────────────── */
+.quiz-step--in { animation: qzSlideIn 420ms cubic-bezier(.22,1,.36,1) both; }
+.quiz-step--in-back { animation: qzSlideInBack 420ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes qzSlideIn     { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes qzSlideInBack { from { transform: translateX(-28px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.quiz-step__question {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4.5vw, 2.375rem);
+  font-weight: 400;
+  color: var(--color-heading);
+  line-height: 1.15;
+  margin-bottom: 0.625rem;
+  letter-spacing: -0.01em;
+}
+.quiz-step__hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 2.25rem;
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+}
+
+/* ── Options ──────────────────────────────────────────────────────────── */
+.quiz-options {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.25rem;
+}
+.quiz-options--2 { grid-template-columns: 1fr 1fr; }
+.quiz-options--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 440px) {
+  .quiz-options--2 { grid-template-columns: 1fr; }
+  .quiz-options--3 { grid-template-columns: 1fr 1fr; }
+}
+
+.quiz-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid rgba(51,5,7,.12);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 250ms ease, background 250ms ease, box-shadow 250ms ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+.quiz-option:hover {
+  border-color: rgba(51,5,7,.35);
+  background: rgba(51,5,7,.02);
+  box-shadow: 0 2px 12px rgba(51,5,7,.04);
+}
+.quiz-option.is-on {
+  border-color: var(--color-accent);
+  background: rgba(51,5,7,.04);
+  box-shadow: 0 2px 16px rgba(51,5,7,.06);
+}
+.quiz-option.is-disabled {
+  opacity: .35;
+  cursor: default;
+  pointer-events: none;
+}
+.quiz-option__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-bottom: 0.15rem;
+}
+.quiz-option__label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-heading);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+.quiz-option__sub {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+.quiz-option__check {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(51,5,7,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.quiz-option.is-on .quiz-option__check {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  transform: scale(1.05);
+}
+.quiz-option__check svg { width: 9px; height: 9px; color: #fff; display: none; }
+.quiz-option.is-on .quiz-option__check svg { display: block; }
+
+/* Gift details two groups */
+.quiz-gift-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 0.25rem;
+}
+@media (max-width: 480px) {
+  .quiz-gift-groups { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+.quiz-gift-group__label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Multi-select counter badge */
+.quiz-family-counter {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-top: 0.85rem;
+  min-height: 1.2em;
+  transition: color 250ms ease;
+}
+.quiz-family-counter.at-max { color: var(--color-accent); }
+
+/* ── Step footer ──────────────────────────────────────────────────────── */
+.quiz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(51,5,7,.08);
+  gap: 1rem;
+}
+.quiz-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.quiz-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 250ms ease;
+  white-space: nowrap;
+}
+.quiz-back-btn:hover { color: var(--color-accent); }
+.quiz-back-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.quiz-skip-btn {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  opacity: 0.65;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 250ms ease, opacity 250ms ease;
+  white-space: nowrap;
+}
+.quiz-skip-btn:hover { opacity: 1; color: var(--color-accent); }
+
+/* ── Results header ───────────────────────────────────────────────────── */
+.quiz-results__header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+.quiz-results__eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.quiz-results__eyebrow::before,
+.quiz-results__eyebrow::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.3;
+}
+.quiz-results__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.875rem, 4.5vw, 2.75rem);
+  font-weight: 400;
+  color: var(--color-heading);
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+.quiz-results__desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.75;
+  max-width: 440px;
+  margin: 0 auto;
+  letter-spacing: 0.02em;
+}
+
+/* ── Results grid ─────────────────────────────────────────────────────── */
+.quiz-cards {
+  display: grid;
+  gap: 1px;
+  background: rgba(51,5,7,.08);
+}
+@media (min-width: 520px) {
+  .quiz-cards { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 900px) {
+  .quiz-cards { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── Result card ──────────────────────────────────────────────────────── */
+.qcard {
+  background: var(--color-bg);
+  border: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: background 350ms ease;
+}
+.qcard::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 500ms ease;
+}
+.qcard:hover {
+  background: rgba(51,5,7,.02);
+  transform: none;
+  box-shadow: none;
+}
+.qcard:hover::after {
+  transform: scaleX(1);
+}
+
+/* Image */
+.qcard__img {
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: rgba(51,5,7,.03);
+  position: relative;
+  flex-shrink: 0;
+}
+.qcard__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms cubic-bezier(.22,1,.36,1);
+}
+.qcard:hover .qcard__img img { transform: scale(1.04); }
+.qcard__img-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: rgba(51,5,7,.08);
+  background: radial-gradient(ellipse at 50% 40%, rgba(51,5,7,.06), transparent 70%);
+}
+
+/* Body */
+.qcard__body {
+  padding: 1.375rem 1.375rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.qcard__brand {
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+  opacity: 0.65;
+}
+.qcard__name {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--color-heading);
+  line-height: 1.15;
+  margin-bottom: 1.125rem;
+  letter-spacing: -0.01em;
+}
+
+/* Notes tags */
+.qcard__notes-section {
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+.qcard__notes-group { margin-bottom: 0.6rem; }
+.qcard__notes-group:last-child { margin-bottom: 0; }
+.qcard__notes-label {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.35rem;
+  opacity: 0.55;
+}
+.qcard__notes-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.qcard__note-tag {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  border: 1px solid rgba(51,5,7,.1);
+  background: transparent;
+  padding: 0.2rem 0.55rem;
+  line-height: 1.5;
+  transition: border-color 300ms ease;
+}
+.qcard:hover .qcard__note-tag {
+  border-color: rgba(51,5,7,.2);
+}
+
+/* Footer: price + button */
+.qcard__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1.125rem;
+  border-top: 1px solid rgba(51,5,7,.06);
+}
+.qcard__price {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--color-heading);
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+.qcard__btn-cart {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border: 1px solid var(--color-accent);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  transition: background 250ms ease, color 250ms ease, border-color 250ms ease, letter-spacing 250ms ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.qcard__btn-cart:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  letter-spacing: 0.26em;
+}
+.qcard__btn-cart.is-added {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid rgba(51,5,7,.15);
+  pointer-events: none;
+  letter-spacing: 0.16em;
+}
+
+/* Loading / empty */
+.qz-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 5rem 0;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.qz-spinner {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(51,5,7,.1);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: qzSpin 0.8s linear infinite;
+}
+@keyframes qzSpin { to { transform: rotate(360deg); } }
+.qz-no-results {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+/* Restart */
+.quiz-restart {
+  text-align: center;
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(51,5,7,.06);
+}
+.quiz-restart__btn {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid rgba(51,5,7,.15);
+  cursor: pointer;
+  padding: 0.7rem 1.5rem;
+  transition: color 250ms ease, border-color 250ms ease, letter-spacing 250ms ease;
+}
+.quiz-restart__btn:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  letter-spacing: 0.28em;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="podbor-page">
+  {% include "core/partials/navbar.html" %}
+
+  <main class="podbor-main">
+    <div id="quiz-root">
+
+      {# ── INTRO ─────────────────────────────────────────────────────── #}
+      <div id="qz-intro" class="quiz-screen">
+        <div class="quiz-intro">
+          <p class="quiz-intro__eyebrow">Персональный подбор</p>
+          <h1 class="quiz-intro__title">Найдите свой аромат</h1>
+          <p class="quiz-intro__desc">Ответьте на 6 коротких вопросов — и мы подберём ароматы, которые подойдут именно вам или в подарок.</p>
+          <div class="quiz-intro__steps" aria-hidden="true">
+            <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
+            <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
+            <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
+          </div>
+          <button id="qz-start" class="btn-luxury" style="margin:0 auto;">Начать подбор</button>
+        </div>
+      </div>
+
+      {# ── STEP ──────────────────────────────────────────────────────── #}
+      <div id="qz-step-screen" class="quiz-screen" hidden>
+        <div class="quiz-progress">
+          <div class="quiz-progress__track">
+            <div id="qz-progress-fill" class="quiz-progress__fill" style="width:0%"></div>
+          </div>
+          <div class="quiz-progress__meta">
+            <span id="qz-progress-label" class="quiz-progress__label">Шаг 1 из 6</span>
+            <span id="qz-progress-name" class="quiz-progress__name"></span>
+          </div>
+        </div>
+        <div id="qz-step-body"></div>
+      </div>
+
+      {# ── RESULTS ───────────────────────────────────────────────────── #}
+      <div id="qz-results-screen" class="quiz-screen" hidden>
+        <div id="qz-results-body"></div>
+      </div>
+
+    </div>
+  </main>
+
+  {% include "core/partials/footer.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── MOCK DATA ─────────────────────────────────────────────────────── */
+  var FRAG_ICONS = {
+    'Свежий':'🌊', 'Цветочный':'🌸', 'Сладкий':'🍯', 'Пряный':'🌶',
+    'Древесный':'🌲', 'Восточный':'🕌'
+  };
+
+  /* ── STATE ─────────────────────────────────────────────────────────── */
+  var state = {
+    stepId: null,
+    history: [],
+    direction: 'forward',
+    answers: {
+      for_whom:    null,   // 'self' | 'gift'
+      has_fav:     null,   // 'yes'  | 'no'
+      gift_gender: null,   // 'male' | 'female' | 'unisex'
+      gift_age:    null,   // 'young'| 'adult'  | 'mature'
+      occasion:    null,   // string key
+      families:    [],     // array, max 2
+      intensity:   null,   // string
+      avoid_notes: [],     // array of keys
+      budget:      null    // number
+    }
+  };
+
+  /* ── STEP META ─────────────────────────────────────────────────────── */
+  var STEP_META = {
+    for_whom:     { num:1, name:'Для кого' },
+    self_fav:     { num:1, name:'Предпочтения' },
+    gift_details: { num:1, name:'О получателе' },
+    occasion:     { num:2, name:'Повод' },
+    family:       { num:3, name:'Характер' },
+    intensity:    { num:4, name:'Интенсивность' },
+    avoid:        { num:5, name:'Нелюбимые ноты' },
+    budget:       { num:6, name:'Бюджет' }
+  };
+
+  /* ── NAVIGATION ────────────────────────────────────────────────────── */
+  function nextStepId(id) {
+    if (id === 'for_whom')  return state.answers.for_whom === 'self' ? 'self_fav' : 'gift_details';
+    if (id === 'self_fav' || id === 'gift_details') return 'occasion';
+    if (id === 'occasion')  return 'family';
+    if (id === 'family')    return 'intensity';
+    if (id === 'intensity') return 'avoid';
+    if (id === 'avoid')     return 'budget';
+    return null; // budget → results
+  }
+
+  function canProceed(id) {
+    var a = state.answers;
+    if (id === 'for_whom')     return !!a.for_whom;
+    if (id === 'self_fav')     return !!a.has_fav;
+    if (id === 'gift_details') return !!a.gift_gender && !!a.gift_age;
+    if (id === 'occasion')     return !!a.occasion;
+    if (id === 'family')       return a.families.length > 0;
+    if (id === 'intensity')    return !!a.intensity;
+    if (id === 'avoid')        return true; // skippable
+    if (id === 'budget')       return a.budget !== null;
+    return false;
+  }
+
+  /* ── HTML HELPERS ──────────────────────────────────────────────────── */
+  function opt(value, icon, label, sub, cls, checked) {
+    cls = cls || '';
+    var chk = checked ? ' is-on' : '';
+    return '<button type="button" class="quiz-option' + chk + ' ' + cls + '" data-value="' + value + '">'
+      + (icon ? '<span class="quiz-option__icon">' + icon + '</span>' : '')
+      + '<span class="quiz-option__label">' + label + '</span>'
+      + (sub ? '<span class="quiz-option__sub">' + sub + '</span>' : '')
+      + '<span class="quiz-option__check"><svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1,4 4,7 9,1"/></svg></span>'
+      + '</button>';
+  }
+
+  function footer(stepId, showSkip) {
+    var isFirst = state.history.length === 0;
+    var proceed = canProceed(stepId);
+    return '<div class="quiz-footer">'
+      + '<div class="quiz-footer__left">'
+      + (isFirst ? '' : '<button type="button" class="quiz-back-btn" id="qz-back">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>'
+        + 'Назад</button>')
+      + (showSkip ? '<button type="button" class="quiz-skip-btn" id="qz-skip">Пропустить</button>' : '')
+      + '</div>'
+      + '<button type="button" class="btn-luxury" id="qz-next"' + (proceed ? '' : ' disabled style="opacity:.38;pointer-events:none;"') + '>Далее</button>'
+      + '</div>';
+  }
+
+  /* ── STEP RENDERERS ────────────────────────────────────────────────── */
+  function rForWhom() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Для кого ищем аромат?</p>'
+      + '<p class="quiz-step__hint">От этого зависят вопросы, которые мы зададим дальше.</p>'
+      + '<div class="quiz-options quiz-options--2">'
+      + opt('self', '🙋', 'Для себя', 'Хочу что-то новое или похожее', '', a.for_whom==='self')
+      + opt('gift', '🎁', 'В подарок', 'Выбираю для другого человека', '', a.for_whom==='gift')
+      + '</div>'
+      + footer('for_whom')
+      + '</div>';
+  }
+
+  function rSelfFav() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Есть аромат, который вы уже любите?</p>'
+      + '<p class="quiz-step__hint">Это поможет нам ориентироваться — предложить похожий или совершенно новый.</p>'
+      + '<div class="quiz-options quiz-options--2">'
+      + opt('yes', '✨', 'Да, есть любимый', 'Хочу что-то в том же духе', '', a.has_fav==='yes')
+      + opt('no',  '🔍', 'Нет, ищу новый', 'Хочу открыть что-то неожиданное', '', a.has_fav==='no')
+      + '</div>'
+      + footer('self_fav')
+      + '</div>';
+  }
+
+  function rGiftDetails() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Расскажите о получателе</p>'
+      + '<p class="quiz-step__hint">Пол и возраст помогают точнее попасть в предпочтения.</p>'
+      + '<div class="quiz-gift-groups">'
+      + '<div><span class="quiz-gift-group__label">Пол</span><div class="quiz-options">'
+      + opt('male',   '♂', 'Мужской',  '', 'js-gift-gender', a.gift_gender==='male')
+      + opt('female', '♀', 'Женский',  '', 'js-gift-gender', a.gift_gender==='female')
+      + opt('unisex', '⚭', 'Унисекс',  '', 'js-gift-gender', a.gift_gender==='unisex')
+      + '</div></div>'
+      + '<div><span class="quiz-gift-group__label">Возраст</span><div class="quiz-options">'
+      + opt('young',  '🌱', 'До 25 лет',  '', 'js-gift-age', a.gift_age==='young')
+      + opt('adult',  '🌿', '25 – 40 лет','', 'js-gift-age', a.gift_age==='adult')
+      + opt('mature', '🍂', 'Старше 40',  '', 'js-gift-age', a.gift_age==='mature')
+      + '</div></div>'
+      + '</div>'
+      + footer('gift_details')
+      + '</div>';
+  }
+
+  function rOccasion() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Для какого повода?</p>'
+      + '<p class="quiz-step__hint">Выберите ситуацию, в которой чаще всего будет звучать аромат.</p>'
+      + '<div class="quiz-options quiz-options--2">'
+      + opt('everyday','☀️','Каждый день', 'Лёгкий и ненавязчивый', '', a.occasion==='everyday')
+      + opt('work',    '💼','Работа',       'Сдержанный, деловой',   '', a.occasion==='work')
+      + opt('evening', '🌙','Вечер',        'Чувственный, глубокий', '', a.occasion==='evening')
+      + opt('special', '🥂','Особый случай','Запоминающийся',         '', a.occasion==='special')
+      + '</div>'
+      + footer('occasion')
+      + '</div>';
+  }
+
+  function rFamily() {
+    var a = state.answers;
+    var cnt = a.families.length;
+    var atMax = cnt >= 2;
+    var rows = ['Свежий','Цветочный','Сладкий','Пряный','Древесный','Восточный'].map(function(f){
+      var on = a.families.indexOf(f) >= 0;
+      var dis = atMax && !on;
+      return '<button type="button" class="quiz-option' + (on ? ' is-on' : '') + (dis ? ' is-disabled' : '') + '" data-value="' + f + '" data-family="1">'
+        + '<span class="quiz-option__icon">' + (FRAG_ICONS[f] || '') + '</span>'
+        + '<span class="quiz-option__label">' + f + '</span>'
+        + '<span class="quiz-option__check"><svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1,4 4,7 9,1"/></svg></span>'
+        + '</button>';
+    }).join('');
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Какой характер аромата?</p>'
+      + '<p class="quiz-step__hint">Выберите до двух направлений, которые вам близки.</p>'
+      + '<div class="quiz-options quiz-options--3" id="qz-families">' + rows + '</div>'
+      + '<p id="qz-family-counter" class="quiz-family-counter' + (atMax ? ' at-max' : '') + '">'
+      + (cnt === 0 ? 'Выберите хотя бы одно направление' : cnt === 1 ? 'Выбрано: 1 из 2' : 'Выбрано: 2 из 2 — максимум')
+      + '</p>'
+      + footer('family')
+      + '</div>';
+  }
+
+  function rIntensity() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Предпочитаемая интенсивность?</p>'
+      + '<p class="quiz-step__hint">Насколько громко должен звучать аромат?</p>'
+      + '<div class="quiz-options">'
+      + opt('Лёгкий',     '🍃','Лёгкий',     'Почти неощутимый след, для себя', '', a.intensity==='Лёгкий')
+      + opt('Умеренный',  '🌤','Умеренный',  'Комфортный шлейф, замечают рядом', '', a.intensity==='Умеренный')
+      + opt('Насыщенный', '🔥','Насыщенный', 'Выразительный, долгий шлейф',      '', a.intensity==='Насыщенный')
+      + '</div>'
+      + footer('intensity')
+      + '</div>';
+  }
+
+  function rAvoid() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Есть нелюбимые ноты?</p>'
+      + '<p class="quiz-step__hint">Мы исключим ароматы, где они звучат ярко. Можно пропустить.</p>'
+      + '<div class="quiz-options quiz-options--2">'
+      + opt('vanilla',   '🍮','Ваниль',            'Кондитерская сладость',    'js-avoid', a.avoid_notes.indexOf('vanilla')>=0)
+      + opt('musk',      '🌫','Мускус',             'Кожистая чувственность',   'js-avoid', a.avoid_notes.indexOf('musk')>=0)
+      + opt('patchouli', '🌿','Пачули',             'Земляной, тяжёлый',        'js-avoid', a.avoid_notes.indexOf('patchouli')>=0)
+      + opt('citrus',    '🍋','Цитрус',             'Кислинка, свежесть',       'js-avoid', a.avoid_notes.indexOf('citrus')>=0)
+      + '</div>'
+      + footer('avoid', true)
+      + '</div>';
+  }
+
+  function rBudget() {
+    var a = state.answers;
+    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
+      + '<p class="quiz-step__question">Ваш бюджет?</p>'
+      + '<p class="quiz-step__hint">Цена за флакон. Покажем всё, что вписывается в диапазон.</p>'
+      + '<div class="quiz-options quiz-options--2">'
+      + opt(2000,     '💚','До 2 000 ₽',         '', '', a.budget===2000)
+      + opt(5000,     '💛','До 5 000 ₽',         '', '', a.budget===5000)
+      + opt(10000,    '🧡','До 10 000 ₽',        '', '', a.budget===10000)
+      + opt(999999,   '💎','Без ограничений',     '', '', a.budget===999999)
+      + '</div>'
+      + footer('budget')
+      + '</div>';
+  }
+
+  function renderStepId(id) {
+    switch(id) {
+      case 'for_whom':     return rForWhom();
+      case 'self_fav':     return rSelfFav();
+      case 'gift_details': return rGiftDetails();
+      case 'occasion':     return rOccasion();
+      case 'family':       return rFamily();
+      case 'intensity':    return rIntensity();
+      case 'avoid':        return rAvoid();
+      case 'budget':       return rBudget();
+      default: return '';
+    }
+  }
+
+  /* ── RESULTS RENDERER ──────────────────────────────────────────────── */
+  function renderResults(results) {
+    if (!results || !results.length) {
+      return '<div class="quiz-results__header">'
+        + '<p class="quiz-results__eyebrow">Ваша подборка</p>'
+        + '<h2 class="quiz-results__title">Ничего не найдено</h2>'
+        + '</div>'
+        + '<div class="qz-no-results">По вашим параметрам ничего не найдено.<br>Попробуйте изменить предпочтения.</div>'
+        + '<div class="quiz-restart"><button type="button" class="quiz-restart__btn" id="qz-restart">↺ Пройти заново</button></div>';
+    }
+
+    var csrfToken = (document.querySelector('#htmx-csrf [name=csrfmiddlewaretoken]') || {}).value || '';
+
+    function notesGroup(label, arr) {
+      if (!arr || !arr.length) return '';
+      var tags = arr.map(function(n) { return '<span class="qcard__note-tag">' + n + '</span>'; }).join('');
+      return '<div class="qcard__notes-group">'
+        + '<span class="qcard__notes-label">' + label + '</span>'
+        + '<div class="qcard__notes-tags">' + tags + '</div>'
+        + '</div>';
+    }
+
+    var cards = results.map(function(f) {
+      var imgInner = f.image_url
+        ? '<img src="' + f.image_url + '" alt="' + f.name + '" loading="lazy">'
+        : '<div class="qcard__img-placeholder">🌸</div>';
+      var priceStr = 'от ' + f.price.toLocaleString('ru-RU') + '\u202f₽';
+      return '<div class="qcard">'
+        + '<a href="/products/' + f.slug + '/" class="qcard__img">' + imgInner + '</a>'
+        + '<div class="qcard__body">'
+        +   '<p class="qcard__brand">' + f.brand + '</p>'
+        +   '<h3 class="qcard__name">' + f.name + '</h3>'
+        +   '<div class="qcard__notes-section">'
+        +     notesGroup('Верхние', f.notes.top)
+        +     notesGroup('Сердце',  f.notes.middle)
+        +     notesGroup('База',    f.notes.base)
+        +   '</div>'
+        +   '<div class="qcard__footer">'
+        +     '<span class="qcard__price">' + priceStr + '</span>'
+        +     '<button type="button" class="qcard__btn-cart" data-variant-id="' + f.variant_id + '" data-csrf="' + csrfToken + '">В корзину</button>'
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="quiz-results__header">'
+      + '<p class="quiz-results__eyebrow">Ваша подборка</p>'
+      + '<h2 class="quiz-results__title">Мы подобрали ' + results.length + ' аромата для вас</h2>'
+      + '<p class="quiz-results__desc">Подборка составлена по вашим ответам. Нажмите «В корзину», чтобы добавить аромат.</p>'
+      + '</div>'
+      + '<div class="quiz-cards">' + cards + '</div>'
+      + '<div class="quiz-restart"><button type="button" class="quiz-restart__btn" id="qz-restart">↺ Пройти заново</button></div>';
+  }
+
+  /* ── DOM REFERENCES ────────────────────────────────────────────────── */
+  var elIntro   = document.getElementById('qz-intro');
+  var elStep    = document.getElementById('qz-step-screen');
+  var elResults = document.getElementById('qz-results-screen');
+  var elBody    = document.getElementById('qz-step-body');
+  var elFill    = document.getElementById('qz-progress-fill');
+  var elLabel   = document.getElementById('qz-progress-label');
+  var elName    = document.getElementById('qz-progress-name');
+  var elResBody = document.getElementById('qz-results-body');
+
+  /* ── DISPLAY HELPERS ───────────────────────────────────────────────── */
+  function showScreen(which) {
+    elIntro.hidden   = which !== 'intro';
+    elStep.hidden    = which !== 'step';
+    elResults.hidden = which !== 'results';
+  }
+
+  function refreshProgress(id) {
+    var m = STEP_META[id];
+    var pct = ((m.num - 1) / 6 + (1 / 6) * 0.15) * 100;
+    elFill.style.width = pct + '%';
+    elLabel.textContent = 'Шаг ' + m.num + ' из 6';
+    elName.textContent  = m.name;
+  }
+
+  function refreshNextBtn() {
+    var btn = document.getElementById('qz-next');
+    if (!btn) return;
+    var ok = canProceed(state.stepId);
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '' : '0.38';
+    btn.style.pointerEvents = ok ? '' : 'none';
+  }
+
+  function goToStep(id, dir) {
+    state.stepId    = id;
+    state.direction = dir || 'forward';
+    showScreen('step');
+    refreshProgress(id);
+    elBody.innerHTML = renderStepId(id);
+    // animate progress fill
+    requestAnimationFrame(function() {
+      var m = STEP_META[id];
+      elFill.style.width = (m.num / 6 * 100) + '%';
+    });
+  }
+
+  /* ── EVENT DELEGATION ──────────────────────────────────────────────── */
+  document.getElementById('quiz-root').addEventListener('click', function(e) {
+    var t = e.target;
+
+    /* Start */
+    if (t.id === 'qz-start') {
+      state.history = [];
+      state.answers = { for_whom:null, has_fav:null, gift_gender:null, gift_age:null,
+                        occasion:null, families:[], intensity:null, avoid_notes:[], budget:null };
+      goToStep('for_whom', 'forward');
+      return;
+    }
+
+    /* Restart */
+    if (t.id === 'qz-restart') {
+      showScreen('intro');
+      return;
+    }
+
+    /* Back */
+    if (t.id === 'qz-back') {
+      if (state.history.length) {
+        var prev = state.history.pop();
+        goToStep(prev, 'back');
+      }
+      return;
+    }
+
+    /* Skip (avoid step) */
+    if (t.id === 'qz-skip') {
+      state.answers.avoid_notes = [];
+      advance();
+      return;
+    }
+
+    /* Next */
+    if (t.id === 'qz-next') {
+      if (canProceed(state.stepId)) advance();
+      return;
+    }
+
+    /* Option click */
+    var optEl = t.closest('.quiz-option');
+    if (!optEl || optEl.classList.contains('is-disabled')) return;
+    var val = optEl.getAttribute('data-value');
+    var id  = state.stepId;
+
+    if (id === 'for_whom') {
+      state.answers.for_whom = val;
+      // reset conditional branch answers
+      state.answers.has_fav = null;
+      state.answers.gift_gender = null;
+      state.answers.gift_age = null;
+    } else if (id === 'self_fav') {
+      state.answers.has_fav = val;
+    } else if (id === 'gift_details') {
+      if (optEl.classList.contains('js-gift-gender')) state.answers.gift_gender = val;
+      if (optEl.classList.contains('js-gift-age'))    state.answers.gift_age    = val;
+    } else if (id === 'occasion') {
+      state.answers.occasion = val;
+    } else if (id === 'family') {
+      var fams = state.answers.families;
+      var idx  = fams.indexOf(val);
+      if (idx >= 0) { fams.splice(idx, 1); }
+      else if (fams.length < 2) { fams.push(val); }
+    } else if (id === 'intensity') {
+      state.answers.intensity = val;
+    } else if (id === 'avoid') {
+      var av  = state.answers.avoid_notes;
+      var avi = av.indexOf(val);
+      if (avi >= 0) av.splice(avi, 1); else av.push(val);
+    } else if (id === 'budget') {
+      state.answers.budget = parseFloat(val);
+    }
+
+    // Re-render step in-place (no slide, just update content)
+    state.direction = 'none';
+    elBody.innerHTML = renderStepId(id);
+    refreshProgress(id);
+  });
+
+  /* ── CART BUTTON (results screen) ─────────────────────────────────── */
+  document.getElementById('qz-results-screen').addEventListener('click', function(e) {
+    var btn = e.target.closest('.qcard__btn-cart');
+    if (!btn || btn.classList.contains('is-added')) return;
+    var variantId = btn.getAttribute('data-variant-id');
+    var csrf = btn.getAttribute('data-csrf');
+    if (!variantId) return;
+
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    var body = new URLSearchParams({ variant_id: variantId, csrfmiddlewaretoken: csrf });
+    fetch('/products/cart/add/', {
+      method: 'POST',
+      headers: { 'HX-Request': 'true', 'X-CSRFToken': csrf },
+      body: body
+    })
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        var toast = document.getElementById('cart-toast');
+        if (toast) { toast.innerHTML = html; }
+        btn.textContent = 'В корзине';
+        btn.classList.add('is-added');
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'В корзину';
+      });
+  });
+
+  /* ── ADVANCE ───────────────────────────────────────────────────────── */
+  function advance() {
+    var next = nextStepId(state.stepId);
+    if (next) {
+      state.history.push(state.stepId);
+      goToStep(next, 'forward');
+    } else {
+      state.history.push(state.stepId);
+      elFill.style.width = '100%';
+      showScreen('results');
+      elResBody.innerHTML = '<div class="qz-loading"><div class="qz-spinner"></div>Подбираем ароматы…</div>';
+      var a = state.answers;
+      var params = new URLSearchParams({
+        for_whom:    a.for_whom    || '',
+        gift_gender: a.gift_gender || '',
+        budget:      a.budget != null ? String(a.budget) : '',
+        avoid:       (a.avoid_notes || []).join(',')
+      });
+      fetch('/podbor/api/results/?' + params.toString())
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          elResBody.innerHTML = renderResults(data.results || []);
+        })
+        .catch(function() {
+          elResBody.innerHTML = renderResults([]);
+        });
+    }
+  }
+
+})();
+</script>
+{% endblock %}
