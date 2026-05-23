@@ -601,6 +601,23 @@ _AVOID_NOTE_FILTERS = {
         | Q(notes__name__icontains="цитрус") | Q(notes__name__icontains="citrus")
         | Q(notes__name__icontains="бергамот") | Q(notes__name__icontains="bergamot")
     ),
+    "oud": (
+        Q(notes__name__icontains="уд") | Q(notes__name__icontains="oud")
+        | Q(notes__name__icontains="агар") | Q(notes__name__icontains="agarwood")
+    ),
+    "rose": (
+        Q(notes__name__icontains="роза") | Q(notes__name__icontains="rose")
+    ),
+    "tobacco": (
+        Q(notes__name__icontains="табак") | Q(notes__name__icontains="tobacco")
+    ),
+    "leather": (
+        Q(notes__name__icontains="кожа") | Q(notes__name__icontains="leather")
+    ),
+    "incense": (
+        Q(notes__name__icontains="ладан") | Q(notes__name__icontains="incense")
+        | Q(notes__name__icontains="олибанум") | Q(notes__name__icontains="olibanum")
+    ),
 }
 
 _GENDER_SLUGS = {
