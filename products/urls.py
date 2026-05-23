@@ -2,6 +2,7 @@ from django.urls import path
 
 from .cart_views import (
     cart_add,
+    cart_add_bulk,
     cart_clear,
     cart_detail,
     cart_update,
@@ -34,6 +35,7 @@ urlpatterns = [
     path("checkout/yookassa/webhook/", yookassa_webhook, name="yookassa_webhook"),
     path("checkout/", checkout_detail, name="checkout"),
     path("cart/add/", cart_add, name="cart_add"),
+    path("cart/add-bulk/", cart_add_bulk, name="cart_add_bulk"),
     path("cart/update/", cart_update, name="cart_update"),
     path("cart/clear/", cart_clear, name="cart_clear"),
     path("favorites/toggle/", favorite_toggle, name="favorite_toggle"),

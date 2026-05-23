@@ -283,6 +283,48 @@
   .cart-mobile-back:hover {
     color: #330507;
   }
+
+  .cart-clear-form {
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    border: 1px solid rgba(51, 5, 7, 0.28);
+    background: transparent;
+    padding: 0.85rem 1rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(51, 5, 7, 0.72);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .cart-clear-btn:hover {
+    background: rgba(51, 5, 7, 0.05);
+    border-color: rgba(51, 5, 7, 0.45);
+    color: #330507;
+  }
+
+  .cart-clear-btn--compact {
+    width: auto;
+    padding: 0.55rem 0.85rem;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+  }
+
+  .cart-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
 </style>
 {% endblock %}
 
@@ -292,21 +334,13 @@
 
   <main class="mx-auto w-full max-w-7xl lg:px-12">
     {% if cart_items %}
-      {% with line_total=cart_items|length %}
 
       {# ——— Мобильная корзина ——— #}
-      <div id="cart-mobile-root" class="xl:hidden pb-28 text-foreground">
+      <div id="cart-mobile-root" class="xl:hidden pb-32 text-foreground">
         <div class="section-deep border-b border-edge px-4 py-5">
           <a href="{% url 'products:catalog' %}" class="cart-mobile-back">← В каталог</a>
           <h1 class="font-serif text-2xl text-heading">Корзина</h1>
-          <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-muted">Позиций в заказе: {{ line_total }}</p>
-        </div>
-
-        <div class="section-deep flex items-center justify-end border-b border-edge px-4 py-3">
-          <form method="post" action="{% url 'products:cart_clear' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit" class="text-sm text-muted transition-colors hover:text-accent">Удалить всё</button>
-          </form>
+          <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-muted">Позиций в заказе: {{ line_count }}</p>
         </div>
 
         <div class="space-y-4 px-4 py-4">
@@ -357,21 +391,27 @@
         style="padding-bottom: env(safe-area-inset-bottom, 0px);"
       >
         <div class="section-deep pointer-events-auto border-t border-edge px-4 py-3 backdrop-blur-sm">
-          {% if user.is_authenticated %}
-            <a
-              href="{% url 'products:checkout' %}"
-              class="btn-luxury cart-checkout-btn flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
-            >
-              Оформить заказ
-            </a>
-          {% else %}
-            <button
-              type="button"
-              class="btn-luxury cart-checkout-btn js-open-cart-checkout-gate flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
-            >
-              Оформить заказ
-            </button>
-          {% endif %}
+          <div class="cart-mobile-actions">
+            <form method="post" action="{% url 'products:cart_clear' %}" class="cart-clear-form" onsubmit="return confirm('Очистить корзину?');">
+              {% csrf_token %}
+              <button type="submit" class="cart-clear-btn">Очистить корзину</button>
+            </form>
+            {% if user.is_authenticated %}
+              <a
+                href="{% url 'products:checkout' %}"
+                class="btn-luxury cart-checkout-btn flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
+              >
+                Оформить заказ
+              </a>
+            {% else %}
+              <button
+                type="button"
+                class="btn-luxury cart-checkout-btn js-open-cart-checkout-gate flex h-12 w-full justify-center !py-0 text-[10px] uppercase tracking-[0.18em]"
+              >
+                Оформить заказ
+              </button>
+            {% endif %}
+          </div>
         </div>
       </div>
 
@@ -379,7 +419,7 @@
       <div class="hidden px-6 py-14 xl:block">
         <div class="mb-10">
           <h1 class="font-serif text-4xl text-heading md:text-5xl">Корзина</h1>
-          <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">Позиций: {{ item_count }}</p>
+          <p class="mt-3 text-xs uppercase tracking-[0.16em] text-muted">Позиций: {{ line_count }}</p>
         </div>
 
         <div class="grid grid-cols-1 gap-10 xl:grid-cols-[1fr_340px]">
@@ -438,7 +478,10 @@
             {% else %}
               <button type="button" class="btn-luxury cart-checkout-btn js-open-cart-checkout-gate mt-8 inline-flex w-full justify-center">Оформить заказ</button>
             {% endif %}
-            <p class="mt-4 text-xs text-muted">Безопасное оформление и выбор деталей доставки на следующем шаге.</p>
+            <form method="post" action="{% url 'products:cart_clear' %}" class="cart-clear-form mt-4" onsubmit="return confirm('Очистить корзину?');">
+              {% csrf_token %}
+              <button type="submit" class="cart-clear-btn">Очистить корзину</button>
+            </form>
           </aside>
         </div>
       </div>
@@ -459,7 +502,6 @@
         </div>
       </dialog>
 
-      {% endwith %}
     {% else %}
       <div class="section-deep xl:hidden border-b border-edge px-4 py-16 text-center">
         <p class="font-serif text-2xl text-heading">Ваша корзина пуста</p>

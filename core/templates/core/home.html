@@ -637,17 +637,17 @@
         </section>
 
         <!-- ══ TICKER ═════════════════════════════════════════════════ -->
-        <div class="home-ticker" aria-hidden="true">
+        <div class="home-ticker">
             <div class="home-ticker__track">
                 <span class="home-ticker__set">
                     {% for name, slug in featured_brands %}
                     <a href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}" class="home-ticker__link">{{ name }}</a>
-                    <span class="home-ticker__dot">◆</span>
+                    <span class="home-ticker__dot" aria-hidden="true">◆</span>
                     {% endfor %}
                 </span>
-                <span class="home-ticker__set">
+                <span class="home-ticker__set" aria-hidden="true">
                     {% for name, slug in featured_brands %}
-                    <span class="home-ticker__link">{{ name }}</span>
+                    <a href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}" class="home-ticker__link" tabindex="-1">{{ name }}</a>
                     <span class="home-ticker__dot">◆</span>
                     {% endfor %}
                 </span>

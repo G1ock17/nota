@@ -706,11 +706,25 @@
   border-top: 1px solid var(--color-border);
   margin-top: auto;
 }
+.qr-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
 .qr-price {
   font-family: var(--font-serif);
   font-size: 22px;
   font-weight: 300;
   color: var(--color-ink);
+}
+.qr-volume {
+  font-family: var(--font-ui-sans);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 .qr-cart-btn {
   font-family: var(--font-ui-sans);
@@ -877,7 +891,94 @@
   display: block;
 }
 
-/* Restart */
+/* Sample set CTA */
+.qr-sampler {
+  margin-top: 3rem;
+  padding: 2.25rem 2.5rem;
+  background: var(--color-ink);
+  color: var(--background-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  animation: qzFadeUp 0.7s ease 0.35s both;
+}
+.qr-sampler__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+  color: var(--background-color);
+}
+.qr-sampler__sub {
+  font-family: var(--font-ui-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 300;
+  color: rgba(236, 229, 219, 0.72);
+  margin: 0;
+  max-width: 36rem;
+}
+.qr-sampler__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.qr-sampler__btn {
+  font-family: var(--font-ui-sans);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.qr-sampler__btn--outline {
+  background: transparent;
+  color: var(--background-color);
+  border-color: rgba(236, 229, 219, 0.45);
+}
+.qr-sampler__btn--outline:hover:not(:disabled) {
+  border-color: var(--background-color);
+  background: rgba(236, 229, 219, 0.08);
+}
+.qr-sampler__btn--solid {
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  border-color: var(--color-elevated);
+}
+.qr-sampler__btn--solid:hover {
+  background: var(--background-color);
+  border-color: var(--background-color);
+  color: var(--color-ink);
+}
+.qr-sampler__btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+@media (max-width: 720px) {
+  .qr-sampler {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.75rem 1.5rem;
+  }
+  .qr-sampler__actions {
+    width: 100%;
+  }
+  .qr-sampler__btn {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+}
+
+/* Restart (empty results) */
 .quiz-restart {
   text-align: center;
   margin-top: 3rem;
@@ -972,7 +1073,6 @@
     direction: 'forward',
     answers: {
       for_whom:    null,   // 'self' | 'gift'
-      has_fav:     null,   // 'yes'  | 'no'
       gift_gender: null,   // 'male' | 'female' | 'unisex'
       gift_age:    null,   // 'young'| 'adult'  | 'mature'
       occasion:    null,   // string key
@@ -986,7 +1086,6 @@
   /* ── STEP META ─────────────────────────────────────────────────────── */
   var STEP_META = {
     for_whom:     { num:1, name:'Для кого' },
-    self_fav:     { num:1, name:'Предпочтения' },
     gift_details: { num:1, name:'О получателе' },
     occasion:     { num:2, name:'Повод' },
     family:       { num:3, name:'Характер' },
@@ -997,8 +1096,8 @@
 
   /* ── NAVIGATION ────────────────────────────────────────────────────── */
   function nextStepId(id) {
-    if (id === 'for_whom')  return state.answers.for_whom === 'self' ? 'self_fav' : 'gift_details';
-    if (id === 'self_fav' || id === 'gift_details') return 'occasion';
+    if (id === 'for_whom')  return state.answers.for_whom === 'gift' ? 'gift_details' : 'occasion';
+    if (id === 'gift_details') return 'occasion';
     if (id === 'occasion')  return 'family';
     if (id === 'family')    return 'intensity';
     if (id === 'intensity') return 'avoid';
@@ -1009,7 +1108,6 @@
   function canProceed(id) {
     var a = state.answers;
     if (id === 'for_whom')     return !!a.for_whom;
-    if (id === 'self_fav')     return !!a.has_fav;
     if (id === 'gift_details') return !!a.gift_gender && !!a.gift_age;
     if (id === 'occasion')     return !!a.occasion;
     if (id === 'family')       return a.families.length > 0;
@@ -1056,19 +1154,6 @@
       + opt('gift', '🎁', 'В подарок', 'Выбираю для другого человека', '', a.for_whom==='gift')
       + '</div>'
       + footer('for_whom')
-      + '</div>';
-  }
-
-  function rSelfFav() {
-    var a = state.answers;
-    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
-      + '<p class="quiz-step__question">Есть аромат, который вы уже любите?</p>'
-      + '<p class="quiz-step__hint">Это поможет нам ориентироваться — предложить похожий или совершенно новый.</p>'
-      + '<div class="quiz-options quiz-options--2">'
-      + opt('yes', '✨', 'Да, есть любимый', 'Хочу что-то в том же духе', '', a.has_fav==='yes')
-      + opt('no',  '🔍', 'Нет, ищу новый', 'Хочу открыть что-то неожиданное', '', a.has_fav==='no')
-      + '</div>'
-      + footer('self_fav')
       + '</div>';
   }
 
@@ -1184,7 +1269,6 @@
   function renderStepId(id) {
     switch(id) {
       case 'for_whom':     return rForWhom();
-      case 'self_fav':     return rSelfFav();
       case 'gift_details': return rGiftDetails();
       case 'occasion':     return rOccasion();
       case 'family':       return rFamily();
@@ -1251,8 +1335,6 @@
     window.location.href = loginPath + '?next=' + encodeURIComponent(next);
   }
 
-  var MATCH_SCORES = [96, 88, 82, 79, 74, 71, 68, 65];
-
   /* ── SKELETON LOADER ─────────────────────────────────────────────── */
   function skeletonHtml() {
     var card = '<div class="qr-skel-card">'
@@ -1268,6 +1350,36 @@
     return '<div class="qz-loading">'
       + '<div class="qz-loading__text"><div class="qz-spinner"></div>Подбираем ароматы…</div>'
       + '<div class="qr-skel-grid">' + card + card + card + '</div>'
+      + '</div>';
+  }
+
+  function samplerSubtext(results) {
+    var n = results.length;
+    var total = results.reduce(function(s, f) { return s + (f.price || 0); }, 0);
+    var totalStr = Math.round(total).toLocaleString('ru-RU') + '\u202f₽';
+    var volumes = results.map(function(f) { return f.sample_volume || ''; }).filter(Boolean);
+    var sameVol = volumes.length === n && n > 0 && volumes.every(function(v) { return v === volumes[0]; });
+    var volPart = sameVol
+      ? (n + ' \u00d7 ' + volumes[0])
+      : 'минимальный объём каждого';
+    if (n === 1) {
+      return 'Закажите пробник аромата' + (sameVol && volumes[0] ? ' — ' + volumes[0] : '') + ' — за ' + totalStr;
+    }
+    var word = n === 1 ? 'аромата' : (n < 5 ? 'ароматов' : 'ароматов');
+    return 'Закажите набор пробников всех ' + n + ' ' + word + ' — ' + volPart + ' — за ' + totalStr;
+  }
+
+  function samplerBannerHtml(results) {
+    var variantIds = results.map(function(f) { return f.variant_id; }).join(',');
+    return '<div class="qr-sampler">'
+      + '<div class="qr-sampler__text">'
+      +   '<h2 class="qr-sampler__title">Не уверены в выборе?</h2>'
+      +   '<p class="qr-sampler__sub">' + samplerSubtext(results) + '</p>'
+      + '</div>'
+      + '<div class="qr-sampler__actions">'
+      +   '<button type="button" class="qr-sampler__btn qr-sampler__btn--outline" id="qz-sampler-add" data-variant-ids="' + variantIds + '">Набор пробников</button>'
+      +   '<button type="button" class="qr-sampler__btn qr-sampler__btn--solid" id="qz-restart">Пройти заново</button>'
+      + '</div>'
       + '</div>';
   }
 
@@ -1302,7 +1414,7 @@
       return String(n);
     }
     var priceRange = fmtK(minPrice) + '–' + fmtK(maxPrice);
-    var bestMatch = MATCH_SCORES[0] + '%';
+    var bestMatch = (results[0].match_pct != null ? results[0].match_pct : '—') + '%';
 
     /* ── Header ── */
     var countWord = total === 1 ? 'аромат' : (total < 5 ? 'аромата' : 'ароматов');
@@ -1322,7 +1434,7 @@
 
     /* ── Cards ── */
     var cards = results.map(function(f, idx) {
-      var matchPct = MATCH_SCORES[idx] || (60 - idx);
+      var matchPct = f.match_pct != null ? f.match_pct : Math.max(58, 90 - idx * 4);
       var badgeClass = idx === 0 ? ' best' : '';
       var badgeText = idx === 0 ? (matchPct + '% — лучший выбор') : (matchPct + '% совпадение');
 
@@ -1337,6 +1449,9 @@
       }
 
       var priceStr = f.price.toLocaleString('ru-RU') + '\u202f₽';
+      var volumeStr = f.sample_volume
+        ? '<span class="qr-volume">' + f.sample_volume + '</span>'
+        : '';
 
       var isFav = QZ_FAVORITE_IDS.has(f.id);
 
@@ -1355,7 +1470,7 @@
         +     '<div class="qr-match__track"><div class="qr-match__fill" style="width:' + matchPct + '%"><div class="qr-match__dot"></div></div></div>'
         +   '</div>'
         +   '<div class="qr-card__footer">'
-        +     '<div class="qr-price">' + priceStr + '</div>'
+        +     '<div class="qr-price-row"><span class="qr-price">' + priceStr + '</span>' + volumeStr + '</div>'
         +     '<button type="button" class="qr-cart-btn" data-variant-id="' + f.variant_id + '" data-csrf="' + csrfToken + '">В корзину</button>'
         +   '</div>'
         + '</div>'
@@ -1364,7 +1479,7 @@
 
     return headerHtml + statsHtml
       + '<div class="qr-grid">' + cards + '</div>'
-      + '<div class="quiz-restart"><button type="button" class="quiz-restart__btn" id="qz-restart">↺ Пройти заново</button></div>';
+      + samplerBannerHtml(results);
   }
 
   /* ── DOM REFERENCES ────────────────────────────────────────────────── */
@@ -1421,7 +1536,7 @@
     /* Start */
     if (t.id === 'qz-start') {
       state.history = [];
-      state.answers = { for_whom:null, has_fav:null, gift_gender:null, gift_age:null,
+      state.answers = { for_whom:null, gift_gender:null, gift_age:null,
                         occasion:null, families:[], intensity:null, avoid_notes:[], budget:null };
       goToStep('for_whom', 'forward');
       return;
@@ -1464,12 +1579,8 @@
 
     if (id === 'for_whom') {
       state.answers.for_whom = val;
-      // reset conditional branch answers
-      state.answers.has_fav = null;
       state.answers.gift_gender = null;
       state.answers.gift_age = null;
-    } else if (id === 'self_fav') {
-      state.answers.has_fav = val;
     } else if (id === 'gift_details') {
       if (optEl.classList.contains('js-gift-gender')) state.answers.gift_gender = val;
       if (optEl.classList.contains('js-gift-age'))    state.answers.gift_age    = val;
@@ -1529,6 +1640,39 @@
       return;
     }
 
+    /* Sample set → cart */
+    if (t.id === 'qz-sampler-add') {
+      var samplerBtn = t;
+      var idsRaw = samplerBtn.getAttribute('data-variant-ids') || '';
+      var ids = idsRaw.split(',').filter(Boolean);
+      if (!ids.length) return;
+      var csrfSampler = getCsrfToken();
+      if (!csrfSampler) return;
+      samplerBtn.disabled = true;
+      samplerBtn.textContent = '…';
+      var bulkBody = new URLSearchParams();
+      ids.forEach(function(id) { bulkBody.append('variant_id', id); });
+      bulkBody.append('csrfmiddlewaretoken', csrfSampler);
+      fetch('/products/cart/add-bulk/', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'HX-Request': 'true', 'X-CSRFToken': csrfSampler },
+        body: bulkBody
+      })
+        .then(function(r) { return r.text().then(function(html) { return { ok: r.ok, html: html }; }); })
+        .then(function(res) {
+          var toast = document.getElementById('cart-toast');
+          if (toast && res.html) toast.innerHTML = res.html;
+          samplerBtn.textContent = '✓ В корзине';
+          samplerBtn.classList.add('is-added');
+        })
+        .catch(function() {
+          samplerBtn.disabled = false;
+          samplerBtn.textContent = 'Набор пробников';
+        });
+      return;
+    }
+
     /* Cart button */
     var btn = t.closest('.qr-cart-btn');
     if (!btn || btn.classList.contains('is-added')) return;
@@ -1573,6 +1717,10 @@
       var params = new URLSearchParams({
         for_whom:    a.for_whom    || '',
         gift_gender: a.gift_gender || '',
+        gift_age:    a.gift_age    || '',
+        occasion:    a.occasion    || '',
+        families:    (a.families || []).join(','),
+        intensity:   a.intensity   || '',
         budget:      a.budget != null ? String(a.budget) : '',
         avoid:       (a.avoid_notes || []).join(',')
       });

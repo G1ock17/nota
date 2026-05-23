@@ -217,6 +217,57 @@ def cart_add(request):
     return HttpResponseBadRequest("Требуется HTMX")
 
 
+@require_POST
+def cart_add_bulk(request):
+    """Добавить несколько вариантов в корзину (набор пробников)."""
+    raw_ids = request.POST.getlist("variant_id")
+    if not raw_ids:
+        raw = (request.POST.get("variant_ids") or "").strip()
+        if raw:
+            raw_ids = [x.strip() for x in raw.split(",") if x.strip()]
+
+    is_htmx = request.headers.get("HX-Request") == "true"
+    added_count = 0
+    cart = get_cart(request)
+
+    for raw in raw_ids:
+        try:
+            variant_pk = int(raw)
+        except (TypeError, ValueError):
+            continue
+        variant = Variant.objects.filter(pk=variant_pk, stock__gt=0).first()
+        if not variant:
+            continue
+        cart = add_variant(request, variant.pk, 1)
+        added_count += 1
+
+    count = cart_total_items(cart)
+
+    if not added_count:
+        if is_htmx:
+            return render(
+                request,
+                "products/partials/cart_toast.html",
+                {"error": "Нет в наличии"},
+                status=200,
+            )
+        return HttpResponseBadRequest("Нет в наличии")
+
+    if is_htmx:
+        label = "пробник" if added_count == 1 else "пробников"
+        return render(
+            request,
+            "products/partials/cart_toast.html",
+            {
+                "product_name": f"Набор пробников ({added_count} {label})",
+                "item_count": count,
+            },
+            status=200,
+        )
+
+    return HttpResponseBadRequest("Требуется HTMX")
+
+
 def cart_detail(request):
     raw_cart = get_cart(request)
     checkout_next_query = urlencode({"next": reverse("products:checkout")})
@@ -262,6 +313,7 @@ def cart_detail(request):
             "cart_items": items,
             "total_price": total_price,
             "item_count": cart_total_items(raw_cart),
+            "line_count": len(items),
             "checkout_next_query": checkout_next_query,
         },
     )

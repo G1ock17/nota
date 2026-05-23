@@ -25,6 +25,7 @@ from products.cart_utils import cart_total_items, get_cart
 from .forms import LoginForm, ProfileSetupForm, RegistrationForm
 from .models import DeliveryAddress, LoginAttempt, UserProfile
 from .brand_constants import FEATURED_HOME_BRANDS
+from .podbor_matching import parse_quiz_answers, raw_to_match_pct, score_product
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -628,13 +629,8 @@ _GENDER_SLUGS = {
 
 
 def podbor_results(request):
-    """JSON endpoint: return up to 6 real catalog products for quiz results."""
-    for_whom = request.GET.get("for_whom", "")
-    gift_gender = request.GET.get("gift_gender", "")
-    budget_raw = request.GET.get("budget", "")
-    avoid_raw = request.GET.get("avoid", "")
-
-    avoid_keys = [k.strip() for k in avoid_raw.split(",") if k.strip()]
+    """JSON endpoint: return up to 6 catalog products ranked by quiz answers."""
+    answers = parse_quiz_answers(request.GET)
 
     qs = (
         Product.objects.select_related("brand", "category")
@@ -647,39 +643,52 @@ def podbor_results(request):
         .filter(min_price__isnull=False)
     )
 
-    # Gender filter (only when choosing a gift with a specified gender)
-    if for_whom == "gift" and gift_gender in _GENDER_SLUGS:
-        qs = qs.filter(category__slug__in=_GENDER_SLUGS[gift_gender])
+    if answers.for_whom == "gift" and answers.gift_gender in _GENDER_SLUGS:
+        qs = qs.filter(category__slug__in=_GENDER_SLUGS[answers.gift_gender])
 
-    # Budget filter
-    try:
-        budget_val = float(budget_raw) if budget_raw else None
-    except ValueError:
-        budget_val = None
-    if budget_val and budget_val < 999000:
-        qs = qs.filter(min_price__lte=budget_val)
+    if answers.budget and answers.budget < 999_000:
+        qs = qs.filter(min_price__lte=answers.budget)
 
-    # Exclude products containing avoided notes
-    for key in avoid_keys:
+    for key in answers.avoid:
         avoid_q = _AVOID_NOTE_FILTERS.get(key)
         if avoid_q:
             avoid_ids = Product.objects.filter(avoid_q).values_list("id", flat=True)
             qs = qs.exclude(id__in=avoid_ids)
 
-    products = list(qs.order_by("-created_at")[:24])
+    candidates = list(qs[:200])
+    scored: list[tuple[float, Product]] = []
 
-    results = []
-    for product in products:
-        # Cheapest in-stock variant
-        cheapest = None
-        for v in product.variants.all():
-            if v.stock > 0:
-                if cheapest is None or v.price < cheapest.price:
-                    cheapest = v
-        if not cheapest:
+    for product in candidates:
+        sample = product.smallest_in_stock_variant()
+        if not sample:
             continue
 
-        # Main image URL
+        note_names: list[str] = []
+        note_types: dict[str, str] = {}
+        for note in product.notes.all():
+            note_names.append(note.name)
+            note_types[note.name] = note.type
+
+        raw = score_product(
+            note_names=note_names,
+            note_types=note_types,
+            product_name=product.name,
+            description=product.description,
+            category_slug=product.category.slug,
+            brand_featured=product.brand.featured,
+            min_price=float(product.min_price),
+            answers=answers,
+        )
+        scored.append((raw, product))
+
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+
+    results = []
+    for rank, (raw, product) in enumerate(scored[:6]):
+        sample = product.smallest_in_stock_variant()
+        if not sample:
+            continue
+
         image_url = None
         for img in product.images.all():
             if img.is_main:
@@ -690,7 +699,6 @@ def podbor_results(request):
                 image_url = request.build_absolute_uri(img.image.url)
                 break
 
-        # Notes grouped by type
         notes: dict[str, list[str]] = {"top": [], "middle": [], "base": []}
         for note in product.notes.all():
             if note.type in notes:
@@ -702,13 +710,12 @@ def podbor_results(request):
             "brand": product.brand.name,
             "slug": product.slug,
             "image_url": image_url,
-            "price": float(cheapest.price),
-            "variant_id": cheapest.id,
+            "price": float(sample.price),
+            "variant_id": sample.id,
+            "sample_volume": sample.get_volume_display(),
             "notes": notes,
+            "match_pct": raw_to_match_pct(raw, rank),
         })
-
-        if len(results) >= 6:
-            break
 
     return JsonResponse({"results": results})
 
