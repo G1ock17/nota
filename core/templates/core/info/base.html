@@ -3,7 +3,7 @@
 {% block title %}{{ page_title }} — Accord{% endblock %}
 
 {% block body %}
-<div class="info-page min-h-screen text-foreground">
+<div class="info-page {% block info_page_class %}{% endblock %} min-h-screen text-foreground">
   {% include "core/partials/navbar.html" %}
 
   <header class="info-hero">

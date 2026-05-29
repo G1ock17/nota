@@ -1,22 +1,148 @@
 {% extends "core/info/base.html" %}
 
+{% block info_page_class %}delivery-page{% endblock %}
+
+{% block extra_css %}
+<style>
+.delivery-page .info-main {
+  max-width: 1024px;
+  padding-top: 56px;
+  padding-bottom: 80px;
+}
+
+.delivery-page .info-content {
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: 0;
+  color: #330507;
+}
+
+.delivery-page .info-content > * + * {
+  margin-top: 0;
+}
+
+.delivery-lead {
+  margin: 0 0 2.5rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  line-height: 1.5;
+  color: #330507;
+  max-width: 72ch;
+}
+
+.delivery-section {
+  padding: 2rem 0 0;
+  margin: 2rem 0 0;
+  border-top: 1px solid rgba(51, 5, 7, 0.14);
+}
+
+.delivery-page .info-content h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #330507;
+}
+
+.delivery-section p,
+.delivery-section li {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #330507;
+}
+
+.delivery-section p a {
+  color: #330507;
+  font-weight: 500;
+  text-underline-offset: 3px;
+}
+
+.delivery-section p a:hover {
+  opacity: 0.75;
+}
+
+.delivery-page .info-content .delivery-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 72ch;
+}
+
+.delivery-page .info-content .delivery-list li {
+  position: relative;
+  padding: 0 0 0 1.25rem;
+}
+
+.delivery-page .info-content .delivery-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #330507;
+}
+
+.delivery-page .info-content .delivery-list li + li {
+  margin-top: 0.75rem;
+}
+
+.delivery-section strong {
+  font-weight: 600;
+  color: #330507;
+}
+
+@media (max-width: 640px) {
+  .delivery-page .info-main {
+    padding-top: 40px;
+    padding-bottom: 64px;
+  }
+
+  .delivery-lead,
+  .delivery-section p,
+  .delivery-section li {
+    font-size: 15px;
+  }
+}
+</style>
+{% endblock %}
+
 {% block info_content %}
-<p>Мы доставляем заказы по всей России. После оформления и оплаты менеджер свяжется с вами для подтверждения адреса и согласования сроков.</p>
+<p class="delivery-lead">
+  Мы доставляем заказы по всей России. После оформления и оплаты менеджер свяжется с вами
+  для подтверждения адреса и согласования сроков.
+</p>
 
-<h2>Способы доставки</h2>
-<ul>
-  <li><strong>Курьерская доставка</strong> — по адресу, указанному при оформлении заказа в личном кабинете или на этапе checkout.</li>
-</ul>
+<section class="delivery-section">
+  <h2>Способы доставки</h2>
+  <ul class="delivery-list">
+    <li><strong>Курьерская доставка</strong> — по адресу в Москве и Московской области, указанному в личном кабинете или при оформлении заказа.</li>
+  </ul>
+</section>
 
-<h2>Сроки</h2>
-<p>Срок доставки зависит от региона и составляет, как правило, от 2 до 10 рабочих дней после подтверждения заказа. Точную дату сообщим при звонке или в письме с подтверждением.</p>
+<section class="delivery-section">
+  <h2>Сроки</h2>
+  <p>Срок доставки зависит от региона и составляет, как правило, от 2 до 10 рабочих дней после подтверждения заказа. Точную дату сообщим при звонке или в письме с подтверждением.</p>
+</section>
 
-<h2>Стоимость</h2>
-<p>Стоимость доставки рассчитывается индивидуально и сообщается при подтверждении заказа. При заказе от определённой суммы возможна бесплатная доставка — актуальные условия уточняйте у менеджера.</p>
+<section class="delivery-section">
+  <h2>Стоимость</h2>
+  <p>Стоимость доставки рассчитывается индивидуально и сообщается при подтверждении заказа. При заказе от определённой суммы возможна бесплатная доставка — актуальные условия уточняйте у менеджера.</p>
+</section>
 
-<h2>Отслеживание</h2>
-<p>После отправки вы получите трек-номер на email, указанный при регистрации или оформлении заказа. Статус заказа также доступен в <a href="{% url 'account' %}">личном кабинете</a>.</p>
+<section class="delivery-section">
+  <h2>Отслеживание</h2>
+  <p>После отправки вы получите трек-номер на email, указанный при регистрации или оформлении заказа. Статус заказа также доступен в <a href="{% url 'account' %}">личном кабинете</a>.</p>
+</section>
 
-<h2>Получение</h2>
-<p>При получении проверьте целостность упаковки. Если обнаружены повреждения, сообщите курьеру и свяжитесь с нами в течение 24 часов: <a href="mailto:hello@accordroyally.com">hello@accordroyally.com</a>.</p>
+<section class="delivery-section">
+  <h2>Получение</h2>
+  <p>При получении проверьте целостность упаковки. Если обнаружены повреждения, сообщите курьеру и свяжитесь с нами в течение 24 часов: <a href="mailto:hello@accordroyally.com">hello@accordroyally.com</a>.</p>
+</section>
 {% endblock %}

@@ -113,33 +113,8 @@ OCCASION_INTENSITY: dict[str, tuple[str, ...]] = {
     "special": ("Насыщенный", "Умеренный"),
 }
 
-AGE_BOOSTS: dict[str, dict[str, float]] = {
-    "young": {
-        "Свежий": 1.0, "Цитрусовый": 0.95, "Фруктовый": 0.9, "Сладкий": 0.75,
-        "Акватический": 0.85, "Гурманский": 0.7,
-    },
-    "adult": {
-        "Древесный": 0.9, "Фужерный": 0.85, "Цветочный": 0.8, "Свежий": 0.75,
-        "Восточный": 0.7,
-    },
-    "mature": {
-        "Древесный": 1.0, "Восточный": 0.95, "Кожаный": 0.9, "Пряный": 0.85,
-        "Фужерный": 0.8, "Цветочный": 0.65,
-    },
-}
-
-AGE_INTENSITY: dict[str, tuple[str, ...]] = {
-    "young": ("Лёгкий", "Умеренный"),
-    "adult": ("Умеренный", "Лёгкий", "Насыщенный"),
-    "mature": ("Умеренный", "Насыщенный"),
-}
-
-
 @dataclass
 class QuizAnswers:
-    for_whom: str = ""
-    gift_gender: str = ""
-    gift_age: str = ""
     occasion: str = ""
     families: list[str] = field(default_factory=list)
     intensity: str = ""
@@ -216,8 +191,6 @@ def score_product(
     note_types: dict[str, str],
     product_name: str,
     description: str,
-    category_slug: str,
-    brand_featured: bool,
     min_price: float,
     answers: QuizAnswers,
 ) -> float:
@@ -240,57 +213,19 @@ def score_product(
         if intensity in pref:
             occasion_score += (4.0 if intensity == pref[0] else 2.5)
 
-    # ── Gift age (max ~10) ──
-    context_score = 0.0
-    if answers.for_whom == "gift" and answers.gift_age:
-        age_boost = _profile_boost(AGE_BOOSTS.get(answers.gift_age, {}), detected)
-        context_score += age_boost * 6.0
-        pref_i = AGE_INTENSITY.get(answers.gift_age, ())
-        if intensity in pref_i:
-            context_score += (4.0 if intensity == pref_i[0] else 2.0)
-
-    # ── Gender fit (max ~8) ──
-    gender_score = 0.0
-    if answers.for_whom == "gift" and answers.gift_gender:
-        gender_map = {"male": "man", "female": "woman", "unisex": "unisex"}
-        target = gender_map.get(answers.gift_gender, "")
-        if category_slug == target:
-            gender_score = 8.0
-        elif category_slug == "unisex":
-            gender_score = 5.0
-        else:
-            gender_score = 1.0
-
-    # ── For whom nuance (max ~5) ──
-    whom_score = 0.0
-    if answers.for_whom == "gift":
-        if answers.budget and min_price >= answers.budget * 0.55:
-            whom_score += 3.0
-        if brand_featured:
-            whom_score += 2.0
-    elif answers.for_whom == "self":
-        whom_score += 2.5
-        if answers.budget and min_price <= answers.budget * 0.85:
-            whom_score += 2.5
-
-    # ── Budget sweet spot (max ~5) ──
+    # ── Budget fit (max ~5) ──
     budget_score = 0.0
+    whom_score = 2.5
     if answers.budget and answers.budget < 999_000:
         ratio = min_price / answers.budget
+        if min_price <= answers.budget * 0.85:
+            whom_score += 2.5
         if 0.35 <= ratio <= 0.95:
             budget_score = 5.0 * (1.0 - abs(ratio - 0.65) / 0.65)
         elif ratio <= 1.0:
             budget_score = 1.5
 
-    # ── For whom without other context (max ~3) ──
-    branch_score = 0.0
-    if answers.for_whom == "gift" and not answers.gift_age:
-        branch_score = 1.5
-
-    raw = (
-        family_score + intensity_score + occasion_score + context_score
-        + gender_score + whom_score + budget_score + branch_score
-    )
+    raw = family_score + intensity_score + occasion_score + whom_score + budget_score
     return min(raw, 100.0)
 
 
@@ -319,9 +254,6 @@ def parse_quiz_answers(params) -> QuizAnswers:
             budget_val = None
 
     return QuizAnswers(
-        for_whom=(get("for_whom", "") or "").strip(),
-        gift_gender=(get("gift_gender", "") or "").strip(),
-        gift_age=(get("gift_age", "") or "").strip(),
         occasion=(get("occasion", "") or "").strip(),
         families=[f.strip() for f in families_raw.split(",") if f.strip()],
         intensity=(get("intensity", "") or "").strip(),

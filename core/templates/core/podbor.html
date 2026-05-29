@@ -931,13 +931,14 @@
   font-family: var(--font-ui-sans);
   font-size: 11px;
   font-weight: 400;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 12px 22px;
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 .qr-sampler__btn--outline {
   background: transparent;
@@ -970,11 +971,19 @@
   }
   .qr-sampler__actions {
     width: 100%;
+    flex-direction: column;
+    gap: 0.65rem;
   }
   .qr-sampler__btn {
-    flex: 1;
+    width: 100%;
+    flex: none;
     min-width: 0;
     text-align: center;
+    white-space: normal;
+    line-height: 1.35;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+    padding: 14px 16px;
   }
 }
 
@@ -1018,11 +1027,11 @@
         <div class="quiz-intro">
           <p class="quiz-intro__eyebrow">Персональный подбор</p>
           <h1 class="quiz-intro__title">Найдите свой аромат</h1>
-          <p class="quiz-intro__desc">Ответьте на 6 коротких вопросов — и мы подберём ароматы, которые подойдут именно вам или в подарок.</p>
+          <p class="quiz-intro__desc">Ответьте на 5 коротких вопросов — и мы подберём ароматы, которые подойдут именно вам.</p>
           <div class="quiz-intro__steps" aria-hidden="true">
             <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
             <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
-            <span class="quiz-intro__dot"></span><span class="quiz-intro__dot"></span>
+            <span class="quiz-intro__dot"></span>
           </div>
           <button id="qz-start" class="btn-luxury" style="margin:0 auto;">Начать подбор</button>
         </div>
@@ -1035,7 +1044,7 @@
             <div id="qz-progress-fill" class="quiz-progress__fill" style="width:0%"></div>
           </div>
           <div class="quiz-progress__meta">
-            <span id="qz-progress-label" class="quiz-progress__label">Шаг 1 из 6</span>
+            <span id="qz-progress-label" class="quiz-progress__label">Шаг 1 из 5</span>
             <span id="qz-progress-name" class="quiz-progress__name"></span>
           </div>
         </div>
@@ -1066,17 +1075,16 @@
     'Кожаный':'♠', 'Фужерный':'🌿', 'Акватический':'💧', 'Гурманский':'🍫'
   };
 
+  var TOTAL_STEPS = 5;
+
   /* ── STATE ─────────────────────────────────────────────────────────── */
   var state = {
     stepId: null,
     history: [],
     direction: 'forward',
     answers: {
-      for_whom:    null,   // 'self' | 'gift'
-      gift_gender: null,   // 'male' | 'female' | 'unisex'
-      gift_age:    null,   // 'young'| 'adult'  | 'mature'
       occasion:    null,   // string key
-      families:    [],     // array, max 2
+      families:    [],     // array, max 5
       intensity:   null,   // string
       avoid_notes: [],     // array of keys
       budget:      null    // number
@@ -1085,19 +1093,15 @@
 
   /* ── STEP META ─────────────────────────────────────────────────────── */
   var STEP_META = {
-    for_whom:     { num:1, name:'Для кого' },
-    gift_details: { num:1, name:'О получателе' },
-    occasion:     { num:2, name:'Повод' },
-    family:       { num:3, name:'Характер' },
-    intensity:    { num:4, name:'Интенсивность' },
-    avoid:        { num:5, name:'Нелюбимые ноты' },
-    budget:       { num:6, name:'Бюджет' }
+    occasion:     { num:1, name:'Повод' },
+    family:       { num:2, name:'Характер' },
+    intensity:    { num:3, name:'Интенсивность' },
+    avoid:        { num:4, name:'Нелюбимые ноты' },
+    budget:       { num:5, name:'Бюджет' }
   };
 
   /* ── NAVIGATION ────────────────────────────────────────────────────── */
   function nextStepId(id) {
-    if (id === 'for_whom')  return state.answers.for_whom === 'gift' ? 'gift_details' : 'occasion';
-    if (id === 'gift_details') return 'occasion';
     if (id === 'occasion')  return 'family';
     if (id === 'family')    return 'intensity';
     if (id === 'intensity') return 'avoid';
@@ -1107,8 +1111,6 @@
 
   function canProceed(id) {
     var a = state.answers;
-    if (id === 'for_whom')     return !!a.for_whom;
-    if (id === 'gift_details') return !!a.gift_gender && !!a.gift_age;
     if (id === 'occasion')     return !!a.occasion;
     if (id === 'family')       return a.families.length > 0;
     if (id === 'intensity')    return !!a.intensity;
@@ -1144,40 +1146,6 @@
   }
 
   /* ── STEP RENDERERS ────────────────────────────────────────────────── */
-  function rForWhom() {
-    var a = state.answers;
-    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
-      + '<p class="quiz-step__question">Для кого ищем аромат?</p>'
-      + '<p class="quiz-step__hint">От этого зависят вопросы, которые мы зададим дальше.</p>'
-      + '<div class="quiz-options quiz-options--2">'
-      + opt('self', '🙋', 'Для себя', 'Хочу что-то новое или похожее', '', a.for_whom==='self')
-      + opt('gift', '🎁', 'В подарок', 'Выбираю для другого человека', '', a.for_whom==='gift')
-      + '</div>'
-      + footer('for_whom')
-      + '</div>';
-  }
-
-  function rGiftDetails() {
-    var a = state.answers;
-    return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
-      + '<p class="quiz-step__question">Расскажите о получателе</p>'
-      + '<p class="quiz-step__hint">Пол и возраст помогают точнее попасть в предпочтения.</p>'
-      + '<div class="quiz-gift-groups">'
-      + '<div><span class="quiz-gift-group__label">Пол</span><div class="quiz-options">'
-      + opt('male',   '♂', 'Мужской',  '', 'js-gift-gender', a.gift_gender==='male')
-      + opt('female', '♀', 'Женский',  '', 'js-gift-gender', a.gift_gender==='female')
-      + opt('unisex', '⚭', 'Унисекс',  '', 'js-gift-gender', a.gift_gender==='unisex')
-      + '</div></div>'
-      + '<div><span class="quiz-gift-group__label">Возраст</span><div class="quiz-options">'
-      + opt('young',  '', 'До 25 лет',  '', 'js-gift-age', a.gift_age==='young')
-      + opt('adult',  '', '25 – 40 лет','', 'js-gift-age', a.gift_age==='adult')
-      + opt('mature', '', 'Старше 40',  '', 'js-gift-age', a.gift_age==='mature')
-      + '</div></div>'
-      + '</div>'
-      + footer('gift_details')
-      + '</div>';
-  }
-
   function rOccasion() {
     var a = state.answers;
     return '<div class="quiz-step quiz-step--' + (state.direction === 'back' ? 'in-back' : state.direction === 'forward' ? 'in' : '') + '">'
@@ -1268,8 +1236,6 @@
 
   function renderStepId(id) {
     switch(id) {
-      case 'for_whom':     return rForWhom();
-      case 'gift_details': return rGiftDetails();
       case 'occasion':     return rOccasion();
       case 'family':       return rFamily();
       case 'intensity':    return rIntensity();
@@ -1377,7 +1343,7 @@
       +   '<p class="qr-sampler__sub">' + samplerSubtext(results) + '</p>'
       + '</div>'
       + '<div class="qr-sampler__actions">'
-      +   '<button type="button" class="qr-sampler__btn qr-sampler__btn--outline" id="qz-sampler-add" data-variant-ids="' + variantIds + '">Набор пробников</button>'
+      +   '<button type="button" class="qr-sampler__btn qr-sampler__btn--outline" id="qz-sampler-add" data-variant-ids="' + variantIds + '">Добавить в корзину</button>'
       +   '<button type="button" class="qr-sampler__btn qr-sampler__btn--solid" id="qz-restart">Пройти заново</button>'
       + '</div>'
       + '</div>';
@@ -1501,9 +1467,9 @@
 
   function refreshProgress(id) {
     var m = STEP_META[id];
-    var pct = ((m.num - 1) / 6 + (1 / 6) * 0.15) * 100;
+    var pct = ((m.num - 1) / TOTAL_STEPS + (1 / TOTAL_STEPS) * 0.15) * 100;
     elFill.style.width = pct + '%';
-    elLabel.textContent = 'Шаг ' + m.num + ' из 6';
+    elLabel.textContent = 'Шаг ' + m.num + ' из ' + TOTAL_STEPS;
     elName.textContent  = m.name;
   }
 
@@ -1525,7 +1491,7 @@
     // animate progress fill
     requestAnimationFrame(function() {
       var m = STEP_META[id];
-      elFill.style.width = (m.num / 6 * 100) + '%';
+      elFill.style.width = (m.num / TOTAL_STEPS * 100) + '%';
     });
   }
 
@@ -1536,9 +1502,8 @@
     /* Start */
     if (t.id === 'qz-start') {
       state.history = [];
-      state.answers = { for_whom:null, gift_gender:null, gift_age:null,
-                        occasion:null, families:[], intensity:null, avoid_notes:[], budget:null };
-      goToStep('for_whom', 'forward');
+      state.answers = { occasion:null, families:[], intensity:null, avoid_notes:[], budget:null };
+      goToStep('occasion', 'forward');
       return;
     }
 
@@ -1577,14 +1542,7 @@
     var val = optEl.getAttribute('data-value');
     var id  = state.stepId;
 
-    if (id === 'for_whom') {
-      state.answers.for_whom = val;
-      state.answers.gift_gender = null;
-      state.answers.gift_age = null;
-    } else if (id === 'gift_details') {
-      if (optEl.classList.contains('js-gift-gender')) state.answers.gift_gender = val;
-      if (optEl.classList.contains('js-gift-age'))    state.answers.gift_age    = val;
-    } else if (id === 'occasion') {
+    if (id === 'occasion') {
       state.answers.occasion = val;
     } else if (id === 'family') {
       var fams = state.answers.families;
@@ -1663,12 +1621,12 @@
         .then(function(res) {
           var toast = document.getElementById('cart-toast');
           if (toast && res.html) toast.innerHTML = res.html;
-          samplerBtn.textContent = '✓ В корзине';
+          samplerBtn.textContent = '✓ Добавлено';
           samplerBtn.classList.add('is-added');
         })
         .catch(function() {
           samplerBtn.disabled = false;
-          samplerBtn.textContent = 'Набор пробников';
+          samplerBtn.textContent = 'Добавить в корзину';
         });
       return;
     }
@@ -1715,9 +1673,6 @@
       elResBody.innerHTML = skeletonHtml();
       var a = state.answers;
       var params = new URLSearchParams({
-        for_whom:    a.for_whom    || '',
-        gift_gender: a.gift_gender || '',
-        gift_age:    a.gift_age    || '',
         occasion:    a.occasion    || '',
         families:    (a.families || []).join(','),
         intensity:   a.intensity   || '',

@@ -1,21 +1,201 @@
 {% extends "core/info/base.html" %}
 
+{% block info_page_class %}contacts-page{% endblock %}
 {% block info_eyebrow %}Связь{% endblock %}
 
-{% block info_content %}
-<p>Мы на связи по вопросам заказов, подбора аромата, доставки и возврата. Обычно отвечаем в течение одного рабочего дня.</p>
+{% block extra_css %}
+<style>
+.contacts-page .info-main {
+  max-width: 1024px;
+  padding-top: 56px;
+  padding-bottom: 80px;
+}
 
-<div class="info-card">
-  <h3 style="margin-top:0;">Email</h3>
-  <p><a href="mailto:hello@accordroyally.com">hello@accordroyally.com</a></p>
+.contacts-page .info-content {
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: 0;
+  color: #330507;
+}
+
+.contacts-page .info-content > * + * {
+  margin-top: 0;
+}
+
+.contacts-lead {
+  margin: 0 0 2rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  line-height: 1.5;
+  color: #330507;
+  max-width: 52ch;
+}
+
+.contacts-email-card {
+  margin: 0 0 2.5rem;
+  padding: 1.75rem 1.5rem;
+  border: 1px solid rgba(51, 5, 7, 0.14);
+  background: #fff;
+}
+
+.contacts-email-card__label {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-ui-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6f665d;
+}
+
+.contacts-email-card__link {
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: #330507;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.contacts-email-card__link:hover {
+  opacity: 0.78;
+}
+
+.contacts-email-card__note {
+  margin: 0.75rem 0 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #6f665d;
+}
+
+.contacts-section {
+  padding: 2rem 0 0;
+  margin: 2rem 0 0;
+  border-top: 1px solid rgba(51, 5, 7, 0.14);
+}
+
+.contacts-page .info-content h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #330507;
+}
+
+.contacts-section p {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #330507;
+}
+
+.contacts-section p a {
+  color: #330507;
+  font-weight: 500;
+  text-underline-offset: 3px;
+}
+
+.contacts-section p a:hover {
+  opacity: 0.75;
+}
+
+.contacts-actions {
+  margin-top: 2.5rem;
+}
+
+.contacts-write-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.75rem;
+  font-family: var(--font-ui-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  border: 1px solid #330507;
+  background: #330507;
+  color: #f7f5f1 !important;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.contacts-write-btn:hover {
+  background: #4a0b0d;
+  border-color: #4a0b0d;
+  color: #f7f5f1 !important;
+  opacity: 1;
+}
+
+.contacts-page .info-content .contacts-write-btn:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.contacts-write-btn:active {
+  background: #2a0405;
+  border-color: #2a0405;
+}
+
+@media (max-width: 640px) {
+  .contacts-page .info-main {
+    padding-top: 40px;
+    padding-bottom: 64px;
+  }
+
+  .contacts-lead,
+  .contacts-section p {
+    font-size: 15px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block info_content %}
+<p class="contacts-lead">
+  Мы на связи по вопросам заказов, подбора аромата, доставки и возврата.
+  Обычно отвечаем в течение одного рабочего дня.
+</p>
+
+<div class="contacts-email-card">
+  <p class="contacts-email-card__label">Email</p>
+  <a class="contacts-email-card__link" href="mailto:hello@accordroyally.com">hello@accordroyally.com</a>
+  <p class="contacts-email-card__note">Напишите нам — ответим на все вопросы по заказу и подбору.</p>
 </div>
 
-<h2>Заказы и доставка</h2>
-<p>Укажите в письме номер заказа — так мы быстрее поможем. Статус заказа можно посмотреть в <a href="{% url 'account' %}">личном кабинете</a> после входа в аккаунт.</p>
+<section class="contacts-section">
+  <h2>Заказы и доставка</h2>
+  <p>
+    Укажите в письме номер заказа — так мы быстрее поможем.
+    Статус заказа можно посмотреть в <a href="{% url 'account' %}">личном кабинете</a> после входа в аккаунт.
+  </p>
+</section>
 
-<h2>Подбор аромата</h2>
-<p>Опишите, какие ноты вам нравятся, или назовите ароматы, которые уже носите — подберём варианты из каталога.</p>
+<section class="contacts-section">
+  <h2>Подбор аромата</h2>
+  <p>
+    Опишите, какие ноты вам нравятся, или назовите ароматы, которые уже носите —
+    подберём варианты из каталога. Также можно пройти
+    <a href="{% url 'podbor' %}">короткий квиз-подбор</a> на сайте.
+  </p>
+</section>
 
-<h2>Партнёрство</h2>
-<p>По вопросам сотрудничества и оптовых закупок пишите на тот же адрес с пометкой «Партнёрство» в теме письма.</p>
+<section class="contacts-section">
+  <h2>Партнёрство</h2>
+  <p>
+    По вопросам сотрудничества и оптовых закупок пишите на тот же адрес
+    с пометкой «Партнёрство» в теме письма.
+  </p>
+</section>
+
+<div class="contacts-actions">
+  <a href="mailto:hello@accordroyally.com" class="contacts-write-btn">Написать нам</a>
+</div>
 {% endblock %}

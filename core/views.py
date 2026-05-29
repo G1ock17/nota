@@ -643,9 +643,6 @@ def podbor_results(request):
         .filter(min_price__isnull=False)
     )
 
-    if answers.for_whom == "gift" and answers.gift_gender in _GENDER_SLUGS:
-        qs = qs.filter(category__slug__in=_GENDER_SLUGS[answers.gift_gender])
-
     if answers.budget and answers.budget < 999_000:
         qs = qs.filter(min_price__lte=answers.budget)
 
@@ -674,8 +671,6 @@ def podbor_results(request):
             note_types=note_types,
             product_name=product.name,
             description=product.description,
-            category_slug=product.category.slug,
-            brand_featured=product.brand.featured,
             min_price=float(product.min_price),
             answers=answers,
         )
@@ -722,7 +717,7 @@ def podbor_results(request):
 
 INFO_PAGES = {
     "delivery": ("Доставка", "core/info/delivery.html"),
-    "returns": ("Возврат и обмен", "core/info/returns.html"),
+    "returns": ("Возврат", "core/info/returns.html"),
     "about": ("О нас", "core/info/about.html"),
     "contacts": ("Контакты", "core/info/contacts.html"),
     "privacy": ("Политика конфиденциальности", "core/info/privacy.html"),

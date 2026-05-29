@@ -1461,8 +1461,6 @@
             document.documentElement.style.overflow = "hidden";
         }
 
-        window.openFavoriteAuthModal = openModal;
-
         function closeModal() {
             modal.classList.remove("is-open");
             modal.setAttribute("aria-hidden", "true");

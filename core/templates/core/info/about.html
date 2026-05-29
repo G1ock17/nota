@@ -1,26 +1,376 @@
 {% extends "core/info/base.html" %}
 
-{% block info_eyebrow %}Accord{% endblock %}
+{% block info_page_class %}about-page{% endblock %}
+{% block info_eyebrow %}О бренде{% endblock %}
+
+{% block extra_css %}
+<style>
+.about-page .info-main {
+  max-width: 1024px;
+  padding-top: 56px;
+  padding-bottom: 80px;
+}
+
+.about-page .info-content {
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: 0;
+  color: #330507;
+}
+
+.about-page .info-content > * + * {
+  margin-top: 0;
+}
+
+.about-lead {
+  margin: 0 0 2.5rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2.8vw, 1.625rem);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: #330507;
+}
+
+.about-quote {
+  margin: 0 0 3rem;
+  padding: 1.5rem 0 1.5rem 1.25rem;
+  border-left: 3px solid #330507;
+  background: transparent;
+}
+
+.about-quote p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #330507;
+}
+
+.about-quote cite {
+  display: block;
+  margin-top: 0.75rem;
+  font-family: var(--font-ui-sans);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #6f665d;
+}
+
+.about-section {
+  padding: 2.5rem 0 0;
+  margin: 2.5rem 0 0;
+  border-top: 1px solid rgba(51, 5, 7, 0.14);
+}
+
+.about-section:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.about-page .info-content h2 {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: #330507;
+}
+
+.about-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 72ch;
+}
+
+.about-prose p {
+  margin: 0;
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  color: #330507;
+}
+
+.about-values {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-page .info-content .about-values {
+  padding-left: 0;
+  margin-top: 0;
+}
+
+.about-page .info-content .about-values > li {
+  margin-top: 0;
+}
+
+.about-value {
+  margin: 0;
+  padding: 1.35rem 1.25rem;
+  border: 1px solid rgba(51, 5, 7, 0.14);
+  background: #fff;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.about-value__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #330507;
+}
+
+.about-value__text {
+  margin: 0;
+  font-family: var(--font-ui-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: #330507;
+}
+
+.about-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.about-list li {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 1.25rem;
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: #330507;
+}
+
+.about-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #330507;
+}
+
+.about-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.about-page .info-content .about-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  font-family: var(--font-ui-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.about-page .info-content .about-actions a:hover {
+  text-decoration: none;
+  opacity: 1;
+}
+
+.about-page .info-content .about-actions a:first-child {
+  background: #330507;
+  color: #f7f5f1;
+  border: 1px solid #330507;
+}
+
+.about-page .info-content .about-actions a:first-child:hover {
+  background: #4a0b0d;
+  border-color: #4a0b0d;
+}
+
+.about-page .info-content .about-actions a:last-child {
+  background: transparent;
+  color: #330507;
+  border: 1px solid rgba(51, 5, 7, 0.35);
+}
+
+.about-page .info-content .about-actions a:last-child:hover {
+  background: rgba(51, 5, 7, 0.04);
+}
+
+.about-page .info-card {
+  margin-top: 2.5rem;
+  padding: 1.5rem 1.35rem;
+  background: #fff;
+  border: 1px solid rgba(51, 5, 7, 0.14);
+  font-family: var(--font-ui-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  color: #330507;
+}
+
+.about-page .info-card strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #330507;
+}
+
+.about-page .info-card a {
+  color: #330507;
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .about-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .about-value {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .about-value__text {
+    font-size: 15px;
+    flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-page .info-main {
+    padding-top: 40px;
+    padding-bottom: 64px;
+  }
+
+  .about-lead {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .about-prose p,
+  .about-list li,
+  .about-page .info-card {
+    font-size: 15px;
+  }
+
+  .about-page .info-content .about-actions a {
+    padding: 0.85rem 0.65rem;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+}
+</style>
+{% endblock %}
 
 {% block info_content %}
-<p>Accord — нишевый парфюмерный бутик. Мы собираем подлинные ароматы от классических домов до редких нишевых марок, чтобы вы могли найти свой запах в одном месте.</p>
+<p class="about-lead">
+  Accord — нишевый парфюмерный бутик для тех, кто выбирает аромат осознанно.
+</p>
 
-<h2>Наша философия</h2>
-<p>Мы верим, что аромат — это личная история. Поэтому тщательно отбираем позиции в каталоге, работаем только с проверенными поставщиками и помогаем с выбором на каждом этапе.</p>
+<blockquote class="about-quote">
+  <p>«Нишевый аромат — это не просто парфюм. Это подпись, характер, память.»</p>
+  <cite>Философия Accord</cite>
+</blockquote>
 
-<h2>Что мы предлагаем</h2>
-<ul>
-  <li>Оригинальную парфюмерию с прозрачным происхождением</li>
-  <li>Мужские, женские и унисекс ароматы в разных объёмах</li>
-  <li>Коллекцию домов — от известных до авторских нишевых брендов</li>
-  <li>Удобное оформление заказа онлайн и доставку по России</li>
-</ul>
+<section class="about-section">
+  <h2>Кто мы</h2>
+  <div class="about-prose">
+    <p>
+      Мы — команда, которая живёт парфюмерией не понаслышке. Каждая позиция в каталоге
+      проходит отбор: нам важны происхождение, качество сырья и то, как аромат раскрывается
+      на коже — не только в описании.
+    </p>
+    <p>
+      Accord создан для людей, которые ищут не «ещё один флакон», а свой следующий
+      любимый аромат.
+    </p>
+  </div>
+</section>
 
-<h2>Команда</h2>
-<p>За Accord стоят консультанты, которые живут парфюмерией: мы рады подсказать, с чего начать знакомство с нишей или чем дополнить вашу коллекцию.</p>
+<section class="about-section">
+  <h2>Наши принципы</h2>
+  <ul class="about-values">
+    <li class="about-value">
+      <p class="about-value__title">Подлинность</p>
+      <p class="about-value__text">Работаем только с проверенными поставщиками. В каталоге — оригинальная парфюмерия с прозрачным происхождением.</p>
+    </li>
+    <li class="about-value">
+      <p class="about-value__title">Кураторство</p>
+      <p class="about-value__text">Не гонимся за количеством. Отбираем ароматы, которые действительно стоят внимания — знакомые имена и редкие находки.</p>
+    </li>
+    <li class="about-value">
+      <p class="about-value__title">Забота</p>
+      <p class="about-value__text">Помогаем с выбором: от пробника до полного флакона. Подскажем, с чего начать, и чем дополнить коллекцию.</p>
+    </li>
+  </ul>
+</section>
+
+<section class="about-section">
+  <h2>Что вы найдёте у нас</h2>
+  <ul class="about-list">
+    <li>Мужские, женские и унисекс ароматы — в разных объёмах, включая пробники</li>
+    <li>Коллекцию домов: от Dior и Chanel до Xerjoff, Byredo и авторских нишевых марок</li>
+    <li>Персональный подбор аромата — короткий квиз под ваши предпочтения</li>
+    <li>Удобное оформление заказа онлайн и доставку по всей России</li>
+  </ul>
+  <div class="about-actions">
+    <a href="{% url 'podbor' %}">Подобрать аромат</a>
+    <a href="{% url 'products:catalog' %}">Смотреть каталог</a>
+  </div>
+</section>
+
+<section class="about-section">
+  <h2>Как мы работаем</h2>
+  <div class="about-prose">
+    <p>
+      Вы выбираете аромат в каталоге или проходите подбор — мы собираем заказ,
+      аккуратно упаковываем и отправляем курьером.
+    </p>
+    <p>
+      Если сомневаетесь, начните с пробника: так проще понять, как композиция звучит
+      именно на вас, прежде чем брать полный объём.
+    </p>
+  </div>
+</section>
 
 <p class="info-card">
-  <strong>Хотите связаться?</strong><br>
-  Напишите нам на <a href="mailto:hello@accordroyally.com">hello@accordroyally.com</a> или перейдите на страницу <a href="{% url 'info_contacts' %}">Контакты</a>.
+  <strong>Остались вопросы?</strong>
+  Напишите на <a href="mailto:hello@accordroyally.com">hello@accordroyally.com</a>
+  или загляните на страницу <a href="{% url 'info_contacts' %}">Контакты</a>.
+  Обычно отвечаем в течение одного рабочего дня.
 </p>
 {% endblock %}
