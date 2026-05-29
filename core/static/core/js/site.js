@@ -1036,6 +1036,13 @@
             catalogMobileFiltersClose();
             return;
         }
+        var applyFiltersBtn = e.target.closest("[data-catalog-filters-apply]");
+        if (applyFiltersBtn) {
+            e.preventDefault();
+            triggerCatalogFilterUpdate();
+            catalogMobileFiltersClose();
+            return;
+        }
         var openBtn = e.target.closest("[data-filter-modal-open]");
         if (openBtn) {
             e.preventDefault();

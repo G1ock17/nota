@@ -21,6 +21,26 @@
     justify-content: center;
     padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4.5rem);
   }
+  .product-detail-luxe__back {
+    display: none;
+    align-self: flex-start;
+    margin: 0 0 1.25rem;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(51, 5, 7, 0.62);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .product-detail-luxe__back:hover {
+    color: #330507;
+  }
+  @media (max-width: 1023px) {
+    .product-detail-luxe__back {
+      display: inline-block;
+    }
+  }
   .product-detail-luxe__image-wrap {
     width: min(100%, 30rem);
     position: relative;
@@ -409,6 +429,7 @@
   <main class="w-full">
     <section class="product-detail-luxe__layout">
       <div class="product-detail-luxe__visual">
+        <a href="{% url 'products:catalog' %}" class="product-detail-luxe__back">← Назад в каталог</a>
         {% with imgs=product.images.all %}
           {% if imgs %}
             <div class="product-detail-luxe__image-wrap">

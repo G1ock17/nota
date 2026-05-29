@@ -9,9 +9,10 @@
     aria-hidden="true"
   ></div>
 
+  <div class="catalog-filters-panel flex min-h-0 flex-1 flex-col overflow-hidden">
   <div
     class="filter-sidebar relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
-    style="padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)); padding-left: 1.5rem; padding-right: 1.5rem;"
+    style="padding-bottom: 1.5rem; padding-left: 1.5rem; padding-right: 1.5rem;"
   >
 
     {# ── Шапка ── #}
@@ -99,6 +100,13 @@
       {% include "products/partials/catalog_filter_modal_triggers.html" %}
     </div>
 
+  </div>
+
+  <div class="cfs-apply-footer">
+    <button type="button" class="cfs-apply-btn" data-catalog-filters-apply>
+      Показать товары
+    </button>
+  </div>
   </div>
 
   {# Скрытые поля — синхронизация с модалками через JS #}

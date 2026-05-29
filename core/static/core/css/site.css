@@ -532,6 +532,35 @@ main section {
 
 .cfs-close-btn svg { width: 12px; height: 12px; }
 
+.cfs-apply-footer {
+    flex-shrink: 0;
+    padding: 1rem 1.5rem max(1rem, env(safe-area-inset-bottom, 0px));
+    background: #f7f5f1;
+    border-top: 1px solid rgba(51, 5, 7, 0.1);
+}
+
+.cfs-apply-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    border: 1px solid #330507;
+    background: #330507;
+    color: #f7f5f1;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.cfs-apply-btn:hover {
+    background: transparent;
+    color: #330507;
+}
+
 /* ── Секции фильтров ────────────────────────────────────────── */
 .cfs-section {
     padding: 1.25rem 0;
@@ -666,25 +695,46 @@ main section {
         transition: opacity 320ms ease !important;
     }
 
-    #catalog-sidebar-filters .filter-sidebar {
+    #catalog-sidebar-filters .catalog-filters-panel {
         max-width: 28rem !important;
         width: 28rem !important;
-        max-height: 100dvh !important;
         height: 100dvh !important;
-        overflow-y: auto !important;
+        max-height: 100dvh !important;
+        display: flex !important;
+        flex-direction: column !important;
         border: none !important;
         border-left: 1px solid rgba(51, 5, 7, 0.1) !important;
         background: #f7f5f1 !important;
         box-shadow: -48px 0 96px rgba(10, 2, 2, 0.14) !important;
         border-radius: 0 !important;
-        padding: 0 2.25rem 2rem !important;
         transform: translateX(100%);
         transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1) !important;
         flex: none !important;
     }
 
-    #catalog-sidebar-filters.is-open .filter-sidebar {
+    #catalog-sidebar-filters.is-open .catalog-filters-panel {
         transform: translateX(0);
+    }
+
+    #catalog-sidebar-filters .filter-sidebar {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 2.25rem 0 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    #catalog-sidebar-filters .cfs-apply-footer {
+        padding-left: 2.25rem;
+        padding-right: 2.25rem;
     }
 
     .cfs-header {
