@@ -14,6 +14,7 @@ from .models import (
     Variant,
     sort_volume_strings,
 )
+from .search import filter_products_by_search
 
 
 def parse_notes_filter_params(params):
@@ -82,7 +83,7 @@ def product_search_suggest(request):
         return JsonResponse({"results": []})
 
     qs = (
-        Product.objects.filter(Q(name__icontains=q) | Q(brand__name__icontains=q))
+        filter_products_by_search(Product.objects.all(), q)
         .select_related("brand")
         .prefetch_related(
             Prefetch(
@@ -152,7 +153,7 @@ class SearchListView(ListView):
             .filter(min_price__isnull=False)
         )
         if query:
-            qs = qs.filter(Q(name__icontains=query) | Q(brand__name__icontains=query))
+            qs = filter_products_by_search(qs, query)
         return qs.distinct().order_by("name")
 
     def get_context_data(self, **kwargs):
@@ -226,7 +227,7 @@ class CatalogListView(ListView):
 
         query = (params.get("q") or "").strip()
         if query:
-            qs = qs.filter(Q(name__icontains=query) | Q(brand__name__icontains=query))
+            qs = filter_products_by_search(qs, query)
 
         category_slugs = params.getlist("category")
         if category_slugs:
