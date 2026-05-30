@@ -592,23 +592,7 @@
 #categories .home-cat-grid > .reveal:nth-child(2) { transition-delay: 150ms; }
 #categories .home-cat-grid > .reveal:nth-child(3) { transition-delay: 300ms; }
 
-/* Бренды: тот же reveal + stagger; шаг 60 ms, чтобы сетка не «тянулась» секундами */
-#brands .home-brands-mosaic > .reveal:nth-child(1)  { transition-delay: 0ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(2)  { transition-delay: 60ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(3)  { transition-delay: 120ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(4)  { transition-delay: 180ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(5)  { transition-delay: 240ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(6)  { transition-delay: 300ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(7)  { transition-delay: 360ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(8)  { transition-delay: 420ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(9)  { transition-delay: 480ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(10) { transition-delay: 540ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(11) { transition-delay: 600ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(12) { transition-delay: 660ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(13) { transition-delay: 720ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(14) { transition-delay: 780ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(15) { transition-delay: 840ms; }
-#brands .home-brands-mosaic > .reveal:nth-child(16) { transition-delay: 900ms; }
+/* Бренды: stagger задаётся inline в шаблоне (число брендов из БД) */
 </style>
 {% endblock %}
 
@@ -894,7 +878,7 @@
             </div>
             <div class="home-brands-mosaic">
                 {% for name, slug in featured_brands %}
-                <div class="reveal">
+                <div class="reveal" style="transition-delay: {% if forloop.counter0 < 16 %}{% widthratio forloop.counter0 1 60 %}{% else %}900{% endif %}ms">
                     <a
                         href="{% url 'products:catalog' %}?brand={{ slug|urlencode }}"
                         class="home-brands-cell"

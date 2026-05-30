@@ -344,6 +344,22 @@ main section {
     color: inherit;
 }
 
+.product-card .product-brand {
+    margin: 0 0 0.2rem;
+    font-family: var(--font-ui-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(51, 5, 7, 0.48);
+}
+
+@media (min-width: 640px) {
+    .product-card .product-brand {
+        font-size: 11px;
+    }
+}
+
 .product-card .product-title {
     margin: 0 0 0.45rem;
     font-family: var(--font-serif);
@@ -445,6 +461,14 @@ main section {
     font-family: var(--font-serif) !important;
 }
 
+#catalog-product-grid .product-card .product-brand,
+#featured .product-card .product-brand,
+.product-detail-related .product-card .product-brand {
+    display: block;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    color: #330507 !important;
+}
+
 #catalog-product-grid .product-card .product-subtitle,
 #catalog-product-grid .product-card .product-volume-line,
 #catalog-product-grid .product-card .product-price,
@@ -454,7 +478,6 @@ main section {
 .product-detail-related .product-card .product-subtitle,
 .product-detail-related .product-card .product-volume-line,
 .product-detail-related .product-card .product-price,
-.product-detail-related .product-card .product-brand,
 .product-detail-related .product-card .product-volume {
     font-family: var(--font-ui-sans) !important;
 }
@@ -621,7 +644,6 @@ main section {
     color: #330507;
     outline: none;
     transition: border-color 160ms ease;
-    -moz-appearance: textfield;
 }
 
 .cfs-price-input::-webkit-inner-spin-button,
@@ -1200,6 +1222,12 @@ main section {
 
 /* Каталог на телефоне: компактнее название и цена */
 @media (max-width: 639.98px) {
+    #catalog-product-grid .product-card .product-brand {
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        margin-bottom: 0.15rem;
+    }
+
     #catalog-product-grid .product-card .product-title {
         font-size: 0.8rem;
         line-height: 1.3;

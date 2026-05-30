@@ -24,7 +24,7 @@ from products.cart_utils import cart_total_items, get_cart
 
 from .forms import LoginForm, ProfileSetupForm, RegistrationForm
 from .models import DeliveryAddress, LoginAttempt, UserProfile
-from .brand_constants import FEATURED_HOME_BRANDS
+from products.brand_catalog import catalog_brand_choices, featured_home_brands
 from .podbor_matching import parse_quiz_answers, raw_to_match_pct, score_product
 
 User = get_user_model()
@@ -101,7 +101,7 @@ def home(request):
         request,
         "core/home.html",
         {
-            "featured_brands": FEATURED_HOME_BRANDS,
+            "featured_brands": featured_home_brands(),
             "featured_products": featured_products,
         },
     )

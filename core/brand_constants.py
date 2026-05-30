@@ -1,24 +1,5 @@
-# Премиальные бренды на главной: (отображаемое имя, slug для ?brand=… в каталоге)
-FEATURED_HOME_BRANDS = [
-    ("Amouage", "amouage"),
-    ("Byredo", "byredo"),
-    ("Diptyque", "diptyque"),
-    ("Le Labo", "le-labo"),
-    ("Creed", "creed"),
-    ("Tom Ford", "tom-ford"),
-    ("Xerjoff", "xerjoff"),
-    ("Chanel", "chanel"),
-    ("Kilian", "kilian"),
-    ("Frédéric Malle", "frederic-malle"),
-    ("Parfums de Marly", "parfums-de-marly"),
-    ("Dior", "dior"),
-    ("Mancera", "mancera"),
-    ("Montale", "montale"),
-    ("Nishane", "nishane"),
-    ("Guerlain", "guerlain"),
-]
-
 # Мега-меню в шапке: топ-12 брендов (быстрый доступ, подробный список — на /brands/)
+# «Коллекция домов» на главной — из БД (products.brand_catalog.catalog_brand_choices).
 MEGA_MENU_BRANDS = [
     ("Amouage", "amouage"),
     ("Byredo", "byredo"),

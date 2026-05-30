@@ -1,4 +1,4 @@
-﻿"""
+"""
 Delete all products and brands whose slug is not on the allowlist.
 
 Removes OrderItems that reference variants of deleted products first (Variant is PROTECTed).
@@ -39,7 +39,7 @@ ALLOWED_BRAND_NAMES = [
     "Jo Malone",
     "Jean Paul Gaultier",
     "Kajal",
-    "Kilian",
+    "Kilian",  # включает By Kilian (slug by-kilian → kilian)
     "Le Labo",
     "Lancome",
     "Louis Vuitton",
@@ -70,7 +70,6 @@ ALLOWED_BRAND_NAMES = [
     "Clive Christian",
     "Essential Parfums",
     "Vilhelm Parfumerie",
-    "By Kilian",
 ]
 
 # Same brands under different names in the database / import data

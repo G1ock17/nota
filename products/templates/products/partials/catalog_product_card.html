@@ -26,6 +26,7 @@
     href="{% url 'products:product_detail' product.slug %}"
     class="product-info focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf6e9] focus-visible:ring-[rgba(51,5,7,0.85)]"
   >
+    <p class="product-brand">{{ product.brand.name }}</p>
     <h3 class="product-title">{{ product.name }}</h3>
     <span class="product-volume-line">
       {% with v=product.smallest_in_stock_variant %}

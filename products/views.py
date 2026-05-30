@@ -108,7 +108,7 @@ def product_search_suggest(request):
         results.append(
             {
                 "slug": product.slug,
-                "name": product.name,
+                "name": product.display_name,
                 "brand": product.brand.name,
                 "image_url": img.image.url if img else "",
                 "min_price": str(min_p) if min_p is not None else None,

@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.text import slugify
 
+from products.display_names import strip_brand_prefix
+
 User = get_user_model()
 
 
@@ -118,7 +120,24 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def display_name(self) -> str:
+        """Совпадает с name после нормализации при сохранении."""
+        return self.name
+
     def save(self, *args, **kwargs):
+        if self.brand_id:
+            brand_name = ""
+            if getattr(self, "brand", None) is not None:
+                brand_name = self.brand.name
+            if not brand_name:
+                brand_name = (
+                    Brand.objects.filter(pk=self.brand_id)
+                    .values_list("name", flat=True)
+                    .first()
+                    or ""
+                )
+            self.name = strip_brand_prefix(self.name, brand_name)
         if not self.slug:
             self.slug = slugify(self.name)[:255]
         super().save(*args, **kwargs)

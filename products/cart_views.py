@@ -38,7 +38,7 @@ def _send_order_confirmation_email(order: Order, checkout_items: list[dict], req
     email_items = []
     for item in checkout_items:
         variant = item["variant"]
-        product_name = variant.product.name
+        product_name = variant.product.display_name
         volume = variant.get_volume_display()
         if volume:
             product_name = f"{product_name} ({volume})"
@@ -200,7 +200,7 @@ def cart_add(request):
     count = cart_total_items(cart)
 
     if is_htmx:
-        product_name = variant.product.name
+        product_name = variant.product.display_name
         vol = variant.get_volume_display()
         if vol:
             product_name = f"{product_name} ({vol})"

@@ -11,6 +11,8 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils.text import slugify
 
+from products.brand_aliases import canonical_brand_name
+from products.display_names import strip_brand_prefix
 from products.models import Brand, Category, FragranceNote, Product, ProductImage, Variant
 
 
@@ -198,23 +200,29 @@ class Command(BaseCommand):
         )
 
         def resolve_brand(brand_name: str):
-            bslug = slugify(brand_name)[:255]
+            canonical_name = canonical_brand_name(brand_name)
+            bslug = slugify(canonical_name)[:255]
             b = brand_by_slug.get(bslug)
             if b is None:
-                b = Brand.objects.create(name=brand_name, slug=bslug)
+                b = Brand.objects.create(name=canonical_name, slug=bslug)
                 brand_by_slug[bslug] = b
+            elif b.name != canonical_name:
+                b.name = canonical_name
+                b.save(update_fields=["name"])
             return b
 
         for idx, item in enumerate(products_data, start=1):
-            name = (item.get("name") or "").strip()
+            specs = item.get("specs") or {}
+            brand_name = (item.get("brand") or specs.get("Бренд") or "Без бренда").strip()
+            name = strip_brand_prefix(
+                (item.get("name") or "").strip(),
+                canonical_brand_name(brand_name),
+            )
             if not name:
                 if verbosity >= 2:
                     self.stdout.write(self.style.WARNING(f"[{idx}] Пропуск: пустое имя товара"))
                 skipped += 1
                 continue
-
-            specs = item.get("specs") or {}
-            brand_name = (item.get("brand") or specs.get("Бренд") or "Без бренда").strip()
             category_slug = resolve_gender_category_slug(specs.get("Пол"), default_category_slug)
             description = (item.get("description") or "").strip()
             price = parse_price(item.get("price"))
