@@ -197,7 +197,10 @@
                     })
                     .catch(function (err) {
                         if (err && err.name === "AbortError") return;
-                        closeSearchPanel(root);
+                        openSearchPanel(
+                            root,
+                            '<p class="nav-search__hint">Не удалось загрузить результаты</p>'
+                        );
                     });
             }
 

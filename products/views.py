@@ -77,6 +77,15 @@ def build_notes_catalog_unique():
     return result
 
 
+def _product_image_url(image) -> str:
+    if not image or not image.image:
+        return ""
+    try:
+        return image.image.url
+    except ValueError:
+        return ""
+
+
 def product_search_suggest(request):
     q = (request.GET.get("q") or "").strip()
     if len(q) < 2:
@@ -106,12 +115,15 @@ def product_search_suggest(request):
     for product in qs:
         img = product.images.first()
         min_p = product.min_price
+        brand_name = ""
+        if product.brand_id and getattr(product, "brand", None):
+            brand_name = product.brand.name or ""
         results.append(
             {
                 "slug": product.slug,
                 "name": product.display_name,
-                "brand": product.brand.name,
-                "image_url": img.image.url if img else "",
+                "brand": brand_name,
+                "image_url": _product_image_url(img),
                 "min_price": str(min_p) if min_p is not None else None,
             }
         )
