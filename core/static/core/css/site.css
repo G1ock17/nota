@@ -3940,6 +3940,16 @@ main section {
     width: 100%;
 }
 
+.nav-search__brand {
+    margin: 0 0 0.15rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
 .nav-search__name {
     margin: 0;
     font-family: var(--font-serif);

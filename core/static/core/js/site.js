@@ -115,6 +115,13 @@
                 var meta = document.createElement("div");
                 meta.className = "nav-search__meta";
 
+                if (item.brand) {
+                    var brand = document.createElement("p");
+                    brand.className = "nav-search__brand";
+                    brand.textContent = item.brand;
+                    meta.appendChild(brand);
+                }
+
                 var name = document.createElement("p");
                 name.className = "nav-search__name";
                 name.textContent = item.name || "";
