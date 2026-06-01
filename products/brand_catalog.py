@@ -14,7 +14,7 @@ FEATURED_HOME_SLUGS = [
     "xerjoff",
     "by-kilian",
     "parfums-de-marly",
-    "maison-francis-kurkdjian",
+    "bvlgari",
     "creed",
     "tom-ford",
     "amouage",
