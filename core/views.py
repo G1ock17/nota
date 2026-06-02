@@ -24,6 +24,13 @@ from products.cart_utils import cart_total_items, get_cart
 
 from .forms import LoginForm, ProfileSetupForm, RegistrationForm
 from .models import DeliveryAddress, LoginAttempt, UserProfile
+from .rate_limit import (
+    ACTION_PASSWORD_RESET,
+    ACTION_REGISTER,
+    ACTION_RESEND_VERIFY,
+    record_attempt,
+    recent_attempts,
+)
 from products.brand_catalog import catalog_brand_choices, featured_home_brands
 from .podbor_matching import parse_quiz_answers, raw_to_match_pct, score_product
 
@@ -32,6 +39,12 @@ logger = logging.getLogger(__name__)
 
 MAX_LOGIN_ATTEMPTS = 5
 LOGIN_COOLDOWN_MINUTES = 15
+MAX_PASSWORD_RESET_ATTEMPTS = 5
+PASSWORD_RESET_COOLDOWN_MINUTES = 15
+MAX_RESEND_VERIFY_ATTEMPTS = 3
+RESEND_VERIFY_COOLDOWN_MINUTES = 15
+MAX_REGISTER_ATTEMPTS = 10
+REGISTER_COOLDOWN_MINUTES = 60
 
 
 def _get_client_ip(request):
@@ -43,6 +56,8 @@ def _verify_captcha(token: str, ip: str) -> bool:
     secret = getattr(settings, "YANDEX_CAPTCHA_SERVER_KEY", "")
     if not secret:
         return True
+    if not (token or "").strip():
+        return False
     try:
         resp = http_requests.get(
             "https://smartcaptcha.yandexcloud.net/validate",
@@ -52,7 +67,8 @@ def _verify_captcha(token: str, ip: str) -> bool:
         return resp.json().get("status") == "ok"
     except Exception:
         logger.exception("Yandex SmartCaptcha verification failed")
-        return True
+        # Fail-closed: при ошибке проверки капча считается не пройденной.
+        return False
 
 
 def _send_verification_email(request, user, profile):
@@ -131,8 +147,15 @@ def register_view(request):
         form = RegistrationForm(request.POST)
         ip = _get_client_ip(request)
 
+        if recent_attempts(ip, ACTION_REGISTER, REGISTER_COOLDOWN_MINUTES) >= MAX_REGISTER_ATTEMPTS:
+            form.add_error(None, "Слишком много попыток регистрации. Попробуйте позже.")
+            return render(request, "core/register.html", {
+                "form": form, "captcha_key": captcha_key,
+            })
+
         captcha_token = request.POST.get("smart-token", "")
         if captcha_key and not _verify_captcha(captcha_token, ip):
+            record_attempt(ip, ACTION_REGISTER)
             form.add_error(None, "Пожалуйста, подтвердите, что вы не робот.")
             return render(request, "core/register.html", {
                 "form": form, "captcha_key": captcha_key,
@@ -142,7 +165,10 @@ def register_view(request):
             user = form.save()
             profile, _ = UserProfile.objects.get_or_create(user=user)
             _send_verification_email(request, user, profile)
+            LoginAttempt.objects.filter(ip_address=ip, username=ACTION_REGISTER).delete()
             return render(request, "core/register_done.html", {"email": user.email})
+
+        record_attempt(ip, ACTION_REGISTER)
     else:
         form = RegistrationForm()
 
@@ -175,6 +201,14 @@ def email_verify(request, token: str):
 
 def resend_verification(request):
     if request.method == "POST":
+        ip = _get_client_ip(request)
+        if recent_attempts(ip, ACTION_RESEND_VERIFY, RESEND_VERIFY_COOLDOWN_MINUTES) >= MAX_RESEND_VERIFY_ATTEMPTS:
+            return render(request, "core/register_done.html", {
+                "email": request.POST.get("email", "").strip().lower(),
+                "resent": True,
+                "rate_limited": True,
+            })
+
         email = request.POST.get("email", "").strip().lower()
         try:
             user = User.objects.get(email=email, is_active=False)
@@ -183,6 +217,7 @@ def resend_verification(request):
                 _send_verification_email(request, user, profile)
         except User.DoesNotExist:
             pass
+        record_attempt(ip, ACTION_RESEND_VERIFY)
         return render(request, "core/register_done.html", {
             "email": email,
             "resent": True,
@@ -301,6 +336,15 @@ def password_reset_request(request):
     email_value = ""
 
     if request.method == "POST":
+        ip = _get_client_ip(request)
+        if recent_attempts(ip, ACTION_PASSWORD_RESET, PASSWORD_RESET_COOLDOWN_MINUTES) >= MAX_PASSWORD_RESET_ATTEMPTS:
+            sent = True
+            return render(request, "core/password_reset.html", {
+                "sent": sent,
+                "email": request.POST.get("email", "").strip().lower(),
+                "rate_limited": True,
+            })
+
         email_value = request.POST.get("email", "").strip().lower()
         if email_value:
             try:
@@ -324,6 +368,7 @@ def password_reset_request(request):
                 )
             except User.DoesNotExist:
                 pass
+            record_attempt(ip, ACTION_PASSWORD_RESET)
             sent = True
 
     return render(request, "core/password_reset.html", {

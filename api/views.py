@@ -1,6 +1,7 @@
 from decimal import Decimal, InvalidOperation
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db import transaction
@@ -8,6 +9,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
+from core.rate_limit import ACTION_GIFT_PURCHASE, record_attempt, recent_attempts
 from products.gift_cards import (
     GIFT_CARD_APPLY_SESSION_KEY,
     allocate_user_cards,
@@ -21,8 +23,21 @@ def _json_error(message: str, status: int = 400):
     return JsonResponse({"ok": False, "error": message}, status=status)
 
 
+def _client_ip(request) -> str:
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    return xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR", "0.0.0.0")
+
+
 @require_POST
 def purchase_gift_card(request):
+    # Endpoint создаёт карты без оплаты — доступен только при явном флаге (dev/тест).
+    if not getattr(settings, "GIFT_CARD_PURCHASE_ENABLED", False):
+        return _json_error("Покупка подарочных карт через API отключена.", status=403)
+
+    ip = _client_ip(request)
+    if recent_attempts(ip, ACTION_GIFT_PURCHASE, 60) >= 20:
+        return _json_error("Слишком много запросов. Попробуйте позже.", status=429)
+
     try:
         nominal = decimal_from_money_post(request.POST.get("nominal", "0"))
     except (InvalidOperation, AttributeError, TypeError, ValueError):
@@ -63,6 +78,8 @@ def purchase_gift_card(request):
             recipient_list=[buyer_email],
             fail_silently=True,
         )
+
+    record_attempt(ip, ACTION_GIFT_PURCHASE)
 
     return JsonResponse(
         {

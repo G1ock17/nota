@@ -15,6 +15,7 @@ import logging.handlers
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,12 +33,27 @@ YOOKASSA_SECRET_KEY = os.environ.get("YOOKASSA_SECRET_KEY", "").strip()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # На сервере задайте в .env: SECRET_KEY, DEBUG=False, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS.
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-7^(+ng0r29ylo51zy=tb49ek&*7@w4^8bqxghaf-!caj%5i!pp",
+_INSECURE_DEV_SECRET_KEY = (
+    "django-insecure-7^(+ng0r29ylo51zy=tb49ek&*7@w4^8bqxghaf-!caj%5i!pp"
 )
 
 DEBUG = os.environ.get("DEBUG", "True").strip().lower() in ("1", "true", "yes")
+
+_secret_from_env = os.environ.get("SECRET_KEY", "").strip()
+if _secret_from_env:
+    SECRET_KEY = _secret_from_env
+elif DEBUG:
+    # Только для локальной разработки; в production DEBUG=False и SECRET_KEY обязателен.
+    SECRET_KEY = _INSECURE_DEV_SECRET_KEY
+else:
+    raise ImproperlyConfigured(
+        "SECRET_KEY must be set via environment variable when DEBUG=False."
+    )
+
+if not DEBUG and SECRET_KEY == _INSECURE_DEV_SECRET_KEY:
+    raise ImproperlyConfigured(
+        "SECRET_KEY must not use the insecure development default in production."
+    )
 
 ALLOWED_HOSTS = [
     h.strip()
@@ -47,6 +63,18 @@ ALLOWED_HOSTS = [
 
 _csrf_origins = os.environ.get("CSRF_TRUSTED_ORIGINS", "").strip()
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
+
+# Покупка подарочных карт через API без оплаты — только явно в dev/тесте.
+GIFT_CARD_PURCHASE_ENABLED = os.environ.get(
+    "GIFT_CARD_PURCHASE_ENABLED",
+    "True" if DEBUG else "False",
+).strip().lower() in ("1", "true", "yes")
+
+# Опциональный allowlist IP для webhook ЮKassa (через запятую). Пусто = проверка отключена.
+_yookassa_ips = os.environ.get("YOOKASSA_WEBHOOK_IPS", "").strip()
+YOOKASSA_WEBHOOK_IPS = frozenset(
+    ip.strip() for ip in _yookassa_ips.split(",") if ip.strip()
+)
 
 
 # Application definition
@@ -226,3 +254,38 @@ if _log_to_file:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Production security (Django deployment checklist) ---
+def _env_bool(name: str, default: str) -> bool:
+    return os.environ.get(name, default).strip().lower() in ("1", "true", "yes")
+
+
+if not DEBUG:
+    # За reverse-proxy (nginx/ispmanager): Django видит HTTPS по заголовку.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT", "True")
+    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", "True")
+    SECURE_HSTS_PRELOAD = _env_bool("SECURE_HSTS_PRELOAD", "True")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+
+    if not ALLOWED_HOSTS or ALLOWED_HOSTS == ["localhost", "127.0.0.1"]:
+        raise ImproperlyConfigured(
+            "ALLOWED_HOSTS must be set to your domain(s) when DEBUG=False."
+        )
+    if not CSRF_TRUSTED_ORIGINS:
+        raise ImproperlyConfigured(
+            "CSRF_TRUSTED_ORIGINS must include https://your-domain when DEBUG=False."
+        )
+else:
+    # Локально: без принудительного HTTPS, но базовые заголовки остаются.
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"

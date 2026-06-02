@@ -62,7 +62,11 @@ class LoginAttempt(models.Model):
     @classmethod
     def recent_failures(cls, ip: str, minutes: int = 15) -> int:
         cutoff = timezone.now() - timezone.timedelta(minutes=minutes)
-        return cls.objects.filter(ip_address=ip, attempted_at__gte=cutoff).count()
+        return (
+            cls.objects.filter(ip_address=ip, attempted_at__gte=cutoff)
+            .exclude(username__startswith="__")
+            .count()
+        )
 
     @classmethod
     def cleanup_old(cls, hours: int = 24):

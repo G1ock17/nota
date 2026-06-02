@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
@@ -32,6 +33,21 @@ from core.models import DeliveryAddress, UserProfile
 GUEST_CHECKOUT_ADDRESS_KEY = "guest_checkout_address"
 
 logger = logging.getLogger(__name__)
+
+
+def _webhook_client_ip(request) -> str:
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "")
+
+
+def _webhook_ip_allowed(request) -> bool:
+    allowed = getattr(settings, "YOOKASSA_WEBHOOK_IPS", frozenset())
+    if not allowed:
+        return True
+    client_ip = _webhook_client_ip(request)
+    return client_ip in allowed
 
 
 def _send_order_confirmation_email(order: Order, checkout_items: list[dict], request=None) -> None:
@@ -744,8 +760,13 @@ def yookassa_webhook(request):
     """
     HTTP-уведомление ЮKassa: обновляет статус заказа без участия браузера
     (после настройки URL в личном кабинете ЮKassa).
+    csrf_exempt необходим для внешних POST; проверяем IP (если задан allowlist)
+    и всегда перепроверяем платёж через API ЮKassa.
     """
     if not is_yookassa_configured():
+        return HttpResponse(status=403)
+    if not _webhook_ip_allowed(request):
+        logger.warning("ЮKassa webhook: запрос с неразрешённого IP %s", _webhook_client_ip(request))
         return HttpResponse(status=403)
     try:
         data = json.loads(request.body.decode())
