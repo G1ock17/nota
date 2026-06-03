@@ -1,0 +1,5 @@
+PassengerEnabled on
+PassengerPython /var/www/u3413005/data/www/accordroyally.com/venv/bin/python
+
+# Явно указываем учётную систему (если автоопределение по пути не сработало)
+SetEnv DJANGO_PROJECT accounting
