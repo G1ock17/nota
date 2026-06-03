@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Профиль{% endblock %}
+{% block page_title %}Профиль{% endblock %}
+{% block content %}
+<div class="max-w-xl bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+  <div class="flex items-center gap-4">
+    <div class="h-14 w-14 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-semibold">
+      {{ user.get_username|first|upper }}
+    </div>
+    <div>
+      <p class="text-lg font-semibold text-slate-900">{{ user.get_full_name|default:user.get_username }}</p>
+      <p class="text-sm text-slate-500">{{ user.email|default:"email не указан" }}</p>
+    </div>
+  </div>
+  <dl class="divide-y divide-slate-100 text-sm">
+    <div class="flex justify-between py-2"><dt class="text-slate-500">Организация</dt><dd class="font-medium">{{ current_organization.name }}</dd></div>
+    <div class="flex justify-between py-2"><dt class="text-slate-500">Роль</dt><dd class="font-medium">{{ current_membership.get_role_display }}</dd></div>
+    <div class="flex justify-between py-2"><dt class="text-slate-500">Базовая валюта</dt><dd class="font-medium">{{ current_organization.currency }}</dd></div>
+  </dl>
+  <a href="{% url 'accounts:password_reset' %}" class="inline-block text-sm text-indigo-600 hover:underline">Сменить пароль</a>
+</div>
+{% endblock %}

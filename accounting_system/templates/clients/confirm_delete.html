@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Удалить клиента{% endblock %}
+{% block page_title %}Удаление клиента{% endblock %}
+{% block content %}
+<div class="max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+  <p class="text-sm text-slate-600">Удалить клиента <span class="font-semibold">{{ object.name }}</span>?
+     Связанные счета удалить нельзя — сначала обработайте их.</p>
+  <form method="post" class="mt-5 flex gap-2">
+    {% csrf_token %}
+    <button class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Удалить</button>
+    <a href="{% url 'clients:detail' object.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50">Отмена</a>
+  </form>
+</div>
+{% endblock %}

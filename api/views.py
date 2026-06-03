@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_GET, require_POST
 
 from core.rate_limit import ACTION_GIFT_PURCHASE, record_attempt, recent_attempts
@@ -16,7 +17,7 @@ from products.gift_cards import (
     decimal_from_money_post,
     total_active_balance,
 )
-from products.models import GiftCard, GiftCardTransaction
+from products.models import GiftCard, GiftCardTransaction, Order
 
 
 def _json_error(message: str, status: int = 400):
@@ -198,3 +199,56 @@ def apply_gift_card_to_cart(request):
             "payable_amount": str(order_total - amount),
         }
     )
+
+
+_ACCOUNTING_PAID_STATUSES = (
+    Order.Status.PAID,
+    Order.Status.ASSEMBLING,
+    Order.Status.SHIPPED,
+    Order.Status.DELIVERED,
+)
+
+
+def _accounting_token_ok(request) -> bool:
+    expected = getattr(settings, "ACCOUNTING_SYNC_TOKEN", "").strip()
+    if not expected:
+        return False
+    supplied = (
+        request.headers.get("X-Accounting-Token")
+        or request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+        or request.GET.get("token", "")
+    ).strip()
+    return supplied == expected
+
+
+@require_GET
+def accounting_orders_export(request):
+    """Paid orders for the accounting system (token-protected, minimal fields)."""
+    if not _accounting_token_ok(request):
+        return _json_error("Доступ запрещён.", status=403)
+
+    qs = Order.objects.filter(status__in=_ACCOUNTING_PAID_STATUSES).order_by("-created_at")
+    since_raw = (request.GET.get("since") or "").strip()
+    if since_raw:
+        since = parse_date(since_raw)
+        if since is not None:
+            qs = qs.filter(created_at__date__gte=since)
+
+    orders = []
+    for order in qs.iterator():
+        orders.append(
+            {
+                "id": order.pk,
+                "email": order.email,
+                "first_name": order.first_name,
+                "last_name": order.last_name,
+                "phone": order.phone,
+                "status": order.status,
+                "total_price": str(order.total_price),
+                "gift_card_debit": str(order.gift_card_debit or Decimal("0")),
+                "payable_amount": str(order.payable_amount or Decimal("0")),
+                "created_at": order.created_at.isoformat(),
+            }
+        )
+
+    return JsonResponse({"ok": True, "count": len(orders), "orders": orders})

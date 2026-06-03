@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+{% block title %}Транзакции{% endblock %}
+{% block page_title %}Транзакции{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <p class="text-sm text-slate-500">Доходы, расходы и переводы</p>
+  <div class="flex gap-2">
+    <a href="{% url 'reports:export_transactions' %}{% query_replace %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">
+      <i data-lucide="file-spreadsheet" class="h-4 w-4"></i>Excel
+    </a>
+    {% if can_create %}
+    <form method="post" action="{% url 'shop_sync:sync' %}" class="inline">
+      {% csrf_token %}
+      <button type="submit"
+              class="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100"
+              title="Загрузить оплаченные заказы с accordroyally.com">
+        <i data-lucide="refresh-cw" class="h-4 w-4"></i>Синхр. с магазином
+      </button>
+    </form>
+    <a href="{% url 'shop_sync:import_file' %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-800 hover:bg-indigo-100">
+      <i data-lucide="file-up" class="h-4 w-4"></i>Импорт заказов
+    </a>
+    <a href="{% url 'transactions:import' %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">
+      <i data-lucide="file-text" class="h-4 w-4"></i>Импорт CSV
+    </a>
+    <a href="{% url 'transactions:create' %}"
+       class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+      <i data-lucide="plus" class="h-4 w-4"></i>Добавить
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+{# Filters #}
+<form class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3"
+      hx-get="{% url 'transactions:list' %}" hx-target="#tx-results" hx-swap="innerHTML"
+      hx-trigger="submit, change, keyup changed delay:400ms from:input[name=q]" hx-push-url="true">
+  <input type="search" name="q" value="{{ filters.q }}" placeholder="Поиск…"
+         class="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  <select name="type" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Все типы</option>
+    {% for v, label in types %}<option value="{{ v }}" {% if filters.type == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <select name="category" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Категория</option>
+    {% for c in categories %}<option value="{{ c.id }}" {% if filters.category == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <select name="client" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Клиент</option>
+    {% for c in clients %}<option value="{{ c.id }}" {% if filters.client == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <input type="date" name="date_from" value="{{ filters.date_from }}" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+  <input type="date" name="date_to" value="{{ filters.date_to }}" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+  <input type="number" step="0.01" name="amount_min" value="{{ filters.amount_min }}" placeholder="Сумма от"
+         class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+  <input type="number" step="0.01" name="amount_max" value="{{ filters.amount_max }}" placeholder="до"
+         class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+  <a href="{% url 'transactions:list' %}" class="flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Сброс</a>
+</form>
+
+<div id="tx-results">
+  {% include 'transactions/partials/transaction_rows.html' %}
+</div>
+{% endblock %}

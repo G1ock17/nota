@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    accounting_orders_export,
     activate_gift_card,
     apply_gift_card_to_cart,
     my_gift_cards,
@@ -12,4 +13,9 @@ urlpatterns = [
     path("gift-cards/activate", activate_gift_card, name="api_gift_cards_activate"),
     path("gift-cards/my", my_gift_cards, name="api_gift_cards_my"),
     path("cart/apply-gift-card", apply_gift_card_to_cart, name="api_cart_apply_gift_card"),
+    path(
+        "internal/accounting/orders/",
+        accounting_orders_export,
+        name="api_accounting_orders",
+    ),
 ]

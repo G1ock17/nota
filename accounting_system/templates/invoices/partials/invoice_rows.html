@@ -1,0 +1,54 @@
+{% load core_tags %}
+<div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+  <table class="w-full data-table text-sm">
+    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+      <tr>
+        <th class="px-4 py-3 text-left">Номер</th>
+        <th class="px-4 py-3 text-left">Клиент</th>
+        <th class="px-4 py-3 text-left">Статус</th>
+        <th class="px-4 py-3 text-left">Выставлен</th>
+        <th class="px-4 py-3 text-left">Срок</th>
+        <th class="px-4 py-3 text-right">Итого</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for inv in invoices %}
+        <tr class="{% if inv.is_overdue %}bg-red-50/50{% endif %}">
+          <td class="px-4 py-3 font-medium">
+            <a href="{% url 'invoices:detail' inv.pk %}" class="text-indigo-600 hover:underline">{{ inv.number }}</a>
+          </td>
+          <td class="px-4 py-3 text-slate-600">{{ inv.client.name }}</td>
+          <td class="px-4 py-3">
+            <span class="inline-block px-2 py-0.5 rounded text-xs font-medium {{ inv.status|status_badge }}">{{ inv.get_status_display }}</span>
+          </td>
+          <td class="px-4 py-3 text-slate-500">{{ inv.issue_date|date:"d.m.Y" }}</td>
+          <td class="px-4 py-3 {% if inv.is_overdue %}text-red-600 font-semibold{% else %}text-slate-500{% endif %}">{{ inv.due_date|date:"d.m.Y" }}</td>
+          <td class="px-4 py-3 text-right font-semibold">{{ inv.total|money:inv.currency }}</td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            <a href="{% url 'invoices:detail' inv.pk %}" class="text-slate-400 hover:text-indigo-600"><i data-lucide="eye" class="h-4 w-4 inline"></i></a>
+            {% if can_edit %}<a href="{% url 'invoices:edit' inv.pk %}" class="ml-2 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="h-4 w-4 inline"></i></a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="px-4 py-10 text-center text-slate-400">Счета не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if is_paginated %}
+<div class="flex items-center justify-between mt-4 text-sm">
+  <span class="text-slate-500">Стр. {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}
+      <a hx-get="{% url 'invoices:list' %}{% query_replace page=page_obj.previous_page_number %}" hx-target="#inv-results" hx-swap="innerHTML" hx-push-url="true"
+         href="{% query_replace page=page_obj.previous_page_number %}" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-50">← Назад</a>
+    {% endif %}
+    {% if page_obj.has_next %}
+      <a hx-get="{% url 'invoices:list' %}{% query_replace page=page_obj.next_page_number %}" hx-target="#inv-results" hx-swap="innerHTML" hx-push-url="true"
+         href="{% query_replace page=page_obj.next_page_number %}" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-50">Вперёд →</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+{% block title %}Счета{% endblock %}
+{% block page_title %}Счета{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <p class="text-sm text-slate-500">Выставленные счета и их статусы</p>
+  <div class="flex gap-2">
+    <a href="{% url 'reports:export_invoices' %}{% query_replace %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">
+      <i data-lucide="download" class="h-4 w-4"></i>Excel
+    </a>
+    {% if can_create %}
+    <a href="{% url 'invoices:create' %}"
+       class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+      <i data-lucide="plus" class="h-4 w-4"></i>Новый счёт
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<form class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 flex flex-wrap gap-3"
+      hx-get="{% url 'invoices:list' %}" hx-target="#inv-results" hx-swap="innerHTML"
+      hx-trigger="submit, change, keyup changed delay:400ms from:input[name=q]" hx-push-url="true">
+  <input type="search" name="q" value="{{ search }}" placeholder="Номер или клиент…"
+         class="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  <select name="status" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Все статусы</option>
+    {% for v, label in statuses %}<option value="{{ v }}" {% if current_status == v %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <a href="{% url 'invoices:list' %}" class="flex items-center rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Сброс</a>
+</form>
+
+<div id="inv-results">
+  {% include 'invoices/partials/invoice_rows.html' %}
+</div>
+{% endblock %}

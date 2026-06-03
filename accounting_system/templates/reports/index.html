@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Отчёты{% endblock %}
+{% block page_title %}Отчёты и аналитика{% endblock %}
+{% block content %}
+<form class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 flex flex-wrap items-end gap-3"
+      hx-get="{% url 'reports:index' %}" hx-target="#reports-content" hx-swap="innerHTML"
+      hx-trigger="submit, change" hx-push-url="true">
+  <div>
+    <label class="block text-xs text-slate-500 mb-1">С даты</label>
+    <input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  </div>
+  <div>
+    <label class="block text-xs text-slate-500 mb-1">По дату</label>
+    <input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  </div>
+  <button class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Применить</button>
+  <div class="ml-auto flex gap-2">
+    <a href="{% url 'reports:export_pnl' %}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"><i data-lucide="download" class="h-4 w-4"></i>P&L (Excel)</a>
+  </div>
+</form>
+
+<div id="reports-content">
+  {% include 'reports/partials/content.html' %}
+</div>
+{% endblock %}

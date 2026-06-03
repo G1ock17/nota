@@ -1,0 +1,61 @@
+{% load core_tags %}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500">Выручка за период</p>
+    <p class="mt-1 text-2xl font-bold text-emerald-600">{{ kpis.revenue|money:current_organization.currency }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500">Расходы за период</p>
+    <p class="mt-1 text-2xl font-bold text-red-600">{{ kpis.expenses|money:current_organization.currency }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <p class="text-sm text-slate-500">Прибыль за период</p>
+    <p class="mt-1 text-2xl font-bold {% if kpis.profit < 0 %}text-red-600{% else %}text-slate-900{% endif %}">{{ kpis.profit|money:current_organization.currency }}</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <h3 class="text-sm font-semibold text-slate-700 mb-3">Выручка по категориям</h3>
+    <div class="h-72"><canvas id="chartRevenueByCategory"></canvas></div>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-5">
+    <h3 class="text-sm font-semibold text-slate-700 mb-3">Структура расходов</h3>
+    <div class="h-72"><canvas id="chartExpenseBreakdown"></canvas></div>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
+  <h3 class="text-sm font-semibold text-slate-700 mb-3">Денежный поток (12 мес.)</h3>
+  <div class="h-72"><canvas id="chartCashFlow"></canvas></div>
+</div>
+
+<div class="bg-white rounded-2xl border border-slate-200 p-5">
+  <h3 class="text-sm font-semibold text-slate-700 mb-3">P&amp;L по месяцам</h3>
+  <table class="w-full text-sm">
+    <thead class="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+      <tr><th class="py-2 text-left">Период</th><th class="py-2 text-right">Выручка</th>
+          <th class="py-2 text-right">Расходы</th><th class="py-2 text-right">Прибыль</th>
+          <th class="py-2 text-right">Маржа</th></tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for row in pnl_rows %}
+        <tr>
+          <td class="py-2">{{ row.label }}</td>
+          <td class="py-2 text-right text-emerald-600">{{ row.revenue|money:current_organization.currency }}</td>
+          <td class="py-2 text-right text-red-600">{{ row.expense|money:current_organization.currency }}</td>
+          <td class="py-2 text-right font-medium {% if row.profit < 0 %}text-red-600{% endif %}">{{ row.profit|money:current_organization.currency }}</td>
+          <td class="py-2 text-right text-slate-500">{{ row.margin|pct }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{{ chart_data|json_script:"reports-data" }}
+<script>
+  (function () {
+    var data = JSON.parse(document.getElementById("reports-data").textContent);
+    if (window.initReportCharts) window.initReportCharts(data);
+  })();
+</script>

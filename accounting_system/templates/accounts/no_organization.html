@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Нет организации{% endblock %}
+{% block content_plain %}
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md text-center bg-white rounded-2xl border border-slate-200 p-8">
+    <h1 class="text-xl font-semibold text-slate-900">Организация не назначена</h1>
+    <p class="mt-2 text-sm text-slate-500">
+      Ваша учётная запись не привязана ни к одной организации.
+      Обратитесь к администратору, чтобы получить доступ.
+    </p>
+    <form method="post" action="{% url 'accounts:logout' %}" class="mt-6">{% csrf_token %}
+      <button class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white">Выйти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% load core_tags %}
+<div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+  <table class="w-full data-table text-sm">
+    <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+      <tr>
+        <th class="px-4 py-3 text-left">Категория</th>
+        <th class="px-4 py-3 text-left">Тип</th>
+        <th class="px-4 py-3 text-left">Родительская</th>
+        <th class="px-4 py-3 text-right">Операций</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for cat in categories %}
+        <tr>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center gap-2">
+              <span class="h-3 w-3 rounded-full" style="background: {{ cat.color }}"></span>
+              <span class="font-medium">{{ cat.name }}</span>
+            </span>
+          </td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-medium {{ cat.type|type_badge }}">{{ cat.get_type_display }}</span></td>
+          <td class="px-4 py-3 text-slate-500">{{ cat.parent.name|default:"—" }}</td>
+          <td class="px-4 py-3 text-right text-slate-500">{{ cat.tx_count }}</td>
+          <td class="px-4 py-3 text-right whitespace-nowrap">
+            {% if can_edit %}<a href="{% url 'categories:edit' cat.pk %}" class="text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="h-4 w-4 inline"></i></a>{% endif %}
+            {% if can_delete %}<a href="{% url 'categories:delete' cat.pk %}" class="ml-2 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4 inline"></i></a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="px-4 py-10 text-center text-slate-400">Категории не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

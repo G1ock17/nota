@@ -28,6 +28,9 @@ load_dotenv(BASE_DIR / ".env")
 YOOKASSA_SHOP_ID = os.environ.get("YOOKASSA_SHOP_ID", "").strip()
 YOOKASSA_SECRET_KEY = os.environ.get("YOOKASSA_SECRET_KEY", "").strip()
 
+# Секрет для выгрузки заказов в учётную систему (заголовок X-Accounting-Token).
+ACCOUNTING_SYNC_TOKEN = os.environ.get("ACCOUNTING_SYNC_TOKEN", "").strip()
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

@@ -1,0 +1,87 @@
+{% load static core_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}Учётная система{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+{% if user.is_authenticated and current_organization %}
+  <div class="flex min-h-screen">
+    {# ---------------- Sidebar ---------------- #}
+    <aside class="hidden md:flex md:w-64 flex-col bg-slate-900 text-slate-300">
+      <div class="px-6 py-5 border-b border-slate-800">
+        <p class="text-xs uppercase tracking-wider text-slate-500">Организация</p>
+        <p class="text-lg font-semibold text-white truncate">{{ current_organization.name }}</p>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        {% for item in nav_items %}
+          <a href="{% url item.url %}"
+             class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition
+                    {% if item.active %}bg-indigo-600 text-white{% else %}hover:bg-slate-800 hover:text-white{% endif %}">
+            <i data-lucide="{{ item.icon }}" class="h-4 w-4"></i>{{ item.label }}
+          </a>
+        {% endfor %}
+      </nav>
+      <div class="px-3 py-4 border-t border-slate-800">
+        <a href="{% url 'accounts:profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-slate-800 hover:text-white">
+          <i data-lucide="user" class="h-4 w-4"></i>{{ user.get_username }}
+        </a>
+        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+          <button class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-slate-800 hover:text-white">
+            <i data-lucide="log-out" class="h-4 w-4"></i>Выйти
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    {# ---------------- Main ---------------- #}
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="flex items-center justify-between gap-3 bg-white border-b border-slate-200 px-4 md:px-8 py-3">
+        <h1 class="text-lg font-semibold text-slate-900">{% block page_title %}{% endblock %}</h1>
+        <span class="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium">
+          {{ current_membership.get_role_display }}
+        </span>
+      </header>
+
+      {% if messages %}
+      <div class="px-4 md:px-8 pt-4 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-lg px-4 py-3 text-sm border
+            {% if message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800
+            {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800
+            {% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-800
+            {% else %}bg-slate-50 border-slate-200 text-slate-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <main class="flex-1 px-4 md:px-8 py-6">{% block content %}{% endblock %}</main>
+    </div>
+  </div>
+{% else %}
+  <main>{% block content_plain %}{% endblock %}</main>
+{% endif %}
+
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+    document.body.addEventListener("htmx:afterSettle", function () { if (window.lucide) lucide.createIcons(); });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

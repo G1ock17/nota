@@ -1,0 +1,17 @@
+# Core framework (pinned to the 4.2 LTS line — matches existing migrations)
+Django==4.2.30
+
+# MySQL 8 driver for production
+mysqlclient==2.2.4
+
+# Secrets / config from .env
+python-decouple==3.8
+
+# Static files serving in production (WSGI)
+whitenoise==6.7.0
+
+# Excel export
+openpyxl==3.1.5
+
+# PDF generation (invoices). Requires native libs (GTK/Pango) on the host.
+weasyprint==62.3

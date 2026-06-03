@@ -1,0 +1,32 @@
+{% load core_tags %}
+<div id="status-control" class="flex flex-wrap items-center gap-2">
+  <span class="inline-block px-3 py-1 rounded-full text-sm font-medium {{ invoice.status|status_badge }}">
+    {{ invoice.get_status_display }}
+  </span>
+  {% if invoice.paid_date %}<span class="text-xs text-slate-400">оплачен {{ invoice.paid_date|date:"d.m.Y" }}</span>{% endif %}
+
+  {% if can_edit %}
+    <div class="flex gap-2 ml-2">
+      {% if invoice.status == 'DRAFT' %}
+        <button hx-post="{% url 'invoices:set_status' invoice.pk %}" hx-vals='{"status": "SENT"}'
+                hx-target="#status-control" hx-swap="outerHTML"
+                class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">Отправить</button>
+      {% endif %}
+      {% if invoice.status == 'SENT' or invoice.status == 'OVERDUE' %}
+        <button hx-post="{% url 'invoices:set_status' invoice.pk %}" hx-vals='{"status": "PAID"}'
+                hx-target="#status-control" hx-swap="outerHTML"
+                class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Отметить оплаченным</button>
+      {% endif %}
+      {% if invoice.status != 'PAID' and invoice.status != 'CANCELLED' %}
+        <button hx-post="{% url 'invoices:set_status' invoice.pk %}" hx-vals='{"status": "CANCELLED"}'
+                hx-target="#status-control" hx-swap="outerHTML"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50">Отменить</button>
+      {% endif %}
+      {% if invoice.status == 'CANCELLED' %}
+        <button hx-post="{% url 'invoices:set_status' invoice.pk %}" hx-vals='{"status": "DRAFT"}'
+                hx-target="#status-control" hx-swap="outerHTML"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50">Вернуть в черновик</button>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

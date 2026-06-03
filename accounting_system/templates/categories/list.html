@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Категории{% endblock %}
+{% block page_title %}Категории{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <p class="text-sm text-slate-500">Статьи доходов и расходов</p>
+  {% if can_create %}
+  <a href="{% url 'categories:create' %}" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+    <i data-lucide="plus" class="h-4 w-4"></i>Новая категория
+  </a>
+  {% endif %}
+</div>
+
+<form class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 flex flex-wrap gap-3"
+      hx-get="{% url 'categories:list' %}" hx-target="#cat-results" hx-swap="innerHTML"
+      hx-trigger="submit, change, keyup changed delay:400ms from:input[name=q]" hx-push-url="true">
+  <input type="search" name="q" value="{{ search }}" placeholder="Поиск…"
+         class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  <select name="type" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Все типы</option>
+    <option value="INCOME" {% if current_type == 'INCOME' %}selected{% endif %}>Доход</option>
+    <option value="EXPENSE" {% if current_type == 'EXPENSE' %}selected{% endif %}>Расход</option>
+  </select>
+</form>
+
+<div id="cat-results">
+  {% include 'categories/partials/category_table.html' %}
+</div>
+{% endblock %}

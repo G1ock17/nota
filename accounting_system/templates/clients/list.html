@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Клиенты{% endblock %}
+{% block page_title %}Клиенты{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <p class="text-sm text-slate-500">Контрагенты и плательщики</p>
+  {% if can_create %}
+  <a href="{% url 'clients:create' %}" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+    <i data-lucide="plus" class="h-4 w-4"></i>Новый клиент
+  </a>
+  {% endif %}
+</div>
+
+<form class="bg-white rounded-2xl border border-slate-200 p-4 mb-4 flex flex-wrap gap-3"
+      hx-get="{% url 'clients:list' %}" hx-target="#client-results" hx-swap="innerHTML"
+      hx-trigger="submit, change, keyup changed delay:400ms from:input[name=q]" hx-push-url="true">
+  <input type="search" name="q" value="{{ search }}" placeholder="Имя, ИНН, email…"
+         class="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  <select name="type" class="rounded-lg border border-slate-300 px-2 py-2 text-sm">
+    <option value="">Все типы</option>
+    <option value="COMPANY" {% if current_type == 'COMPANY' %}selected{% endif %}>Компания</option>
+    <option value="INDIVIDUAL" {% if current_type == 'INDIVIDUAL' %}selected{% endif %}>Физ. лицо</option>
+  </select>
+</form>
+
+<div id="client-results">
+  {% include 'clients/partials/client_rows.html' %}
+</div>
+{% endblock %}

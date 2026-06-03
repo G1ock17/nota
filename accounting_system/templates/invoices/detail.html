@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+{% block title %}Счёт {{ invoice.number }}{% endblock %}
+{% block page_title %}Счёт {{ invoice.number }}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  {% include 'invoices/partials/status_control.html' %}
+  <div class="flex gap-2 no-print">
+    <a href="{% url 'invoices:print' invoice.pk %}" target="_blank"
+       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">
+      <i data-lucide="printer" class="h-4 w-4"></i>Печать
+    </a>
+    <a href="{% url 'invoices:pdf' invoice.pk %}"
+       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50">
+      <i data-lucide="file-down" class="h-4 w-4"></i>PDF
+    </a>
+    {% if can_edit %}<a href="{% url 'invoices:edit' invoice.pk %}" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"><i data-lucide="pencil" class="h-4 w-4"></i>Изменить</a>{% endif %}
+    {% if can_delete %}<a href="{% url 'invoices:delete' invoice.pk %}" class="inline-flex items-center gap-2 rounded-lg border border-red-300 text-red-600 px-3 py-2 text-sm font-medium hover:bg-red-50"><i data-lucide="trash-2" class="h-4 w-4"></i></a>{% endif %}
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6">
+    <table class="w-full text-sm">
+      <thead class="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+        <tr><th class="py-2 text-left">Наименование</th><th class="py-2 text-right">Кол-во</th>
+            <th class="py-2 text-right">Цена</th><th class="py-2 text-right">Сумма</th></tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for item in invoice.items.all %}
+          <tr><td class="py-2">{{ item.name }}</td>
+              <td class="py-2 text-right">{{ item.qty }}</td>
+              <td class="py-2 text-right">{{ item.unit_price|money:invoice.currency }}</td>
+              <td class="py-2 text-right font-medium">{{ item.amount|money:invoice.currency }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="mt-4 ml-auto w-full max-w-xs space-y-1 text-sm">
+      <div class="flex justify-between"><span class="text-slate-500">Подытог</span><span>{{ invoice.subtotal|money:invoice.currency }}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">НДС ({{ invoice.tax_rate }}%)</span><span>{{ invoice.tax_amount|money:invoice.currency }}</span></div>
+      <div class="flex justify-between border-t border-slate-200 pt-1 text-base font-bold"><span>Итого</span><span>{{ invoice.total|money:invoice.currency }}</span></div>
+    </div>
+    {% if invoice.notes %}<p class="mt-4 text-sm text-slate-500 whitespace-pre-line">{{ invoice.notes }}</p>{% endif %}
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 text-sm">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-slate-400">Клиент</p>
+      <a href="{% url 'clients:detail' invoice.client.pk %}" class="font-semibold text-indigo-600 hover:underline">{{ invoice.client.name }}</a>
+      {% if invoice.client.inn %}<p class="text-slate-500">ИНН: {{ invoice.client.inn }}</p>{% endif %}
+      {% if invoice.client.email %}<p class="text-slate-500">{{ invoice.client.email }}</p>{% endif %}
+    </div>
+    <dl class="divide-y divide-slate-100">
+      <div class="flex justify-between py-2"><dt class="text-slate-500">Выставлен</dt><dd>{{ invoice.issue_date|date:"d.m.Y" }}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-slate-500">Срок оплаты</dt><dd class="{% if invoice.is_overdue %}text-red-600 font-semibold{% endif %}">{{ invoice.due_date|date:"d.m.Y" }}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-slate-500">Валюта</dt><dd>{{ invoice.currency }}</dd></div>
+    </dl>
+    {% if invoice.transactions.exists %}
+      <div class="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-emerald-700 text-xs">
+        Создана связанная транзакция дохода при оплате.
+      </div>
+    {% endif %}
+  </div>
+</div>
+<a href="{% url 'invoices:list' %}" class="mt-4 inline-block text-sm text-slate-500 hover:underline no-print">← Ко всем счетам</a>
+{% endblock %}

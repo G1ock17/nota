@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load core_tags %}
+{% block title %}Удалить транзакцию{% endblock %}
+{% block page_title %}Удаление транзакции{% endblock %}
+{% block content %}
+<div class="max-w-md bg-white rounded-2xl border border-slate-200 p-6">
+  <p class="text-sm text-slate-600">Удалить операцию
+    <span class="font-semibold">{{ object.get_type_display }} {{ object.amount|money:object.currency }}</span>
+    от {{ object.date|date:"d.m.Y" }}? Действие необратимо.</p>
+  <form method="post" class="mt-5 flex gap-2">
+    {% csrf_token %}
+    <button class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Удалить</button>
+    <a href="{% url 'transactions:list' %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50">Отмена</a>
+  </form>
+</div>
+{% endblock %}

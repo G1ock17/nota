@@ -1,0 +1,68 @@
+{% load core_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4; margin: 1.5cm; }
+    body { font-family: "DejaVu Sans", Arial, sans-serif; color: #1e293b; font-size: 12px; }
+    h1 { font-size: 22px; margin: 0; }
+    .muted { color: #64748b; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 18px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th { text-align: left; color: #64748b; border-bottom: 1px solid #cbd5e1; padding: 6px 4px; font-size: 11px; text-transform: uppercase; }
+    td { padding: 6px 4px; border-bottom: 1px solid #eef2f7; }
+    .right { text-align: right; }
+    .totals { width: 240px; margin-left: auto; }
+    .totals .row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .grand { border-top: 2px solid #1e293b; font-weight: bold; font-size: 15px; padding-top: 5px; }
+    .badge { padding: 2px 8px; border-radius: 10px; background: #eef2ff; color: #4338ca; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Счёт {{ invoice.number }}</h1>
+      <div class="muted">от {{ invoice.issue_date|date:"d.m.Y" }}</div>
+    </div>
+    <div class="right">
+      <div><strong>{{ invoice.organization.name }}</strong></div>
+      <div class="muted"><span class="badge">{{ invoice.get_status_display }}</span></div>
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <td style="border:0; width:50%; vertical-align:top;">
+        <div class="muted">Плательщик</div>
+        <strong>{{ invoice.client.name }}</strong><br>
+        {% if invoice.client.legal_name %}{{ invoice.client.legal_name }}<br>{% endif %}
+        {% if invoice.client.inn %}ИНН: {{ invoice.client.inn }}<br>{% endif %}
+        {{ invoice.client.address }}
+      </td>
+      <td style="border:0; text-align:right; vertical-align:top;">
+        <div class="muted">Срок оплаты</div><strong>{{ invoice.due_date|date:"d.m.Y" }}</strong>
+      </td>
+    </tr>
+  </table>
+
+  <table>
+    <thead><tr><th>Наименование</th><th class="right">Кол-во</th><th class="right">Цена</th><th class="right">Сумма</th></tr></thead>
+    <tbody>
+      {% for item in invoice.items.all %}
+        <tr><td>{{ item.name }}</td><td class="right">{{ item.qty }}</td>
+            <td class="right">{{ item.unit_price|money:invoice.currency }}</td>
+            <td class="right">{{ item.amount|money:invoice.currency }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="row"><span class="muted">Подытог</span><span>{{ invoice.subtotal|money:invoice.currency }}</span></div>
+    <div class="row"><span class="muted">НДС ({{ invoice.tax_rate }}%)</span><span>{{ invoice.tax_amount|money:invoice.currency }}</span></div>
+    <div class="row grand"><span>Итого</span><span>{{ invoice.total|money:invoice.currency }}</span></div>
+  </div>
+
+  {% if invoice.notes %}<p class="muted" style="margin-top:18px;">{{ invoice.notes }}</p>{% endif %}
+</body>
+</html>
