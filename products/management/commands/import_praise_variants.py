@@ -9,11 +9,34 @@ from django.db import transaction
 
 from products.brand_aliases import canonical_brand_name
 from products.models import Brand, Product, Variant
-from products.pricing import retail_price
+from products.pricing import parse_wholesale_price, retail_price
+
+MATCH_STOP_WORDS = frozenset(
+    {
+        "pour",
+        "femme",
+        "homme",
+        "parfum",
+        "essence",
+        "de",
+        "the",
+        "for",
+        "men",
+        "women",
+        "edp",
+        "edt",
+        "edc",
+    }
+)
 
 VOL_RE = re.compile(r"\s+(\d+(?:[.,]\d+)?)\s*ml\b", re.I)
 DECANT_RE = re.compile(
     r"\bsample\b|\bmini\b|atomiser|refill|\bpen\b|\d+[.,]\d+\s*ml",
+    re.I,
+)
+NON_PERFUME_RE = re.compile(
+    r"\bdeo\b|deodorant|after\s*shave|body\s*(lotion|cream|mist)|shower\s*gel|"
+    r"hair\s*(mist|spray)|all\s*over\s*spray|\bgel\b",
     re.I,
 )
 CONC_RE = re.compile(r"\b(ed[ptc]|extrait|parfum|cologne|absolue|absolu)\b", re.I)
@@ -40,16 +63,10 @@ BRAND_OVERRIDES = {
 
 
 def parse_price(value):
-    if value is None:
+    wholesale = parse_wholesale_price(value)
+    if wholesale is None:
         return None
-    text = str(value).replace(" ", "").replace(",", ".")
-    try:
-        price = Decimal(text)
-    except (InvalidOperation, ValueError):
-        return None
-    if price is None or price <= 0:
-        return None
-    return retail_price(price)
+    return retail_price(wholesale)
 
 
 def norm_text(value: str) -> str:
@@ -95,6 +112,48 @@ def score_match(db_name: str, praise_name: str) -> float:
     return len(a & b) / max(len(a), len(b))
 
 
+def praise_token_text(value: str) -> str:
+    s = (value or "").lower()
+    s = s.replace("'", "'").replace("'", "'")
+    s = re.sub(r"[^a-z0-9\s]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def distinctive_tokens(name: str) -> list[str]:
+    tokens = praise_token_text(name).split()
+    return [t for t in tokens if len(t) > 2 and t not in MATCH_STOP_WORDS]
+
+
+def name_match_allowed(db_name: str, praise_name: str, min_score: float) -> bool:
+    if norm_text(db_name) == norm_text(praise_name):
+        return True
+    if score_match(db_name, praise_name) < min_score:
+        return False
+    keys = distinctive_tokens(db_name)
+    if not keys:
+        return True
+    praise_norm = praise_token_text(praise_name)
+    return all(token in praise_norm for token in keys)
+
+
+def match_product_rows(product_name: str, cands: list, min_score: float) -> list:
+    """Строки прайса для одного товара: без «соседних» ароматов того же бренда."""
+    exact = [c for c in cands if norm_text(c[0]) == norm_text(product_name)]
+    if exact:
+        return exact
+
+    scored = [
+        (score_match(product_name, c[0]), c)
+        for c in cands
+        if name_match_allowed(product_name, c[0], min_score)
+    ]
+    if not scored:
+        return []
+    scored.sort(key=lambda x: (-x[0], x[1][4]))
+    best_score = scored[0][0]
+    return [c for s, c in scored if s >= best_score - 0.001]
+
+
 def should_import(vol: float, is_decant: bool) -> bool:
     if vol in (5, 10):
         return True
@@ -104,14 +163,32 @@ def should_import(vol: float, is_decant: bool) -> bool:
 
 
 def pick_best_row(rows):
-    """Одна строка прайса на объём: без TEST, затем минимальная цена."""
+    """Одна строка прайса на объём: без TEST, затем минимальная оптовая цена."""
+    non_test = [r for r in rows if "test" not in r[5].lower()]
+    pool = non_test if non_test else rows
 
     def sort_key(row):
-        raw = row[5].lower()
-        is_test = "test" in raw
-        return (is_test, row[4])
+        return row[4]
 
-    return min(rows, key=sort_key)
+    return min(pool, key=sort_key)
+
+
+def test_only_rows(rows) -> bool:
+    return bool(rows) and all("test" in r[5].lower() for r in rows)
+
+
+def should_skip_test_only_bottle(
+    volume_ml: float, price, known_bottle_prices: dict[float, object]
+) -> bool:
+    """TEST-only для флакона: пропуск, если цена ниже уже известного меньшего объёма."""
+    if volume_ml < 30:
+        return False
+    for ml, smaller_price in known_bottle_prices.items():
+        if ml >= volume_ml:
+            continue
+        if price < smaller_price:
+            return True
+    return False
 
 
 class Command(BaseCommand):
@@ -146,6 +223,11 @@ class Command(BaseCommand):
             default=0.65,
             help="Минимальное совпадение названия (0–1)",
         )
+        parser.add_argument(
+            "--prune-stale",
+            action="store_true",
+            help="Удалить флаконы (30ml+), которых нет в актуальном прайсе",
+        )
 
     def handle(self, *args, **options):
         file_path = Path(options["file"])
@@ -156,6 +238,7 @@ class Command(BaseCommand):
         allow_update = options["update"]
         stock_default = max(int(options["stock"]), 0)
         min_score = float(options["min_score"])
+        prune_stale = options["prune_stale"]
 
         df = pd.read_excel(file_path, sheet_name="TDSheet", engine="xlrd", header=None)
 
@@ -177,16 +260,18 @@ class Command(BaseCommand):
             is_decant = bool(DECANT_RE.search(raw))
             if not should_import(vol, is_decant):
                 continue
+            if vol >= 30 and NON_PERFUME_RE.search(raw):
+                continue
             prefix = raw[: m.start()].strip()
             parts = re.split(r"\s{2,}", prefix, maxsplit=1)
             brand_raw = parts[0].strip()
             perfume = parts[1].strip() if len(parts) > 1 else ""
             brand = find_db_brand(brand_raw, db_brands, db_brands_slug)
-            price = parse_price(row[15])
-            if not brand or not perfume or price is None:
+            wholesale = parse_wholesale_price(row[15])
+            if not brand or not perfume or wholesale is None:
                 continue
             praise_by_brand[brand.slug].append(
-                (perfume, vol_key, vol, is_decant, price, raw)
+                (perfume, vol_key, vol, is_decant, wholesale, raw)
             )
 
         products = list(Product.objects.select_related("brand"))
@@ -197,6 +282,7 @@ class Command(BaseCommand):
 
         to_create = []
         to_update = []
+        to_delete = []
         matched_products = 0
         unmatched_products = 0
 
@@ -206,29 +292,36 @@ class Command(BaseCommand):
                 unmatched_products += 1
                 continue
 
-            exact = [c for c in cands if norm_text(c[0]) == norm_text(product.name)]
-            if exact:
-                matched = exact
-            else:
-                scored = [
-                    (score_match(product.name, c[0]), c)
-                    for c in cands
-                    if score_match(product.name, c[0]) >= min_score
-                ]
-                if not scored:
-                    unmatched_products += 1
-                    continue
-                scored.sort(key=lambda x: (-x[0], x[1][4]))
-                best_score = scored[0][0]
-                matched = [c for s, c in scored if s >= best_score - 0.05]
+            matched = match_product_rows(product.name, cands, min_score)
+            if not matched:
+                unmatched_products += 1
+                continue
 
             by_volume = defaultdict(list)
             for row in matched:
                 by_volume[row[1]].append(row)
 
             product_hits = 0
-            for volume, rows in by_volume.items():
+            praise_volumes = set()
+            known_bottle_prices: dict[float, object] = {}
+            for (_pid, vol), variant in existing_variants.items():
+                if _pid != product.id:
+                    continue
+                ml = variant.numeric_volume_ml()
+                if ml is not None and ml >= 30:
+                    known_bottle_prices[ml] = variant.price
+
+            for volume in sorted(by_volume.keys(), key=lambda v: float(v[:-2])):
+                rows = by_volume[volume]
                 best = pick_best_row(rows)
+                price = retail_price(best[4])
+                volume_ml = best[2]
+                if test_only_rows(rows) and should_skip_test_only_bottle(
+                    volume_ml, price, known_bottle_prices
+                ):
+                    continue
+                known_bottle_prices[volume_ml] = price
+                praise_volumes.add(volume)
                 key = (product.id, volume)
                 existing = existing_variants.get(key)
                 if existing is None:
@@ -236,17 +329,27 @@ class Command(BaseCommand):
                         Variant(
                             product=product,
                             volume=volume,
-                            price=best[4],
+                            price=price,
                             stock=stock_default,
                         )
                     )
                     product_hits += 1
-                elif allow_update and existing.price != best[4]:
-                    existing.price = best[4]
+                elif allow_update and existing.price != price:
+                    existing.price = price
                     to_update.append(existing)
                     product_hits += 1
 
-            if product_hits:
+            if prune_stale and allow_update and praise_volumes:
+                for key, variant in existing_variants.items():
+                    if key[0] != product.id:
+                        continue
+                    ml = variant.numeric_volume_ml()
+                    if ml is None or ml < 30:
+                        continue
+                    if variant.volume not in praise_volumes:
+                        to_delete.append(variant.id)
+
+            if product_hits or praise_volumes:
                 matched_products += 1
             else:
                 unmatched_products += 1
@@ -257,7 +360,8 @@ class Command(BaseCommand):
             f"С новыми/обновлёнными вариантами: {matched_products}\n"
             f"Без совпадений в praise: {unmatched_products}\n"
             f"Создать вариантов: {len(to_create)}\n"
-            f"Обновить цен: {len(to_update)}"
+            f"Обновить цен: {len(to_update)}\n"
+            f"Удалить устаревших: {len(to_delete)}"
         )
 
         if dry_run:
@@ -268,11 +372,13 @@ class Command(BaseCommand):
                     self.stdout.write(f"  {v.product.brand.name} | {v.product.name} | {v.volume} | {v.price}")
             return
 
-        if not to_create and not to_update:
+        if not to_create and not to_update and not to_delete:
             self.stdout.write(self.style.NOTICE("Нечего импортировать."))
             return
 
         with transaction.atomic():
+            if to_delete:
+                Variant.objects.filter(id__in=to_delete).delete()
             if to_create:
                 Variant.objects.bulk_create(to_create, ignore_conflicts=True)
             if to_update:
@@ -280,6 +386,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"\nГотово: создано {len(to_create)}, обновлено {len(to_update)}."
+                f"\nГотово: создано {len(to_create)}, обновлено {len(to_update)}, "
+                f"удалено {len(to_delete)}."
             )
         )

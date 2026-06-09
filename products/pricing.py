@@ -7,14 +7,14 @@ MARKUP_TIERS: list[tuple[Decimal, Decimal | None, Decimal]] = [
     (Decimal("0"), Decimal("1000"), Decimal("500")),
     (Decimal("1000"), Decimal("3000"), Decimal("1000")),
     (Decimal("3000"), Decimal("5000"), Decimal("1500")),
-    (Decimal("5000"), Decimal("10000"), Decimal("2000")),
-    (Decimal("10000"), Decimal("20000"), Decimal("3000")),
-    (Decimal("20000"), Decimal("30000"), Decimal("4000")),
-    (Decimal("30000"), Decimal("50000"), Decimal("5000")),
-    (Decimal("50000"), Decimal("80000"), Decimal("6000")),
-    (Decimal("80000"), Decimal("120000"), Decimal("8000")),
-    (Decimal("120000"), Decimal("200000"), Decimal("10000")),
-    (Decimal("200000"), None, Decimal("12000")),
+    (Decimal("5000"), Decimal("10000"), Decimal("2500")),
+    (Decimal("10000"), Decimal("20000"), Decimal("4000")),
+    (Decimal("20000"), Decimal("30000"), Decimal("5000")),
+    (Decimal("30000"), Decimal("50000"), Decimal("6000")),
+    (Decimal("50000"), Decimal("80000"), Decimal("7000")),
+    (Decimal("80000"), Decimal("120000"), Decimal("9000")),
+    (Decimal("120000"), Decimal("200000"), Decimal("11000")),
+    (Decimal("200000"), None, Decimal("13000")),
 ]
 
 
@@ -46,7 +46,61 @@ def round_to_100(amount: Decimal) -> Decimal:
     )
 
 
+def parse_wholesale_price(value) -> Decimal | None:
+    """Число из ячейки прайса без наценки."""
+    if value is None:
+        return None
+    text = str(value).replace(" ", "").replace(",", ".")
+    try:
+        price = Decimal(text)
+    except (InvalidOperation, ValueError):
+        return None
+    return price if price > 0 else None
+
+
 def retail_price(wholesale) -> Decimal:
     """Опт + наценка, округление до ближайших 100 ₽."""
     base = _to_decimal(wholesale)
     return round_to_100(base + markup_amount(base))
+
+
+def enforce_monotonic_volume_prices(variants) -> list:
+    """
+    Цена не убывает с ростом объёма.
+    Если больший объём подозрительно дешёв (< 50% от меньшего) — поднимаем его цену,
+    иначе снижаем цену меньшего объёма.
+    """
+    items = []
+    for variant in variants:
+        ml = variant.numeric_volume_ml()
+        if ml is not None:
+            items.append((variant, ml))
+    items.sort(key=lambda pair: pair[1])
+
+    changed = []
+    for i in range(1, len(items)):
+        smaller, larger = items[i - 1][0], items[i][0]
+        if smaller.price <= larger.price:
+            continue
+        if larger.price < smaller.price * Decimal("0.5"):
+            larger.price = smaller.price
+            if larger not in changed:
+                changed.append(larger)
+        else:
+            smaller.price = larger.price
+            if smaller not in changed:
+                changed.append(smaller)
+    return changed
+
+
+def sync_product_volume_prices(product) -> int:
+    """Подправить цены одного товара; вернуть число обновлённых вариантов."""
+    variants = list(product.variants.all())
+    if len(variants) < 2:
+        return 0
+    before = {variant.id: variant.price for variant in variants}
+    changed = enforce_monotonic_volume_prices(variants)
+    to_save = [variant for variant in changed if variant.price != before[variant.id]]
+    if to_save:
+        Variant.objects.bulk_update(to_save, ["price"])
+    return len(to_save)
