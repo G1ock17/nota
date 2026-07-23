@@ -17,6 +17,7 @@ urlpatterns = [
     path('contacts/', views.info_page, {'page': 'contacts'}, name='info_contacts'),
     path('privacy/', views.info_page, {'page': 'privacy'}, name='info_privacy'),
     path('offer/', views.info_page, {'page': 'offer'}, name='info_offer'),
+    path('requisites/', views.info_page, {'page': 'requisites'}, name='info_requisites'),
 
     path('accounts/login/', views.login_view, name='login'),
     path('accounts/register/', views.register_view, name='register'),

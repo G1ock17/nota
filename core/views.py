@@ -767,6 +767,7 @@ INFO_PAGES = {
     "contacts": ("Контакты", "core/info/contacts.html"),
     "privacy": ("Политика конфиденциальности", "core/info/privacy.html"),
     "offer": ("Оферта", "core/info/offer.html"),
+    "requisites": ("Контакты и реквизиты", "core/info/requisites.html"),
 }
 
 
