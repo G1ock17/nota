@@ -281,11 +281,11 @@ class Order(models.Model):
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     gift_card_debit = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     payable_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    yookassa_payment_id = models.CharField(
+    ozon_pay_order_id = models.CharField(
         max_length=64,
         blank=True,
         default="",
-        verbose_name="Платёж ЮKassa",
+        verbose_name="Заказ Ozon Pay",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

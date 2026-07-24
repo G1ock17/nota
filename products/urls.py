@@ -9,8 +9,8 @@ from .cart_views import (
     checkout_detail,
     checkout_save_address,
     checkout_success,
-    yookassa_return,
-    yookassa_webhook,
+    ozon_pay_return,
+    ozon_pay_webhook,
 )
 from .favorite_views import favorite_post_auth, favorite_toggle
 from .views import (
@@ -31,8 +31,8 @@ urlpatterns = [
     path("cart/", cart_detail, name="cart"),
     path("checkout/save-address/", checkout_save_address, name="checkout_save_address"),
     path("checkout/success/", checkout_success, name="checkout_success"),
-    path("checkout/yookassa/return/", yookassa_return, name="yookassa_return"),
-    path("checkout/yookassa/webhook/", yookassa_webhook, name="yookassa_webhook"),
+    path("checkout/ozon-pay/return/", ozon_pay_return, name="ozon_pay_return"),
+    path("checkout/ozon-pay/webhook/", ozon_pay_webhook, name="ozon_pay_webhook"),
     path("checkout/", checkout_detail, name="checkout"),
     path("cart/add/", cart_add, name="cart_add"),
     path("cart/add-bulk/", cart_add_bulk, name="cart_add_bulk"),

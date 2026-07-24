@@ -22,11 +22,13 @@ from .gift_cards import (
     total_active_balance,
 )
 from .models import Order, OrderItem, Variant
-from .yookassa_pay import (
+from .ozon_pay import (
     create_redirect_payment,
-    fetch_payment,
-    is_yookassa_configured,
-    try_mark_order_paid,
+    fetch_order_details,
+    is_ozon_pay_configured,
+    try_mark_order_paid_from_details,
+    try_mark_order_paid_from_notification,
+    verify_notification_signature,
 )
 from core.models import DeliveryAddress, UserProfile
 
@@ -43,7 +45,7 @@ def _webhook_client_ip(request) -> str:
 
 
 def _webhook_ip_allowed(request) -> bool:
-    allowed = getattr(settings, "YOOKASSA_WEBHOOK_IPS", frozenset())
+    allowed = getattr(settings, "OZON_PAY_WEBHOOK_IPS", frozenset())
     if not allowed:
         return True
     client_ip = _webhook_client_ip(request)
@@ -528,7 +530,7 @@ def checkout_detail(request):
         return {
             "cart_items": items,
             "total_price": total_price,
-            "yookassa_enabled": is_yookassa_configured(),
+            "ozon_pay_enabled": is_ozon_pay_configured(),
             "checkout_total_amount_str": checkout_total_amount_str,
             "gift_available_balance": gift_available,
             "gift_available_balance_str": gift_available_balance_str,
@@ -658,25 +660,32 @@ def checkout_detail(request):
                 apply_gift_cards_to_order(order=order, user=request.user, requested_amount=requested)
         _send_order_confirmation_email(order, items, request=request)
 
-        if order.payable_amount > Decimal("0.00") and is_yookassa_configured():
+        if order.payable_amount > Decimal("0.00") and is_ozon_pay_configured():
             try:
-                return_url = request.build_absolute_uri(reverse("products:yookassa_return"))
-                payment = create_redirect_payment(order, return_url)
-                confirmation = getattr(payment, "confirmation", None)
-                confirm_url = getattr(confirmation, "confirmation_url", None) if confirmation else None
-                if not confirm_url:
-                    raise ValueError("Ответ ЮKassa без confirmation_url")
-                order.yookassa_payment_id = payment.id
-                order.save(update_fields=["yookassa_payment_id"])
+                success_url = request.build_absolute_uri(reverse("products:ozon_pay_return"))
+                fail_url = request.build_absolute_uri(reverse("products:checkout"))
+                notification_url = request.build_absolute_uri(reverse("products:ozon_pay_webhook"))
+                payment = create_redirect_payment(
+                    order,
+                    success_url=success_url,
+                    fail_url=fail_url,
+                    notification_url=notification_url,
+                )
+                confirm_url = payment.get("_pay_link")
+                ozon_order_id = payment.get("_ozon_order_id")
+                if not confirm_url or not ozon_order_id:
+                    raise ValueError("Ответ Ozon Pay без payLink или id заказа")
+                order.ozon_pay_order_id = ozon_order_id
+                order.save(update_fields=["ozon_pay_order_id"])
                 request.session[CART_SESSION_KEY] = {}
                 request.session.pop(GIFT_CARD_APPLY_SESSION_KEY, None)
                 if not request.user.is_authenticated:
                     request.session.pop(GUEST_CHECKOUT_ADDRESS_KEY, None)
-                request.session["pending_yookassa_order_id"] = order.pk
+                request.session["pending_ozon_pay_order_id"] = order.pk
                 request.session.modified = True
                 return redirect(confirm_url)
             except Exception:
-                logger.exception("Не удалось создать платёж ЮKassa")
+                logger.exception("Не удалось создать платёж Ozon Pay")
                 cancel_checkout_order_after_payment_failure(order)
                 messages.error(
                     request,
@@ -698,26 +707,26 @@ def checkout_detail(request):
 
 
 @require_http_methods(["GET", "HEAD"])
-def yookassa_return(request):
-    if not is_yookassa_configured():
+def ozon_pay_return(request):
+    if not is_ozon_pay_configured():
         return redirect("products:cart")
 
-    pending_id = request.session.get("pending_yookassa_order_id")
+    pending_id = request.session.get("pending_ozon_pay_order_id")
     if not pending_id:
         return redirect("products:cart")
 
     order = Order.objects.filter(pk=pending_id).first()
-    if not order or not order.yookassa_payment_id:
-        request.session.pop("pending_yookassa_order_id", None)
+    if not order or not order.ozon_pay_order_id:
+        request.session.pop("pending_ozon_pay_order_id", None)
         return redirect("products:cart")
 
     try:
-        payment = fetch_payment(order.yookassa_payment_id)
+        details = fetch_order_details(order)
     except Exception:
-        logger.exception("ЮKassa: не удалось получить статус платежа")
+        logger.exception("Ozon Pay: не удалось получить статус заказа")
         messages.warning(
             request,
-            "Не удалось проверить оплату. Если деньги списались, статус заказа обновится после уведомления от ЮKassa.",
+            "Не удалось проверить оплату. Если деньги списались, статус заказа обновится после уведомления от Ozon Pay.",
         )
         if order.user_id:
             return redirect("account")
@@ -725,25 +734,18 @@ def yookassa_return(request):
         request.session.modified = True
         return redirect("products:checkout_success")
 
-    if str(getattr(payment, "id", "") or "") != str(order.yookassa_payment_id):
-        request.session.pop("pending_yookassa_order_id", None)
-        messages.error(request, "Идентификатор платежа не совпадает с заказом.")
-        return redirect("products:cart")
-
-    status = (payment.status or "").strip()
-    request.session.pop("pending_yookassa_order_id", None)
+    request.session.pop("pending_ozon_pay_order_id", None)
     request.session.modified = True
 
-    if status == "succeeded":
-        if not try_mark_order_paid(order, payment):
-            messages.error(request, "Не удалось подтвердить оплату по данным ЮKassa.")
-            return redirect("products:cart")
+    if try_mark_order_paid_from_details(order, details):
         if order.user_id:
             return redirect("account")
         request.session["checkout_last_order_id"] = order.pk
         return redirect("products:checkout_success")
 
-    if status == "canceled":
+    item = details.get("item") or (details.get("order") or {}).get("item") or {}
+    status = (item.get("status") or "").strip() if isinstance(item, dict) else ""
+    if status in ("STATUS_CANCELLED", "STATUS_CANCELED", "STATUS_EXPIRED"):
         messages.info(request, "Оплата отменена.")
         return redirect("products:catalog")
 
@@ -756,39 +758,39 @@ def yookassa_return(request):
 
 @csrf_exempt
 @require_POST
-def yookassa_webhook(request):
+def ozon_pay_webhook(request):
     """
-    HTTP-уведомление ЮKassa: обновляет статус заказа без участия браузера
-    (после настройки URL в личном кабинете ЮKassa).
-    csrf_exempt необходим для внешних POST; проверяем IP (если задан allowlist)
-    и всегда перепроверяем платёж через API ЮKassa.
+    POST-нотификация Ozon Pay о статусе транзакции.
+    csrf_exempt необходим для внешних POST; проверяем подпись requestSign
+    и при необходимости IP allowlist.
     """
-    if not is_yookassa_configured():
+    if not is_ozon_pay_configured():
         return HttpResponse(status=403)
     if not _webhook_ip_allowed(request):
-        logger.warning("ЮKassa webhook: запрос с неразрешённого IP %s", _webhook_client_ip(request))
+        logger.warning("Ozon Pay webhook: запрос с неразрешённого IP %s", _webhook_client_ip(request))
         return HttpResponse(status=403)
     try:
         data = json.loads(request.body.decode())
     except (json.JSONDecodeError, UnicodeDecodeError):
         return HttpResponse(status=400)
 
-    obj = data.get("object")
-    if not isinstance(obj, dict):
-        return HttpResponse(status=200)
-    payment_id = obj.get("id")
-    if not payment_id:
-        return HttpResponse(status=200)
+    if not isinstance(data, dict):
+        return HttpResponse(status=400)
+    if not verify_notification_signature(data):
+        logger.warning("Ozon Pay webhook: неверная подпись")
+        return HttpResponse(status=403)
 
-    try:
-        payment = fetch_payment(payment_id)
-    except Exception:
-        logger.exception("ЮKassa webhook: не удалось получить платёж %s", payment_id)
-        return HttpResponse(status=500)
+    ext_order_id = (data.get("extOrderID") or data.get("extOrderId") or "").strip()
+    order = None
+    if ext_order_id:
+        order = Order.objects.filter(pk=ext_order_id).first()
+    if not order:
+        order_id = (data.get("orderID") or data.get("orderId") or "").strip()
+        if order_id:
+            order = Order.objects.filter(ozon_pay_order_id=order_id).first()
 
-    order = Order.objects.filter(yookassa_payment_id=payment_id).first()
-    if order and (getattr(payment, "status", None) or "").strip() == "succeeded":
-        try_mark_order_paid(order, payment)
+    if order and (data.get("status") or "").strip() == "Completed":
+        try_mark_order_paid_from_notification(order, data)
     return HttpResponse(status=200)
 
 

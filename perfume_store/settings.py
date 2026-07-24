@@ -24,9 +24,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Корневой `.env` (не коммитится) — подхватывается до чтения os.environ ниже.
 load_dotenv(BASE_DIR / ".env")
 
-# ЮKassa (тестовые ключи из личного кабинета: Настройки → API-ключи, режим «Тест»).
-YOOKASSA_SHOP_ID = os.environ.get("YOOKASSA_SHOP_ID", "").strip()
-YOOKASSA_SECRET_KEY = os.environ.get("YOOKASSA_SECRET_KEY", "").strip()
+# Ozon Pay (эквайринг Ozon Банка: Эквайринг → Интеграции → токен).
+OZON_PAY_ACCESS_KEY = os.environ.get("OZON_PAY_ACCESS_KEY", "").strip()
+OZON_PAY_SECRET_KEY = os.environ.get("OZON_PAY_SECRET_KEY", "").strip()
+OZON_PAY_NOTIFICATION_SECRET = os.environ.get("OZON_PAY_NOTIFICATION_SECRET", "").strip()
+OZON_PAY_API_BASE_URL = os.environ.get("OZON_PAY_API_BASE_URL", "https://payapi.ozon.ru").strip()
+OZON_PAY_PAYMENT_ALGORITHM = os.environ.get("OZON_PAY_PAYMENT_ALGORITHM", "PAY_ALGO_SMS").strip()
+OZON_PAY_FISCALIZATION_TYPE = os.environ.get("OZON_PAY_FISCALIZATION_TYPE", "FISCAL_TYPE_SINGLE").strip()
+OZON_PAY_VAT = os.environ.get("OZON_PAY_VAT", "VAT_NONE").strip()
+OZON_PAY_ENABLE_FISCALIZATION = os.environ.get("OZON_PAY_ENABLE_FISCALIZATION", "true").strip()
+try:
+    OZON_PAY_TIMEOUT = int(os.environ.get("OZON_PAY_TIMEOUT", "30") or "30")
+except ValueError:
+    OZON_PAY_TIMEOUT = 30
 
 # Секрет для выгрузки заказов в учётную систему (заголовок X-Accounting-Token).
 ACCOUNTING_SYNC_TOKEN = os.environ.get("ACCOUNTING_SYNC_TOKEN", "").strip()
@@ -73,11 +83,9 @@ GIFT_CARD_PURCHASE_ENABLED = os.environ.get(
     "True" if DEBUG else "False",
 ).strip().lower() in ("1", "true", "yes")
 
-# Опциональный allowlist IP для webhook ЮKassa (через запятую). Пусто = проверка отключена.
-_yookassa_ips = os.environ.get("YOOKASSA_WEBHOOK_IPS", "").strip()
-YOOKASSA_WEBHOOK_IPS = frozenset(
-    ip.strip() for ip in _yookassa_ips.split(",") if ip.strip()
-)
+# Опциональный allowlist IP для webhook Ozon Pay (через запятую). Пусто = проверка отключена.
+_ozon_pay_ips = os.environ.get("OZON_PAY_WEBHOOK_IPS", "").strip()
+OZON_PAY_WEBHOOK_IPS = frozenset(ip.strip() for ip in _ozon_pay_ips.split(",") if ip.strip())
 
 
 # Application definition

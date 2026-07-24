@@ -731,10 +731,10 @@
           <div class="checkout-summary-foot">
             <button type="submit" id="checkout-submit-btn" class="checkout-submit-btn" {% if not checkout_has_address %}disabled{% endif %}>Оформить заказ</button>
             <p class="checkout-summary-submit-note">
-              {% if yookassa_enabled %}
-                Далее — тестовая оплата в ЮKassa (карта из кабинета разработчика).
+              {% if ozon_pay_enabled %}
+                Далее — оплата через Ozon Pay (карта или СБП).
               {% else %}
-                Оплата онлайн появится после настройки ЮKassa (переменные YOOKASSA_*).
+                Оплата онлайн появится после настройки Ozon Pay (переменные OZON_PAY_*).
               {% endif %}
             </p>
             <a href="{% url 'products:cart' %}" class="checkout-back checkout-back--summary">← В корзину</a>
